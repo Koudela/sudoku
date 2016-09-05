@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="pref_easy_touch"
+        android:summary="@string/pref_easy_touch_summ"
+        android:title="@string/pref_easy_touch" />
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="pref_auto_hint"
+        android:summary="@string/pref_auto_hint_summ"
+        android:title="@string/pref_auto_hint" />
+    <PreferenceCategory
+        android:key="pref_font_size"
+        android:title="@string/pref_font_size">
+        <ListPreference
+            android:defaultValue="@string/pref_font_size_main_default"
+            android:dialogTitle="@string/pref_font_size_main"
+            android:entries="@array/pref_font_size_main_entries"
+            android:entryValues="@array/pref_font_size_main_values"
+            android:key="pref_font_size_main"
+            android:title="@string/pref_font_size_main" />
+        <ListPreference
+            android:defaultValue="@string/pref_font_size_helper_default"
+            android:dialogTitle="@string/pref_font_size_helper"
+            android:entries="@array/pref_font_size_helper_entries"
+            android:entryValues="@array/pref_font_size_helper_values"
+            android:key="pref_font_size_helper"
+            android:title="@string/pref_font_size_helper" />
+        <ListPreference
+            android:defaultValue="@string/pref_font_size_input_default"
+            android:dialogTitle="@string/pref_font_size_input"
+            android:entries="@array/pref_font_size_input_entries"
+            android:entryValues="@array/pref_font_size_input_values"
+            android:key="pref_font_size_input"
+            android:title="@string/pref_font_size_input" />
+    </PreferenceCategory>
+</PreferenceScreen>

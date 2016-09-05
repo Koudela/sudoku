@@ -3,7 +3,6 @@ package net.koudela.sudoku;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
-import android.support.annotation.IntegerRes;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -21,7 +20,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private View requestView;
     private Button[] mainButtons = new Button[DIM * DIM];
     private TextView[] helperTextViews = new TextView[DIM*DIM];
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,6 +102,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+
+        switch (id) {
+            case R.id.action_info:
+                Toast.makeText(this, "Info selected", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.action_settings:
+                Intent intent = new Intent (this, PreferencesActivity.class);
+                startActivity(intent);
+                Toast.makeText(this, "Settings selected", Toast.LENGTH_SHORT).show();
+                break;
+            default:
+                break;
+        }
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {

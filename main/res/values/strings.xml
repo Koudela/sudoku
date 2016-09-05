@@ -1,6 +1,21 @@
 <resources>
     <string name="app_name">Sudoku</string>
     <string name="action_settings">Settings</string>
+    <string name="action_info">Info</string>
+
     <string name="resultNumber">is</string>
     <string name="helperNumber">is not</string>
+
+    <string name="pref_easy_touch">easy touch</string>
+    <string name="pref_easy_touch_summ">touching the sudoku-grid activates the zoom</string>
+    <string name="pref_auto_hint">automatic hints</string>
+    <string name="pref_auto_hint_summ">each number on the sudoku-grid automatically sets hints vertical, horizontal and field-wise</string>
+
+    <string name="pref_font_size">settings font size</string>
+    <string name="pref_font_size_main">font size sudoku-grid</string>
+    <string name="pref_font_size_main_default">16</string>
+    <string name="pref_font_size_helper">font size hints</string>
+    <string name="pref_font_size_helper_default">8</string>
+    <string name="pref_font_size_input">font size selection</string>
+    <string name="pref_font_size_input_default">12</string>
 </resources>

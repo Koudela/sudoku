@@ -16,6 +16,7 @@ package="net.koudela.sudoku">
         </intent-filter>
     </activity>
     <activity android:name=".ChooseInputActivity" />
+    <activity android:name=".PreferencesActivity" />
 </application>
 
 </manifest>
