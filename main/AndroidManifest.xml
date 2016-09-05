@@ -15,6 +15,7 @@ package="net.koudela.sudoku">
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
     </activity>
+    <activity android:name=".ChooseInputActivity" />
 </application>
 
 </manifest>

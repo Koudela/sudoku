@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/resultNumber" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <Button
+            android:textStyle="bold"
+            android:textColor="@color/chooseInputIs"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="chooseInput"
+            android:tag="is1"
+            android:text="1" />
+
+        <Button
+            android:textStyle="bold"
+            android:textColor="@color/chooseInputIs"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="chooseInput"
+            android:tag="is2"
+            android:text="2" />
+
+        <Button
+            android:textStyle="bold"
+            android:textColor="@color/chooseInputIs"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="chooseInput"
+            android:tag="is3"
+            android:text="3" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <Button
+            android:textStyle="bold"
+            android:textColor="@color/chooseInputIs"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="chooseInput"
+            android:tag="is4"
+            android:text="4" />
+
+        <Button
+            android:layout_width="0dp"
+            android:textStyle="bold"
+            android:textColor="@color/chooseInputIs"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="chooseInput"
+            android:tag="is5"
+            android:text="5" />
+
+        <Button
+            android:layout_width="0dp"
+            android:textStyle="bold"
+            android:textColor="@color/chooseInputIs"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="chooseInput"
+            android:tag="is6"
+            android:text="6" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <Button
+            android:layout_width="0dp"
+            android:textStyle="bold"
+            android:textColor="@color/chooseInputIs"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="chooseInput"
+            android:tag="is7"
+            android:text="7" />
+
+        <Button
+            android:layout_width="0dp"
+            android:textStyle="bold"
+            android:textColor="@color/chooseInputIs"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="chooseInput"
+            android:tag="is8"
+            android:text="8" />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:textStyle="bold"
+            android:textColor="@color/chooseInputIs"
+            android:layout_weight="1"
+            android:onClick="chooseInput"
+            android:tag="is9"
+            android:text="9" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/helperNumber" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <Button
+            android:layout_width="0dp"
+            android:textStyle="bold"
+            android:textColor="@color/chooseInputNot"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="chooseInput"
+            android:tag="not1"
+            android:text="1" />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="chooseInput"
+            android:textStyle="bold"
+            android:textColor="@color/chooseInputNot"
+            android:tag="not2"
+            android:text="2" />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="chooseInput"
+            android:textStyle="bold"
+            android:textColor="@color/chooseInputNot"
+            android:tag="not3"
+            android:text="3" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <Button
+            android:textStyle="bold"
+            android:textColor="@color/chooseInputNot"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="chooseInput"
+            android:tag="not4"
+            android:text="4" />
+
+        <Button
+            android:textStyle="bold"
+            android:textColor="@color/chooseInputNot"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="chooseInput"
+            android:tag="not5"
+            android:text="5" />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:textStyle="bold"
+            android:textColor="@color/chooseInputNot"
+            android:layout_weight="1"
+            android:onClick="chooseInput"
+            android:tag="not6"
+            android:text="6" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <Button
+            android:layout_width="0dp"
+            android:textStyle="bold"
+            android:textColor="@color/chooseInputNot"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="chooseInput"
+            android:tag="not7"
+            android:text="7" />
+
+        <Button
+            android:layout_width="0dp"
+            android:textStyle="bold"
+            android:textColor="@color/chooseInputNot"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="chooseInput"
+            android:tag="not8"
+            android:text="8" />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:textStyle="bold"
+            android:textColor="@color/chooseInputNot"
+            android:layout_weight="1"
+            android:onClick="chooseInput"
+            android:tag="not9"
+            android:text="9" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,6 +1,9 @@
 package net.koudela.sudoku;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
+import android.support.annotation.IntegerRes;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -13,7 +16,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+    private final static int CHOOSE_INPUT_REQUEST = 1;
     private final static int DIM = 9;
+    private View requestView;
+    private Button[] mainButtons = new Button[DIM * DIM];
+    private TextView[] helperTextViews = new TextView[DIM*DIM];
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,7 +32,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
     // add the views populating the tableMain
     private void initTableMain() {
-        Button[] mainButtons = new Button[DIM * DIM];
         LinearLayout[] mainLayoutCols = new LinearLayout[DIM];
         LinearLayout.LayoutParams[] mainButtonParams = new LinearLayout.LayoutParams[DIM];
 
@@ -40,8 +47,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             for (int j = 0; j < DIM; j++) {
                 mainButtonParams[j] = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1);
                 mainButtonParams[j].setMargins((i % 3) == 0 ? 3 : 1, (j % 3) == 0 ? 3 : 1, 0, 0);
-                String id = "main" + (i + 1) + "" + (j + 1);
                 int arr_id = i * DIM + j;
+                String id = "main" + arr_id;
                 mainButtons[arr_id] = new Button(this);
                 mainButtons[arr_id].setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
                 mainButtons[arr_id].setTag(id);
@@ -54,14 +61,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
     // add the views populating the tableHelper
     private void initTableHelper() {
-        TextView[] helperTextViews = new TextView[DIM*DIM];
         LinearLayout[] helperLayoutCols = new LinearLayout[DIM];
 
         LinearLayout tableHelper = (LinearLayout) findViewById(R.id.tableHelper);
         LinearLayout.LayoutParams helperLayoutParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1);
         LinearLayout.LayoutParams[] helperTextViewParams = new LinearLayout.LayoutParams[DIM];
 
-        String text = "1-3\n-56\n--9";
+        String text = "---\n---\n---";
 
         for (int i=0; i<DIM; i++) {
             helperLayoutCols[i] = new LinearLayout(this);
@@ -73,13 +79,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             for(int j=0; j<DIM; j++) {
                 helperTextViewParams[j] = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1);
                 helperTextViewParams[j].setMargins((i % 3) == 0?3:1, (j % 3) == 0?3:1, 0, 0);
-                String id = "helper"+(i+1)+""+(j+1);
                 int arr_id = i * DIM + j;
+                String id = "helper"+arr_id;
                 helperTextViews[arr_id] = new TextView(this);
                 helperTextViews[arr_id].setTag(id);
                 helperTextViews[arr_id].setText(text);
                 helperTextViews[arr_id].setGravity(Gravity.CENTER);
-                helperTextViews[arr_id].setTextColor(Color.rgb(255,0,0));
+                helperTextViews[arr_id].setTextColor(Color.rgb(204,0,0));
                 helperTextViews[arr_id].setBackgroundColor(Color.rgb(255,255,255));
                 helperTextViews[arr_id].setOnClickListener(this);
                 helperLayoutCols[i].addView(helperTextViews[arr_id], helperTextViewParams[j]);
@@ -108,7 +114,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
     @Override
     public void onClick(View view) {
-        Toast.makeText(getApplicationContext(), (String) view.getTag(), Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(this, ChooseInputActivity.class);
+        requestView = view;
+        startActivityForResult(intent, CHOOSE_INPUT_REQUEST);
     }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == CHOOSE_INPUT_REQUEST && resultCode == Activity.RESULT_OK && data != null) {
+            String requestViewTag = (String) requestView.getTag();
+            String chooseInputViewTag = data.getStringExtra("chooseInputViewTag");
+            Toast.makeText(getApplicationContext(), requestViewTag+";"+chooseInputViewTag, Toast.LENGTH_SHORT).show();
 
+            int arr_id = Integer.valueOf(((String) requestView.getTag()).substring(4));
+            if (chooseInputViewTag.substring(0,2).equals("is")) {
+                String val = chooseInputViewTag.substring(2);
+                // if the chosen number already populates the button we delete the text and replace otherwise
+                if (mainButtons[arr_id].getText().equals(val)) {
+                    mainButtons[arr_id].setText("");
+                    // making the hint 'visible'; (hint is the background for button!)
+                    helperTextViews[arr_id].setTextColor(Color.rgb(204,0,0));
+
+                } else {
+                    mainButtons[arr_id].setText(val);
+                    // making the hint 'invisible'; (hint is the background for button!)
+                    helperTextViews[arr_id].setTextColor(Color.rgb(255,255,255));
+                }
+            } else if (chooseInputViewTag.substring(0,3).equals("not")) {
+                int val = Integer.valueOf(chooseInputViewTag.substring(3));
+                int pos = (val <= 3?val-1:(val <= 6?val:val+1));
+                String hint = (String) helperTextViews[arr_id].getText();
+                // if the chosen number already populates the hint we replace it with a "-" and replace the "-" with the number otherwise
+                hint = hint.substring(0, pos) + (hint.substring(pos, pos+1).equals(String.valueOf(val))?"-":String.valueOf(val)) + hint.substring(pos + 1);
+                helperTextViews[arr_id].setText(hint);
+            }
+        }
+    }
 }
