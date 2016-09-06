@@ -6,13 +6,23 @@
     <string name="resultNumber">is</string>
     <string name="helperNumber">is not</string>
 
+    <string name="pref_boolean">helpers</string>
     <string name="pref_easy_touch">easy touch</string>
-    <string name="pref_easy_touch_summ">touching the sudoku-grid activates the zoom</string>
+    <string name="pref_easy_touch_summ">first touch activates the sudoku field, second touch opens the input dialog</string>
     <string name="pref_auto_hint">automatic hints</string>
-    <string name="pref_auto_hint_summ">each number on the sudoku-grid automatically sets hints vertical, horizontal and field-wise</string>
+    <string name="pref_auto_hint_summ">each number on the sudoku grid automatically sets hints vertical, horizontal and group wise</string>
+    <string name="pref_development">development options</string>
+    <string name="pref_auto_hint_adv1">automatic hints (adv 1)</string>
+    <string name="pref_auto_hint_adv1_summ">if a number is group wise bounded to a specific row/column, in the same row/column other groups get hints</string>
+    <string name="pref_auto_hint_adv2">automatic hints (adv 2)</string>
+    <string name="pref_auto_hint_adv2_summ">if in a group/row/column are n-fields with the same 9-n hints, hints get set in the oher fields of the same group/row/column</string>
+    <string name="pref_auto_insert1">automatic insert 1</string>
+    <string name="pref_auto_insert1_summ">if 8 hints are displayed, the missing number is inserted into the sudoku field</string>
+    <string name="pref_auto_insert2">automatic insert 2</string>
+    <string name="pref_auto_insert2_summ">if a number is missing only once in 9 hints vertical, horizontal or group wise, it gets inserted into the sudoku field</string>
 
     <string name="pref_font_size">settings font size</string>
-    <string name="pref_font_size_main">font size sudoku-grid</string>
+    <string name="pref_font_size_main">font size sudoku grid</string>
     <string name="pref_font_size_main_default">16</string>
     <string name="pref_font_size_helper">font size hints</string>
     <string name="pref_font_size_helper_default">8</string>
