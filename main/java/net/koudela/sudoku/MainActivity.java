@@ -1,6 +1,12 @@
 package net.koudela.sudoku;
-
+// TODO: BUG1: App crashes if the ChooseInputActivity is called, the user chances the screen
+// orientation and enters a input (if he returns via back-symbol after reorientation only BUG2
+// is triggered)
+// maybe use setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCK‌​ED);
+// or add android:screenOrientation="portrait" to the <activity> element/s in the manifest
+// SOLVED: BUG2: App looses its content if user changes the screen orientation in the MainActivity
 import android.app.Activity;
+import android.support.v4.app.FragmentManager;
 import android.content.Intent;
 import android.graphics.Color;
 import android.preference.PreferenceManager;
@@ -17,82 +23,81 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    protected final static int CHOOSE_INPUT_REQUEST = 1;
     protected final static int DIM = 9;
+    protected final static int CHOOSE_INPUT_REQUEST = 1;
     protected View requestView;
     protected Button[] mainButtons = new Button[DIM * DIM];
     protected TextView[] helperTextViews = new TextView[DIM*DIM];
-    protected int arrIdEasyTouchButton = 0;
+    private RetainedFragment dataFragment;
+    protected SudokuData sudokuData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        initTableMain();
-        initTableHelper();
+        // find the retained fragment on activity restarts
+        FragmentManager fm = getSupportFragmentManager();
+        dataFragment = (RetainedFragment) fm.findFragmentByTag("data");
+        // create the fragment and data the first time
+        if (dataFragment == null) {
+            // add the fragment
+            dataFragment = new RetainedFragment();
+            fm.beginTransaction().add(dataFragment, "data").commit();
+            // create the data object
+            sudokuData = new SudokuData();
+            dataFragment.setData(sudokuData);
+        } else {
+            sudokuData = dataFragment.getData();
+        }
+        // add first(!) the views populating the tableHelper
+        initLayoutLayer("Helper");
+        // add second(!) the views populating the tableMain <- sudokuData.setMainButtonsText(...) needs helperTextViews populated
+        initLayoutLayer("Main");
     }
-    // add the views populating the tableMain
-    protected void initTableMain() {
-        LinearLayout[] mainLayoutCols = new LinearLayout[DIM];
-        LinearLayout.LayoutParams[] mainButtonParams = new LinearLayout.LayoutParams[DIM];
 
-        LinearLayout tableMain = (LinearLayout) findViewById(R.id.tableMain);
-        LinearLayout.LayoutParams mainLayoutParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1);
+    public void initLayoutLayer(String type) {
+        LinearLayout[] layoutCols = new LinearLayout[DIM];
+        LinearLayout.LayoutParams[] childViewParams = new LinearLayout.LayoutParams[DIM];
+
+        LinearLayout table = (LinearLayout) findViewById(type.equals("Main")?R.id.tableMain:R.id.tableHelper);
+        LinearLayout.LayoutParams tableLayoutParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1);
 
         for (int i = 0; i < DIM; i++) {
-            mainLayoutCols[i] = new LinearLayout(this);
-            mainLayoutCols[i].setOrientation(LinearLayout.VERTICAL);
-            mainLayoutCols[i].setTag("column" + i + "Main");
-            tableMain.addView(mainLayoutCols[i], mainLayoutParams);
+            layoutCols[i] = new LinearLayout(this);
+            layoutCols[i].setOrientation(LinearLayout.VERTICAL);
+            layoutCols[i].setTag("column" + i + type);
+            if (type.equals("Helper")) layoutCols[i].setBackgroundColor(ContextCompat.getColor(this, R.color.gridColor));
+            table.addView(layoutCols[i], tableLayoutParams);
 
             for (int j = 0; j < DIM; j++) {
-                mainButtonParams[j] = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1);
-                mainButtonParams[j].setMargins((i % 3) == 0 ? 3 : 1, (j % 3) == 0 ? 3 : 1, 0, 0);
-                int arr_id = i * DIM + j;
-                String id = "main" + arr_id;
-                mainButtons[arr_id] = new Button(this);
-                mainButtons[arr_id].setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
-                mainButtons[arr_id].setTag(id);
-                mainButtons[arr_id].setText("");
-                mainButtons[arr_id].setBackgroundResource(0);
-                mainButtons[arr_id].setOnClickListener(this);
-                mainLayoutCols[i].addView(mainButtons[arr_id], mainButtonParams[j]);
+                int arrId = i * DIM + j;
+                if (type.equals("Main")) initMainButtons(arrId);
+                else initHelperTextViews(arrId);
+                childViewParams[j] = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1);
+                childViewParams[j].setMargins((i % 3) == 0 ? 3 : 1, (j % 3) == 0 ? 3 : 1, 0, 0);
+                layoutCols[i].addView(type.equals("Main") ? mainButtons[arrId] : helperTextViews[arrId], childViewParams[j]);
             }
         }
     }
-    // add the views populating the tableHelper
-    protected void initTableHelper() {
-        LinearLayout[] helperLayoutCols = new LinearLayout[DIM];
 
-        LinearLayout tableHelper = (LinearLayout) findViewById(R.id.tableHelper);
-        LinearLayout.LayoutParams helperLayoutParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1);
-        LinearLayout.LayoutParams[] helperTextViewParams = new LinearLayout.LayoutParams[DIM];
-
-        String text = "---\n---\n---";
-
-        for (int i=0; i<DIM; i++) {
-            helperLayoutCols[i] = new LinearLayout(this);
-            helperLayoutCols[i].setOrientation(LinearLayout.VERTICAL);
-            helperLayoutCols[i].setTag("column"+i+"Helper");
-            helperLayoutCols[i].setBackgroundColor(Color.rgb(0,0,0));
-            tableHelper.addView(helperLayoutCols[i], helperLayoutParams);
-
-            for (int j=0; j<DIM; j++) {
-                helperTextViewParams[j] = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1);
-                helperTextViewParams[j].setMargins((i % 3) == 0?3:1, (j % 3) == 0?3:1, 0, 0);
-                int arr_id = i * DIM + j;
-                String id = "helper"+arr_id;
-                helperTextViews[arr_id] = new TextView(this);
-                helperTextViews[arr_id].setTag(id);
-                helperTextViews[arr_id].setText(text);
-                helperTextViews[arr_id].setGravity(Gravity.CENTER);
-                helperTextViews[arr_id].setTextColor(Color.rgb(204,0,0));
-                helperTextViews[arr_id].setBackgroundColor(Color.rgb(255,255,255));
-                helperTextViews[arr_id].setOnClickListener(this);
-                helperLayoutCols[i].addView(helperTextViews[arr_id], helperTextViewParams[j]);
-            }
-        }
+    public void initMainButtons(int arrId) {
+        mainButtons[arrId] = new Button(this);
+        mainButtons[arrId].setTag("main" + arrId);
+        mainButtons[arrId].setBackgroundResource(0);
+        mainButtons[arrId].setOnClickListener(this);
+        mainButtons[arrId].setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
+        sudokuData.setMainButtonsText(-1, arrId, mainButtons[arrId], helperTextViews[arrId], this);
     }
+
+    public void initHelperTextViews(int arrId) {
+        helperTextViews[arrId] = new TextView(this);
+        helperTextViews[arrId].setTag("helper" + arrId);
+        helperTextViews[arrId].setGravity(Gravity.CENTER);
+        helperTextViews[arrId].setTextColor(Color.rgb(204,0,0));
+        helperTextViews[arrId].setBackgroundColor(Color.rgb(255,255,255));
+        sudokuData.setHelperTextViewText(arrId, helperTextViews[arrId], this);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -132,22 +137,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         requestView = view;
 
         if (easyTouch) {
-            int arr_id = Integer.valueOf(((String) requestView.getTag()).substring(4));
-            if (arrIdEasyTouchButton != arr_id) {
-                setEasyTouchArea(arr_id);
+            int arrId = Integer.valueOf(((String) requestView.getTag()).substring(4));
+            if (sudokuData.arrIdEasyTouchButton != arrId) {
+                setEasyTouchArea(arrId);
                 return;
             }
         } else setEasyTouchArea(0);
         Intent intent = new Intent(this, ChooseInputActivity.class);
         startActivityForResult(intent, CHOOSE_INPUT_REQUEST);
     }
-    protected void setEasyTouchArea(int arr_id) {
-        if (arrIdEasyTouchButton != arr_id) {
-            helperTextViews[arrIdEasyTouchButton].setBackgroundColor(ContextCompat.getColor(this, R.color.backgroundUntouched));
-            //TODO: If Button[arr_id] is blocked (e.g. in the starting set) arrIdEasyTouchButton = 0 instead of ... = arr_id
-            arrIdEasyTouchButton = arr_id;
-            if (arrIdEasyTouchButton != 0) {
-                helperTextViews[arrIdEasyTouchButton].setBackgroundColor(ContextCompat.getColor(this, R.color.backgroundTouched));
+    public void setEasyTouchArea(int arrId) {
+        if (sudokuData.arrIdEasyTouchButton != arrId) {
+            helperTextViews[sudokuData.arrIdEasyTouchButton].setBackgroundColor(ContextCompat.getColor(this, R.color.backgroundUntouched));
+            if (sudokuData.isBlocked(arrId)) sudokuData.arrIdEasyTouchButton = 0;
+            else sudokuData.arrIdEasyTouchButton = arrId;
+            if (sudokuData.arrIdEasyTouchButton != 0) {
+                helperTextViews[sudokuData.arrIdEasyTouchButton].setBackgroundColor(ContextCompat.getColor(this, R.color.backgroundTouched));
             }
         }
     }
@@ -159,48 +164,50 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             boolean autoHint = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferencesFragment.KEY_PREF_AUTO_HINT, false);
             String chooseInputViewTag = data.getStringExtra("chooseInputViewTag");
-            int arr_id = Integer.valueOf(((String) requestView.getTag()).substring(4));
+            int arrId = Integer.valueOf(((String) requestView.getTag()).substring(4));
 
             if (chooseInputViewTag.substring(0,2).equals("is")) {
                 String value = chooseInputViewTag.substring(2);
+                int number = Integer.valueOf(value);
                 // if the chosen number already populates the button we delete the text and replace otherwise
-                if (mainButtons[arr_id].getText().equals(value)) {
-                    mainButtons[arr_id].setText("");
-                    // making the hint 'visible'; (hint is the background for button!)
-                    helperTextViews[arr_id].setTextColor(Color.rgb(204,0,0));
+                if (mainButtons[arrId].getText().equals(value)) {
+                    sudokuData.setMainButtonsText(0, arrId, mainButtons[arrId], helperTextViews[arrId], this);
                 } else {
-                    mainButtons[arr_id].setText(value);
-                    // making the hint 'invisible'; (hint is the background for button!)
-                    helperTextViews[arr_id].setTextColor(Color.rgb(255,255,255));
-                    if (autoHint) setAutoHints(arr_id, value);
+                    sudokuData.setMainButtonsText(number, arrId, mainButtons[arrId], helperTextViews[arrId], this);
+                    if (autoHint) setAutoHints(number, arrId);
                 }
             } else if (chooseInputViewTag.substring(0,3).equals("not")) {
-                setHint(arr_id, chooseInputViewTag.substring(3), true);
+                setUserHint(Integer.valueOf(chooseInputViewTag.substring(3)), arrId);
             }
         }
     }
-    // delete == false: we replace the old entry with the value on the corresponding position
-    // delete == true: if the value already populates the hint we replace it with a "-" and replace the "-" with value otherwise
-    protected void setHint (int arr_id, String value, boolean delete) {
-        int val = Integer.valueOf(value);
-        int pos = (val <= 3?val-1:(val <= 6?val:val+1));
-        String hint = (String) helperTextViews[arr_id].getText();
-        hint = hint.substring(0, pos) + (delete && hint.substring(pos, pos+1).equals(value)?"-":value) + hint.substring(pos + 1);
-        helperTextViews[arr_id].setText(hint);
+    protected void setUserHint (int number, int arrId) {
+        sudokuData.setUserHint(number, arrId);
+        sudokuData.setHelperTextViewText(arrId, helperTextViews[arrId], this);
     }
-    protected void setAutoHints (int arr_id, String value) {
-        int ii = arr_id / DIM;
-        int jj = arr_id % DIM;
-        for (int arrId :SudokuGroups.getGroupedGroup(arr_id)) {
-            setHint(arrId, value, false);
+    protected void setAutoHints (int number, int arrId) {
+        int ii = arrId / DIM;
+        int jj = arrId % DIM;
+        for (int tempArrId :SudokuGroups.getGroupedGroup(arrId)) {
+            sudokuData.setAutoHint(number, tempArrId, true);
+            sudokuData.setHelperTextViewText(tempArrId, helperTextViews[tempArrId], this);
         }
         for (int i=0; i<DIM; i++) {
-            arr_id = i * DIM + jj;
-            setHint(arr_id, value, false);
+            arrId = i * DIM + jj;
+            sudokuData.setAutoHint(number, arrId, true);
+            sudokuData.setHelperTextViewText(arrId, helperTextViews[arrId], this);
         }
         for (int j=0; j<DIM; j++) {
-            arr_id = ii * DIM + j;
-            setHint(arr_id, value, false);
+            arrId = ii * DIM + j;
+            sudokuData.setAutoHint(number, arrId, true);
+            sudokuData.setHelperTextViewText(arrId, helperTextViews[arrId], this);
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        // store the data in the fragment
+        dataFragment.setData(sudokuData);
     }
 }
