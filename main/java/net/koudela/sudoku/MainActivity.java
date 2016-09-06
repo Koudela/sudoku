@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.preference.PreferenceManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             {33,34,35,42,43,44,51,52,53},
             {60,61,62,69,70,71,78,79,80}
     };
+    protected int arrIdEasyTouchButton = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,18 +139,39 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
     @Override
     public void onClick(View view) {
-        Intent intent = new Intent(this, ChooseInputActivity.class);
+        boolean easyTouch = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferencesFragment.KEY_PREF_EASY_TOUCH, false);
         requestView = view;
+
+        if (easyTouch) {
+            int arr_id = Integer.valueOf(((String) requestView.getTag()).substring(4));
+            if (arrIdEasyTouchButton != arr_id) {
+                setEasyTouchArea(arr_id);
+                return;
+            }
+        } else setEasyTouchArea(0);
+        Intent intent = new Intent(this, ChooseInputActivity.class);
         startActivityForResult(intent, CHOOSE_INPUT_REQUEST);
+    }
+    protected void setEasyTouchArea(int arr_id) {
+        if (arrIdEasyTouchButton != arr_id) {
+            helperTextViews[arrIdEasyTouchButton].setBackgroundColor(ContextCompat.getColor(this, R.color.backgroundUntouched));
+            //TODO: If Button[arr_id] is blocked (e.g. in the starting set) arrIdEasyTouchButton = 0 instead of ... = arr_id
+            arrIdEasyTouchButton = arr_id;
+            if (arrIdEasyTouchButton != 0) {
+                helperTextViews[arrIdEasyTouchButton].setBackgroundColor(ContextCompat.getColor(this, R.color.backgroundTouched));
+            }
+        }
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CHOOSE_INPUT_REQUEST && resultCode == Activity.RESULT_OK && data != null) {
-            String chooseInputViewTag = data.getStringExtra("chooseInputViewTag");
+            setEasyTouchArea(0);
 
             boolean autoHint = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferencesFragment.KEY_PREF_AUTO_HINT, false);
+            String chooseInputViewTag = data.getStringExtra("chooseInputViewTag");
             int arr_id = Integer.valueOf(((String) requestView.getTag()).substring(4));
+
             if (chooseInputViewTag.substring(0,2).equals("is")) {
                 String value = chooseInputViewTag.substring(2);
                 // if the chosen number already populates the button we delete the text and replace otherwise
@@ -180,8 +203,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int ii = arr_id / DIM;
         int jj = arr_id % DIM;
         int[] sudokuGroup = getSudokuGroup(arr_id);
-        for (int i=0; i<sudokuGroup.length; i++) {
-            setHint(sudokuGroup[i], value, false);
+        for (int arrId :sudokuGroup) {
+            setHint(arrId, value, false);
         }
         for (int i=0; i<DIM; i++) {
             arr_id = i * DIM + jj;

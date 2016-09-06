@@ -6,4 +6,7 @@
 
     <color name="chooseInputNot">#CC0000</color>
     <color name="chooseInputIs">#009900</color>
+
+    <color name="backgroundUntouched">#FFFFFF</color>
+    <color name="backgroundTouched">#FFCC55</color>
 </resources>
