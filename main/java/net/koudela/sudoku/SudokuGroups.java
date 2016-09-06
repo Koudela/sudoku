@@ -61,6 +61,16 @@ public class SudokuGroups {
               2, 2, 2, 5, 5, 5, 8, 8, 8,
               2, 2, 2, 5, 5, 5, 8, 8, 8,
               2, 2, 2, 5, 5, 5, 8, 8, 8};
+    public final static int[] TRUE_GRID = {
+              1,4,7,2,5,8,3,6,9,
+              2,5,8,3,6,9,4,7,1,
+              3,6,9,4,7,1,5,8,2,
+              4,7,1,5,8,2,6,9,3,
+              5,8,2,6,9,3,7,1,4,
+              6,9,3,7,1,4,8,2,5,
+              7,1,4,8,2,5,9,3,6,
+              8,2,5,9,3,6,1,4,7,
+              9,3,6,1,4,7,2,5,8};
     public static int[] getVerticalGroup(int arr_id) {
         return SudokuGroups.VERTICAL_GROUPS[SudokuGroups.ID_VERTICAL_GROUPS[arr_id]];
     }
