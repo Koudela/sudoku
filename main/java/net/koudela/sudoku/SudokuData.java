@@ -13,6 +13,7 @@ public class SudokuData {
     protected Boolean[][] isUserHint = new Boolean[DIM*DIM][DIM];
     protected Boolean[][] isAutoHint = new Boolean[DIM*DIM][DIM];
     protected int arrIdEasyTouchButton;
+    protected int requestViewId;
 
     public SudokuData() {
         initData();
@@ -31,6 +32,7 @@ public class SudokuData {
             }
         }
         arrIdEasyTouchButton = 0;
+        requestViewId = -1;
     }
 
     public void setMainButtonsText(int number, int arrId, Button button, TextView textView, Context context) {
@@ -75,6 +77,14 @@ public class SudokuData {
 
     public boolean isBlocked(int arrId) {
         return isBlocked[arrId];
+    }
+
+    public void setRequestViewId(int arrId) {
+        requestViewId = arrId;
+    }
+
+    public int getRequestViewId() {
+        return requestViewId;
     }
 }
 

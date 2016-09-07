@@ -1,10 +1,5 @@
 package net.koudela.sudoku;
-// TODO: BUG1: App crashes if the ChooseInputActivity is called, the user chances the screen
-// orientation and enters a input (if he returns via back-symbol after reorientation only BUG2
-// is triggered)
-// maybe use setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCK‌​ED);
-// or add android:screenOrientation="portrait" to the <activity> element/s in the manifest
-// SOLVED: BUG2: App looses its content if user changes the screen orientation in the MainActivity
+
 import android.app.Activity;
 import android.support.v4.app.FragmentManager;
 import android.content.Intent;
@@ -25,7 +20,6 @@ import android.widget.Toast;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     protected final static int DIM = 9;
     protected final static int CHOOSE_INPUT_REQUEST = 1;
-    protected View requestView;
     protected Button[] mainButtons = new Button[DIM * DIM];
     protected TextView[] helperTextViews = new TextView[DIM*DIM];
     private RetainedFragment dataFragment;
@@ -134,10 +128,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View view) {
         boolean easyTouch = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferencesFragment.KEY_PREF_EASY_TOUCH, false);
-        requestView = view;
+        int arrId = Integer.valueOf(((String) view.getTag()).substring(4));
+        sudokuData.setRequestViewId(arrId);
 
         if (easyTouch) {
-            int arrId = Integer.valueOf(((String) requestView.getTag()).substring(4));
             if (sudokuData.arrIdEasyTouchButton != arrId) {
                 setEasyTouchArea(arrId);
                 return;
@@ -164,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             boolean autoHint = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferencesFragment.KEY_PREF_AUTO_HINT, false);
             String chooseInputViewTag = data.getStringExtra("chooseInputViewTag");
-            int arrId = Integer.valueOf(((String) requestView.getTag()).substring(4));
+            int arrId = sudokuData.getRequestViewId();
 
             if (chooseInputViewTag.substring(0,2).equals("is")) {
                 String value = chooseInputViewTag.substring(2);
