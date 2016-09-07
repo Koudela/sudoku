@@ -1,59 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="pref_font_size_main_entries">
-        <item>8</item>
         <item>12</item>
         <item>16</item>
         <item>20</item>
         <item>24</item>
         <item>28</item>
         <item>32</item>
+        <item>36</item>
     </string-array>
     <string-array name="pref_font_size_main_values">
-        <item>8</item>
         <item>12</item>
         <item>16</item>
         <item>20</item>
         <item>24</item>
         <item>28</item>
         <item>32</item>
+        <item>36</item>
     </string-array>
 
     <string-array name="pref_font_size_helper_entries">
         <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
         <item>12</item>
+        <item>13</item>
+        <item>14</item>
+        <item>15</item>
         <item>16</item>
-        <item>20</item>
-        <item>24</item>
-        <item>28</item>
-        <item>32</item>
     </string-array>
     <string-array name="pref_font_size_helper_values">
         <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
         <item>12</item>
+        <item>13</item>
+        <item>14</item>
+        <item>15</item>
         <item>16</item>
-        <item>20</item>
-        <item>24</item>
-        <item>28</item>
-        <item>32</item>
     </string-array>
 
     <string-array name="pref_font_size_input_entries">
-        <item>8</item>
         <item>12</item>
+        <item>14</item>
         <item>16</item>
+        <item>18</item>
         <item>20</item>
+        <item>22</item>
         <item>24</item>
-        <item>28</item>
-        <item>32</item>
     </string-array>
     <string-array name="pref_font_size_input_values">
-        <item>8</item>
         <item>12</item>
+        <item>14</item>
         <item>16</item>
+        <item>18</item>
         <item>20</item>
+        <item>22</item>
         <item>24</item>
-        <item>28</item>
-        <item>32</item>
     </string-array>
 </resources>

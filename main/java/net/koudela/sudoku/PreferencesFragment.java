@@ -21,34 +21,25 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preferences);
     }
+
     @Override
     public void onResume() {
         super.onResume();
         getPreferenceScreen().getSharedPreferences()
                 .registerOnSharedPreferenceChangeListener(this);
     }
+
     @Override
     public void onPause() {
         super.onPause();
         getPreferenceScreen().getSharedPreferences()
                 .unregisterOnSharedPreferenceChangeListener(this);
     }
+
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         switch (key) {
-            case (PreferencesFragment.KEY_PREF_EASY_TOUCH):
-                Log.v(key, "" + sharedPreferences.getBoolean(key, false));
-                break;
             case (PreferencesFragment.KEY_PREF_AUTO_HINT):
                 Log.v(key, "" + sharedPreferences.getBoolean(key, false));
-                break;
-            case (PreferencesFragment.KEY_PREF_FONT_SIZE_MAIN):
-                Log.v(key, sharedPreferences.getString(key, ""));
-                break;
-            case (PreferencesFragment.KEY_PREF_FONT_SIZE_HELPER):
-                Log.v(key, sharedPreferences.getString(key, ""));
-                break;
-            case (PreferencesFragment.KEY_PREF_FONT_SIZE_INPUT):
-                Log.v(key, sharedPreferences.getString(key, ""));
                 break;
             case (PreferencesFragment.KEY_PREF_AUTO_HINT_ADV1):
                 Log.v(key, "" + sharedPreferences.getBoolean(key, false));

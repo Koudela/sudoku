@@ -23,9 +23,9 @@
 
     <string name="pref_font_size">settings font size</string>
     <string name="pref_font_size_main">font size sudoku grid</string>
-    <string name="pref_font_size_main_default">16</string>
+    <string name="pref_font_size_main_default">20</string>
     <string name="pref_font_size_helper">font size hints</string>
-    <string name="pref_font_size_helper_default">8</string>
+    <string name="pref_font_size_helper_default">13</string>
     <string name="pref_font_size_input">font size selection</string>
-    <string name="pref_font_size_input_default">12</string>
+    <string name="pref_font_size_input_default">16</string>
 </resources>

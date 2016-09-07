@@ -1,6 +1,7 @@
 package net.koudela.sudoku;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.support.v4.app.FragmentManager;
 import android.content.Intent;
 import android.graphics.Color;
@@ -8,6 +9,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,7 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
     protected final static int DIM = 9;
     protected final static int CHOOSE_INPUT_REQUEST = 1;
     protected Button[] mainButtons = new Button[DIM * DIM];
@@ -45,8 +47,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         // add first(!) the views populating the tableHelper
         initLayoutLayer("Helper");
+        setTextSizeHelperTextViews();
         // add second(!) the views populating the tableMain <- sudokuData.setMainButtonsText(...) needs helperTextViews populated
         initLayoutLayer("Main");
+        setTextSizeMainButtons();
+        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
     }
 
     public void initLayoutLayer(String type) {
@@ -98,6 +103,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -125,6 +131,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         return super.onOptionsItemSelected(item);
     }
+
     @Override
     public void onClick(View view) {
         boolean easyTouch = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferencesFragment.KEY_PREF_EASY_TOUCH, false);
@@ -140,6 +147,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Intent intent = new Intent(this, ChooseInputActivity.class);
         startActivityForResult(intent, CHOOSE_INPUT_REQUEST);
     }
+
     public void setEasyTouchArea(int arrId) {
         if (sudokuData.arrIdEasyTouchButton != arrId) {
             helperTextViews[sudokuData.arrIdEasyTouchButton].setBackgroundColor(ContextCompat.getColor(this, R.color.backgroundUntouched));
@@ -150,6 +158,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -198,10 +207,51 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    public void setTextSizeMainButtons() {
+        float textSize = Float.valueOf(PreferenceManager.getDefaultSharedPreferences(this).getString(PreferencesFragment.KEY_PREF_FONT_SIZE_MAIN, "20"));
+        for (Button button: mainButtons) {
+            button.setTextSize(textSize);
+        }
+    }
+
+    public void setTextSizeHelperTextViews() {
+        float textSize = Float.valueOf(PreferenceManager.getDefaultSharedPreferences(this).getString(PreferencesFragment.KEY_PREF_FONT_SIZE_HELPER, "13"));
+        for (TextView textView: helperTextViews) {
+            textView.setTextSize(textSize);
+        }
+    }
+
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        switch (key) {
+            case (PreferencesFragment.KEY_PREF_AUTO_HINT):
+                Log.v(key, "" + sharedPreferences.getBoolean(key, false));
+                break;
+            case (PreferencesFragment.KEY_PREF_FONT_SIZE_MAIN):
+                setTextSizeMainButtons();
+                break;
+            case (PreferencesFragment.KEY_PREF_FONT_SIZE_HELPER):
+                setTextSizeHelperTextViews();
+                break;
+            case (PreferencesFragment.KEY_PREF_AUTO_HINT_ADV1):
+                Log.v(key, "" + sharedPreferences.getBoolean(key, false));
+                break;
+            case (PreferencesFragment.KEY_PREF_AUTO_HINT_ADV2):
+                Log.v(key, "" + sharedPreferences.getBoolean(key, false));
+                break;
+            case (PreferencesFragment.KEY_PREF_AUTO_INSERT1):
+                Log.v(key, "" + sharedPreferences.getBoolean(key, false));
+                break;
+            case (PreferencesFragment.KEY_PREF_AUTO_INSERT2):
+                Log.v(key, "" + sharedPreferences.getBoolean(key, false));
+                break;
+        }
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
         // store the data in the fragment
         dataFragment.setData(sudokuData);
+        PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
     }
 }
