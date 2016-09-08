@@ -171,7 +171,7 @@ public class SudokuData {
             int count = 0;
             int tempArrId = -1;
             for (int arrId : group) {
-                if (autoHint[arrId][number] > 0  || isUserHint[arrId][number]) count++;
+                if (mainButtonsText[arrId] != 0 || autoHint[arrId][number] > 0  || isUserHint[arrId][number]) count++;
                 else if (tempArrId == -1) tempArrId = arrId;
                 else break;
             }
