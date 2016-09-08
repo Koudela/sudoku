@@ -24,7 +24,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected final static int CHOOSE_INPUT_REQUEST = 1;
     protected Button[] mainButtons = new Button[DIM * DIM];
     protected TextView[] helperTextViews = new TextView[DIM*DIM];
-    protected SudokuData sudokuData;
+    // create or get the retained data object
+    protected SudokuData sudokuData = SudokuData.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,15 +33,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         // find the retained fragment on activity restarts
         FragmentManager fm = getSupportFragmentManager();
-        RetainedFragment dataFragment = (RetainedFragment) fm.findFragmentByTag("data");
-        // create the fragment the first time
-        if (dataFragment == null) {
-            // add the fragment
-            dataFragment = new RetainedFragment();
-            fm.beginTransaction().add(dataFragment, "data").commit();
+        if (fm.findFragmentByTag("data") == null) {
+            // create the fragment the first time
+            fm.beginTransaction().add(new RetainedFragment(), "data").commit();
         }
-        // create or get the retained data object
-        sudokuData = SudokuData.getInstance();
         // add first(!) the views populating the tableHelper
         initLayoutLayer("Helper");
         setTextSizeHelperTextViews();
@@ -81,15 +77,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mainButtons[arrId].setBackgroundResource(0);
         mainButtons[arrId].setOnClickListener(this);
         mainButtons[arrId].setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
-        sudokuData.setMainButtonsText(-1, arrId, mainButtons[arrId], helperTextViews[arrId], this);
+        sudokuData.setMainButtonsText(-1, arrId, mainButtons[arrId], helperTextViews, this);
     }
 
     public void initHelperTextViews(int arrId) {
         helperTextViews[arrId] = new TextView(this);
         helperTextViews[arrId].setTag("helper" + arrId);
         helperTextViews[arrId].setGravity(Gravity.CENTER);
-        helperTextViews[arrId].setTextColor(Color.rgb(204,0,0));
-        helperTextViews[arrId].setBackgroundColor(Color.rgb(255,255,255));
+        helperTextViews[arrId].setBackgroundColor(ContextCompat.getColor(this,R.color.backgroundUntouched));
         sudokuData.setHelperTextViewText(arrId, helperTextViews[arrId], this);
     }
 
@@ -160,8 +155,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CHOOSE_INPUT_REQUEST && resultCode == Activity.RESULT_OK && data != null) {
             setEasyTouchArea(0);
-
-            boolean autoHint = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferencesFragment.KEY_PREF_AUTO_HINT, false);
             String chooseInputViewTag = data.getStringExtra("chooseInputViewTag");
             int arrId = sudokuData.getRequestViewId();
 
@@ -170,36 +163,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 int number = Integer.valueOf(value);
                 // if the chosen number already populates the button we delete the text and replace otherwise
                 if (mainButtons[arrId].getText().equals(value)) {
-                    sudokuData.setMainButtonsText(0, arrId, mainButtons[arrId], helperTextViews[arrId], this);
+                    sudokuData.setMainButtonsText(0, arrId, mainButtons[arrId], helperTextViews, this);
                 } else {
-                    sudokuData.setMainButtonsText(number, arrId, mainButtons[arrId], helperTextViews[arrId], this);
-                    if (autoHint) setAutoHints(number, arrId);
+                    sudokuData.setMainButtonsText(number, arrId, mainButtons[arrId], helperTextViews, this);
                 }
             } else if (chooseInputViewTag.substring(0,3).equals("not")) {
-                setUserHint(Integer.valueOf(chooseInputViewTag.substring(3)), arrId);
+                sudokuData.setUserHint(Integer.valueOf(chooseInputViewTag.substring(3)), arrId, helperTextViews[arrId], this);
             }
-        }
-    }
-    protected void setUserHint (int number, int arrId) {
-        sudokuData.setUserHint(number, arrId);
-        sudokuData.setHelperTextViewText(arrId, helperTextViews[arrId], this);
-    }
-    protected void setAutoHints (int number, int arrId) {
-        int ii = arrId / DIM;
-        int jj = arrId % DIM;
-        for (int tempArrId :SudokuGroups.getGroupedGroup(arrId)) {
-            sudokuData.setAutoHint(number, tempArrId, true);
-            sudokuData.setHelperTextViewText(tempArrId, helperTextViews[tempArrId], this);
-        }
-        for (int i=0; i<DIM; i++) {
-            arrId = i * DIM + jj;
-            sudokuData.setAutoHint(number, arrId, true);
-            sudokuData.setHelperTextViewText(arrId, helperTextViews[arrId], this);
-        }
-        for (int j=0; j<DIM; j++) {
-            arrId = ii * DIM + j;
-            sudokuData.setAutoHint(number, arrId, true);
-            sudokuData.setHelperTextViewText(arrId, helperTextViews[arrId], this);
         }
     }
 
@@ -220,7 +190,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         switch (key) {
             case (PreferencesFragment.KEY_PREF_AUTO_HINT):
-                Log.v(key, "" + sharedPreferences.getBoolean(key, false));
+                boolean autoHint = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferencesFragment.KEY_PREF_AUTO_HINT, false);
+                if (autoHint) sudokuData.initAutoHints(helperTextViews, this);
+                // TODO: "else" if an advanced auto hint is selected recalculate else hide auto hints;
                 break;
             case (PreferencesFragment.KEY_PREF_FONT_SIZE_MAIN):
                 setTextSizeMainButtons();
