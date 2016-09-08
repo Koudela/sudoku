@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.support.v4.app.FragmentManager;
 import android.content.Intent;
-import android.graphics.Color;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -111,6 +110,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(intent);
                 Toast.makeText(this, "Settings selected", Toast.LENGTH_SHORT).show();
                 break;
+            case R.id.action_new_game:
+                Toast.makeText(this, "New game selected", Toast.LENGTH_SHORT).show();
+                sudokuData.initData();
+                for (int arrId = 0; arrId < DIM * DIM; arrId++) {
+                    sudokuData.setMainButtonsText(-1, arrId, mainButtons, helperTextViews, this);
+                    sudokuData.setHelperTextViewText(arrId, mainButtons, helperTextViews, this, true);
+                }
             default:
                 break;
         }

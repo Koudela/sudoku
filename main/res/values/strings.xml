@@ -1,21 +1,25 @@
 <resources>
     <string name="app_name">Sudoku</string>
+    <string name="action_new_game">New game</string>
     <string name="action_settings">Settings</string>
     <string name="action_info">Info</string>
 
     <string name="resultNumber">is</string>
     <string name="helperNumber">is not</string>
 
-    <string name="pref_boolean">helpers</string>
+    <string name="pref_game_experience">game experience</string>
     <string name="pref_easy_touch">easy touch</string>
     <string name="pref_easy_touch_summ">first touch activates the sudoku field, second touch opens the input dialog</string>
     <string name="pref_auto_hint">automatic hints</string>
     <string name="pref_auto_hint_summ">each number on the sudoku grid automatically sets hints vertical, horizontal and group wise</string>
+    <string name="pref_level">difficulty level</string>
+    <string name="pref_level_summ">Attention: Changing the difficulty level starts a new game!</string>
+
     <string name="pref_development">development options</string>
     <string name="pref_auto_hint_adv1">automatic hints (adv 1)</string>
     <string name="pref_auto_hint_adv1_summ">if a number is group wise bounded to a specific row/column, in the same row/column other groups get hints</string>
     <string name="pref_auto_hint_adv2">automatic hints (adv 2)</string>
-    <string name="pref_auto_hint_adv2_summ">if in a group/row/column are n-fields with the same 9-n hints, hints get set in the oher fields of the same group/row/column</string>
+    <string name="pref_auto_hint_adv2_summ">if in a group/row/column are n-fields with the same 9 minus n hints, hints get set in the oher fields of the same group/row/column</string>
     <string name="pref_auto_insert1">automatic insert 1</string>
     <string name="pref_auto_insert1_summ">if 8 hints are displayed, the missing number is inserted into the sudoku field</string>
     <string name="pref_auto_insert2">automatic insert 2</string>
@@ -28,4 +32,5 @@
     <string name="pref_font_size_helper_default">13</string>
     <string name="pref_font_size_input">font size selection</string>
     <string name="pref_font_size_input_default">16</string>
+
 </resources>
