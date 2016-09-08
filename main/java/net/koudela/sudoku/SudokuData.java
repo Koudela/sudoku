@@ -39,7 +39,7 @@ public class SudokuData {
                 }
             }
         }
-        arrIdEasyTouchButton = 0;
+        arrIdEasyTouchButton = -1;
         requestViewId = -1;
     }
 
@@ -98,13 +98,24 @@ public class SudokuData {
         }
         else {
             mainButtons[arrId].setText(String.valueOf(number));
-            // making the hint 'invisible'; (hint is the background for button!)
-            helperTextViews[arrId].setTextColor(ContextCompat.getColor(context, R.color.backgroundUntouched));
             if (isAutoInsert[arrId]) mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorAutoInsert));
             else if (isBlocked[arrId]) mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorIsBlocked));
             else mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorUserInput));
             if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT2, false))
                 autoInsert2(mainButtons, helperTextViews, context);
+        }
+        if (arrId == arrIdEasyTouchButton) {
+            helperTextViews[arrId].setBackgroundColor(ContextCompat.getColor(context, R.color.backgroundTouched));
+            if (mainButtonsText[arrId] > 0) {
+                // making the hint 'invisible'; (hint is the background for button!)
+                helperTextViews[arrId].setTextColor(ContextCompat.getColor(context, R.color.backgroundTouched));
+            }
+        } else {
+            helperTextViews[arrId].setBackgroundColor(ContextCompat.getColor(context, R.color.backgroundUntouched));
+            if (mainButtonsText[arrId] > 0) {
+                // making the hint 'invisible'; (hint is the background for button!)
+                helperTextViews[arrId].setTextColor(ContextCompat.getColor(context, R.color.backgroundUntouched));
+            }
         }
     }
 

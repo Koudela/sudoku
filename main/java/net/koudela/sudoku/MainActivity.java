@@ -140,19 +140,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 setEasyTouchArea(arrId);
                 return;
             }
-        } else setEasyTouchArea(0);
+        } else setEasyTouchArea(-1);
         Intent intent = new Intent(this, ChooseInputActivity.class);
         startActivityForResult(intent, CHOOSE_INPUT_REQUEST);
     }
 
     public void setEasyTouchArea(int arrId) {
         if (sudokuData.arrIdEasyTouchButton != arrId) {
-            helperTextViews[sudokuData.arrIdEasyTouchButton].setBackgroundColor(ContextCompat.getColor(this, R.color.backgroundUntouched));
-            if (sudokuData.isBlocked(arrId)) sudokuData.arrIdEasyTouchButton = 0;
-            else sudokuData.arrIdEasyTouchButton = arrId;
-            if (sudokuData.arrIdEasyTouchButton != 0) {
-                helperTextViews[sudokuData.arrIdEasyTouchButton].setBackgroundColor(ContextCompat.getColor(this, R.color.backgroundTouched));
+            if (sudokuData.arrIdEasyTouchButton >= 0) {
+                helperTextViews[sudokuData.arrIdEasyTouchButton].setBackgroundColor(ContextCompat.getColor(this, R.color.backgroundUntouched));
+                if (!((String) mainButtons[sudokuData.arrIdEasyTouchButton].getText()).equals(""))
+                    helperTextViews[sudokuData.arrIdEasyTouchButton].setTextColor(ContextCompat.getColor(this, R.color.backgroundUntouched));
             }
+            if (arrId == -1 || sudokuData.isBlocked(arrId)) sudokuData.arrIdEasyTouchButton = -1;
+            else sudokuData.arrIdEasyTouchButton = arrId;
+        }
+        if (sudokuData.arrIdEasyTouchButton != -1) {
+            helperTextViews[sudokuData.arrIdEasyTouchButton].setBackgroundColor(ContextCompat.getColor(this, R.color.backgroundTouched));
+            if (!((String) mainButtons[sudokuData.arrIdEasyTouchButton].getText()).equals(""))
+                helperTextViews[sudokuData.arrIdEasyTouchButton].setTextColor(ContextCompat.getColor(this, R.color.backgroundTouched));
         }
     }
 
@@ -160,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CHOOSE_INPUT_REQUEST && resultCode == Activity.RESULT_OK && data != null) {
-            setEasyTouchArea(0);
+            setEasyTouchArea(-1);
             String chooseInputViewTag = data.getStringExtra("chooseInputViewTag");
             int arrId = sudokuData.getRequestViewId();
 
