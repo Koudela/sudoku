@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mainButtons[arrId].setBackgroundResource(0);
         mainButtons[arrId].setOnClickListener(this);
         mainButtons[arrId].setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
-        sudokuData.setMainButtonsText(-1, arrId, mainButtons[arrId], helperTextViews, this);
+        sudokuData.setMainButtonsText(-1, arrId, mainButtons, helperTextViews, this);
     }
 
     public void initHelperTextViews(int arrId) {
@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         helperTextViews[arrId].setTag("helper" + arrId);
         helperTextViews[arrId].setGravity(Gravity.CENTER);
         helperTextViews[arrId].setBackgroundColor(ContextCompat.getColor(this,R.color.backgroundUntouched));
-        sudokuData.setHelperTextViewText(arrId, helperTextViews[arrId], this);
+        sudokuData.setHelperTextViewText(arrId, mainButtons, helperTextViews, this, true);
     }
 
     @Override
@@ -163,12 +163,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 int number = Integer.valueOf(value);
                 // if the chosen number already populates the button we delete the text and replace otherwise
                 if (mainButtons[arrId].getText().equals(value)) {
-                    sudokuData.setMainButtonsText(0, arrId, mainButtons[arrId], helperTextViews, this);
+                    sudokuData.setMainButtonsText(0, arrId, mainButtons, helperTextViews, this);
                 } else {
-                    sudokuData.setMainButtonsText(number, arrId, mainButtons[arrId], helperTextViews, this);
+                    sudokuData.setMainButtonsText(number, arrId, mainButtons, helperTextViews, this);
                 }
             } else if (chooseInputViewTag.substring(0,3).equals("not")) {
-                sudokuData.setUserHint(Integer.valueOf(chooseInputViewTag.substring(3)), arrId, helperTextViews[arrId], this);
+                sudokuData.setUserHint(Integer.valueOf(chooseInputViewTag.substring(3)), arrId, mainButtons, helperTextViews, this);
             }
         }
     }
@@ -191,7 +191,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (key) {
             case (PreferencesFragment.KEY_PREF_AUTO_HINT):
                 boolean autoHint = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferencesFragment.KEY_PREF_AUTO_HINT, false);
-                if (autoHint) sudokuData.initAutoHints(helperTextViews, this);
+                if (autoHint) sudokuData.initAutoHints(mainButtons, helperTextViews, this);
                 // TODO: "else" if an advanced auto hint is selected recalculate else hide auto hints;
                 break;
             case (PreferencesFragment.KEY_PREF_FONT_SIZE_MAIN):
@@ -207,7 +207,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.v(key, "" + sharedPreferences.getBoolean(key, false));
                 break;
             case (PreferencesFragment.KEY_PREF_AUTO_INSERT1):
-                Log.v(key, "" + sharedPreferences.getBoolean(key, false));
+                boolean autoInsert1 = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT1, false);
+                if (autoInsert1) sudokuData.initAutoInsert1(mainButtons, helperTextViews, this);
                 break;
             case (PreferencesFragment.KEY_PREF_AUTO_INSERT2):
                 Log.v(key, "" + sharedPreferences.getBoolean(key, false));
