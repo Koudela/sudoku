@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimaryDark">#000099</color>
     <color name="colorAccent">#009900</color>
 
     <color name="chooseInputNot">#CC0000</color>
@@ -10,6 +10,10 @@
     <color name="gridColor">#000000</color>
     <color name="backgroundUntouched">#FFFFFF</color>
     <color name="backgroundTouched">#FFCC55</color>
+
+    <color name="textColorAutoInsert">#009900</color>
+    <color name="textColorIsBlocked">#000000</color>
+    <color name="textColorUserInput">#000099</color>
 
     <color name="userHints">#CC0000</color>
     <color name="autoHints">#FF5500</color>

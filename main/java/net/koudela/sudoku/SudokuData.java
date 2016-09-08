@@ -9,6 +9,7 @@ import android.widget.TextView;
 public class SudokuData {
     private static final SudokuData Singleton = new SudokuData();
     protected final static int DIM = 9;
+    protected Boolean[] isAutoInsert = new Boolean[DIM*DIM];
     protected int[] mainButtonsText = new int[DIM*DIM];
     protected int[] textColorHints = new int[DIM*DIM];
     protected Boolean[] isBlocked = new Boolean[DIM*DIM];
@@ -29,6 +30,7 @@ public class SudokuData {
         for (int i = 0; i < DIM; i++) {
             for (int j = 0; j < DIM; j++) {
                 int arrId = i * DIM + j;
+                isAutoInsert[arrId] = false;
                 mainButtonsText[arrId] = 0;
                 isBlocked[arrId] = false;
                 for (int k = 0; k < DIM; k++) {
@@ -98,6 +100,9 @@ public class SudokuData {
             mainButtons[arrId].setText(String.valueOf(number));
             // making the hint 'invisible'; (hint is the background for button!)
             helperTextViews[arrId].setTextColor(ContextCompat.getColor(context, R.color.backgroundUntouched));
+            if (isAutoInsert[arrId]) mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorAutoInsert));
+            else if (isBlocked[arrId]) mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorIsBlocked));
+            else mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorUserInput));
             if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT2, false))
                 autoInsert2(mainButtons, helperTextViews, context);
         }
@@ -155,7 +160,10 @@ public class SudokuData {
                 } else number = k+1;
             }
         }
-        if (number != 0) setMainButtonsText(number, arrId, mainButtons, helperTextViews, context);
+        if (number != 0) {
+            isAutoInsert[arrId] = true;
+            setMainButtonsText(number, arrId, mainButtons, helperTextViews, context);
+        }
     }
 
     public void autoInsert2(Button[] mainButtons, TextView[] helperTextViews, Context context) {
@@ -175,7 +183,10 @@ public class SudokuData {
                 else if (tempArrId == -1) tempArrId = arrId;
                 else break;
             }
-            if (count == 8) setMainButtonsText(number+1, tempArrId, mainButtons, helperTextViews, context);
+            if (count == 8) {
+                isAutoInsert[tempArrId] = true;
+                setMainButtonsText(number + 1, tempArrId, mainButtons, helperTextViews, context);
+            }
         }
     }
 
