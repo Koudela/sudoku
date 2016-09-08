@@ -98,18 +98,23 @@ public class SudokuData {
             mainButtons[arrId].setText(String.valueOf(number));
             // making the hint 'invisible'; (hint is the background for button!)
             helperTextViews[arrId].setTextColor(ContextCompat.getColor(context, R.color.backgroundUntouched));
+            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT2, false))
+                autoInsert2(mainButtons, helperTextViews, context);
         }
     }
 
     public void setUserHint(int number, int arrId, Button[] mainButtons, TextView[] helperTextViews, Context context) {
         isUserHint[arrId][number-1] = !isUserHint[arrId][number-1];
         setHelperTextViewText(arrId, mainButtons, helperTextViews, context, false);
+        if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT2, false))
+            autoInsert2(mainButtons, helperTextViews, context);
     }
 
     public void setHelperTextViewText(int arrId, Button[] mainButtons, TextView[] helperTextViews, Context context, boolean preventButtonUpdate) {
-        if (!preventButtonUpdate && mainButtonsText[arrId] == 0
-                && PreferenceManager.getDefaultSharedPreferences(context).getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT1, false))
-                        searchAndInsert1(arrId, mainButtons, helperTextViews, context);
+        if (!preventButtonUpdate && mainButtonsText[arrId] == 0) {
+            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT1, false))
+                searchAndInsert1(arrId, mainButtons, helperTextViews, context);
+        }
         String text = "";
         boolean userHints = false;
         boolean autoHints = false;
@@ -151,6 +156,27 @@ public class SudokuData {
             }
         }
         if (number != 0) setMainButtonsText(number, arrId, mainButtons, helperTextViews, context);
+    }
+
+    public void autoInsert2(Button[] mainButtons, TextView[] helperTextViews, Context context) {
+        for (int i = 0; i < DIM; i++) {
+            searchAndInsert2Sub(SudokuGroups.HORIZONTAL_GROUPS[i], mainButtons, helperTextViews, context);
+            searchAndInsert2Sub(SudokuGroups.VERTICAL_GROUPS[i], mainButtons, helperTextViews, context);
+            searchAndInsert2Sub(SudokuGroups.GROUPED_GROUPS[i], mainButtons, helperTextViews, context);
+        }
+    }
+
+    public void searchAndInsert2Sub(int[] group, Button[] mainButtons, TextView[] helperTextViews, Context context) {
+        for (int number = 0; number < DIM; number++) {
+            int count = 0;
+            int tempArrId = -1;
+            for (int arrId : group) {
+                if (autoHint[arrId][number] > 0  || isUserHint[arrId][number]) count++;
+                else if (tempArrId == -1) tempArrId = arrId;
+                else break;
+            }
+            if (count == 8) setMainButtonsText(number+1, tempArrId, mainButtons, helperTextViews, context);
+        }
     }
 
     public boolean isBlocked(int arrId) {

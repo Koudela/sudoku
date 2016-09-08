@@ -207,11 +207,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.v(key, "" + sharedPreferences.getBoolean(key, false));
                 break;
             case (PreferencesFragment.KEY_PREF_AUTO_INSERT1):
-                boolean autoInsert1 = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT1, false);
-                if (autoInsert1) sudokuData.initAutoInsert1(mainButtons, helperTextViews, this);
+                if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT1, false))
+                        sudokuData.initAutoInsert1(mainButtons, helperTextViews, this);
                 break;
             case (PreferencesFragment.KEY_PREF_AUTO_INSERT2):
-                Log.v(key, "" + sharedPreferences.getBoolean(key, false));
+                if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT2, false))
+                        sudokuData.autoInsert2(mainButtons, helperTextViews, this);
                 break;
         }
     }
