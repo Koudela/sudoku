@@ -24,7 +24,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected final static int CHOOSE_INPUT_REQUEST = 1;
     protected Button[] mainButtons = new Button[DIM * DIM];
     protected TextView[] helperTextViews = new TextView[DIM*DIM];
-    private RetainedFragment dataFragment;
     protected SudokuData sudokuData;
 
     @Override
@@ -33,18 +32,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         // find the retained fragment on activity restarts
         FragmentManager fm = getSupportFragmentManager();
-        dataFragment = (RetainedFragment) fm.findFragmentByTag("data");
-        // create the fragment and data the first time
+        RetainedFragment dataFragment = (RetainedFragment) fm.findFragmentByTag("data");
+        // create the fragment the first time
         if (dataFragment == null) {
             // add the fragment
             dataFragment = new RetainedFragment();
             fm.beginTransaction().add(dataFragment, "data").commit();
-            // create the data object
-            sudokuData = new SudokuData();
-            dataFragment.setData(sudokuData);
-        } else {
-            sudokuData = dataFragment.getData();
         }
+        // create or get the retained data object
+        sudokuData = SudokuData.getInstance();
         // add first(!) the views populating the tableHelper
         initLayoutLayer("Helper");
         setTextSizeHelperTextViews();
@@ -250,8 +246,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onDestroy() {
         super.onDestroy();
-        // store the data in the fragment
-        dataFragment.setData(sudokuData);
         PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
     }
 }

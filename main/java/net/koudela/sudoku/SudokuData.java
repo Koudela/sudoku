@@ -6,6 +6,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 public class SudokuData {
+    private static final SudokuData Singleton = new SudokuData();
     protected final static int DIM = 9;
     protected int[] mainButtonsText = new int[DIM*DIM];
     protected int[] textColorHints = new int[DIM*DIM];
@@ -15,8 +16,12 @@ public class SudokuData {
     protected int arrIdEasyTouchButton;
     protected int requestViewId;
 
-    public SudokuData() {
+    private SudokuData() {
         initData();
+    }
+
+    public static SudokuData getInstance() {
+        return Singleton;
     }
 
     public void initData() {
@@ -53,9 +58,11 @@ public class SudokuData {
     public void setUserHint(int number, int arrId) {
         isUserHint[arrId][number-1] = !isUserHint[arrId][number-1];
     }
+
     public void setAutoHint(int number, int arrId, Boolean value) {
         isAutoHint[arrId][number-1] = value;
     }
+
     public void setHelperTextViewText(int arrId, TextView textView, Context context) {
         String text = "";
         boolean userHints = false;
