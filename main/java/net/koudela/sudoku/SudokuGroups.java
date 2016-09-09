@@ -71,15 +71,19 @@ public class SudokuGroups {
               7,1,4,8,2,5,9,3,6,
               8,2,5,9,3,6,1,4,7,
               9,3,6,1,4,7,2,5,8};
+
     public static int[] getVerticalGroup(int arrId) {
         return SudokuGroups.VERTICAL_GROUPS[SudokuGroups.ID_VERTICAL_GROUPS[arrId]];
     }
+
     public static int[] getHorizontalGroup(int arrId) {
         return SudokuGroups.HORIZONTAL_GROUPS[SudokuGroups.ID_HORIZONTAL_GROUPS[arrId]];
     }
+
     public static int[] getGroupedGroup(int arrId) {
         return SudokuGroups.GROUPED_GROUPS[SudokuGroups.ID_GROUPED_GROUPS[arrId]];
     }
+
     public static int[] getStarGroup(int arrId) {
         int[] starGroup = new int[3 * SudokuData.DIM];
         int count = 0;
@@ -87,5 +91,61 @@ public class SudokuGroups {
         for (int tempArrId: getHorizontalGroup(arrId)) starGroup[count++] = tempArrId;
         for (int tempArrId: getGroupedGroup(arrId)) starGroup[count++] = tempArrId;
         return starGroup; // contains 3 times arrId!
+    }
+
+    public static int[] getComplementVerticalGroup(int arrId) {
+        int[] complementGroup = new int[6];
+        int count = 0;
+        int colId = arrId / SudokuData.DIM;
+        int rowId = arrId % SudokuData.DIM;
+        switch (rowId / 3) {// identifier row group
+            case 0:
+                for (int i = 0; i < 3; i++) {
+                    complementGroup[count++] = colId * SudokuData.DIM + 3 + i;
+                    complementGroup[count++] = colId * SudokuData.DIM + 6 + i;
+                }
+                break;
+            case 1:
+                for (int i = 0; i < 3; i++) {
+                    complementGroup[count++] = colId * SudokuData.DIM + i;
+                    complementGroup[count++] = colId * SudokuData.DIM + 6 + i;
+                }
+                break;
+            case 2:
+                for (int i = 0; i < 3; i++) {
+                    complementGroup[count++] = colId * SudokuData.DIM + i;
+                    complementGroup[count++] = colId * SudokuData.DIM + 3 + i;
+                }
+                break;
+        }
+        return complementGroup;
+    }
+
+    public static int[] getComplementHorizontalGroup(int arrId) {
+        int[] complementGroup = new int[6];
+        int count = 0;
+        int colId = arrId / SudokuData.DIM;
+        int rowId = arrId % SudokuData.DIM;
+        switch (colId / 3) {// identifier col group
+            case 0: // == rowId + 9 * (i + 0)
+                for (int i = 0; i < 3; i++) {
+                    complementGroup[count++] = rowId + SudokuData.DIM * (3 + i);
+                    complementGroup[count++] = rowId + SudokuData.DIM * (6 + i);
+                }
+                break;
+            case 1:
+                for (int i = 0; i < 3; i++) {
+                    complementGroup[count++] = rowId + SudokuData.DIM * i;
+                    complementGroup[count++] = rowId + SudokuData.DIM * (6 + i);
+                }
+                break;
+            case 2:
+                for (int i = 0; i < 3; i++) {
+                    complementGroup[count++] = rowId + SudokuData.DIM * i;
+                    complementGroup[count++] = rowId + SudokuData.DIM * (3 + i);
+                }
+                break;
+        }
+        return complementGroup;
     }
 }

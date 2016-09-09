@@ -8,7 +8,6 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -213,10 +212,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 setTextSizeHelperTextViews();
                 break;
             case (PreferencesFragment.KEY_PREF_AUTO_HINT_ADV1):
-                Log.v(key, "" + sharedPreferences.getBoolean(key, false));
+                if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferencesFragment.KEY_PREF_AUTO_HINT_ADV1, false))
+                    sudokuData.autoHintsAdv1(mainButtons, helperTextViews, this);
+                else {
+                    sudokuData.resetAutoHintsAdv1();
+                    sudokuData.updateDisplayHintsAll(mainButtons, helperTextViews, this, false);
+                }
                 break;
             case (PreferencesFragment.KEY_PREF_AUTO_HINT_ADV2):
-                Log.v(key, "" + sharedPreferences.getBoolean(key, false));
+                if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferencesFragment.KEY_PREF_AUTO_HINT_ADV2, false))
+                    sudokuData.autoHintsAdv2(mainButtons, helperTextViews, this);
+                else {
+                    sudokuData.resetAutoHintsAdv2();
+                    sudokuData.updateDisplayHintsAll(mainButtons, helperTextViews, this, false);
+                }
                 break;
             case (PreferencesFragment.KEY_PREF_AUTO_INSERT1):
                 if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT1, false))
