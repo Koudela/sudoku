@@ -220,11 +220,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case (PreferencesFragment.KEY_PREF_AUTO_INSERT1):
                 if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT1, false))
-                        sudokuData.initAutoInsert1(mainButtons, helperTextViews, this);
+                    for (int arrId = 0; arrId < DIM*DIM; arrId++) sudokuData.searchAndInsert1(arrId, mainButtons, helperTextViews, this);
                 break;
             case (PreferencesFragment.KEY_PREF_AUTO_INSERT2):
                 if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT2, false))
-                        sudokuData.autoInsert2(mainButtons, helperTextViews, this);
+                    sudokuData.autoInsert2(mainButtons, helperTextViews, this);
                 break;
         }
     }

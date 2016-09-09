@@ -8,13 +8,14 @@ import android.widget.TextView;
 
 public class SudokuData {
     private static final SudokuData Singleton = new SudokuData();
-    protected final static int DIM = 9;
+    public final static int DIM = 9;
     protected Boolean[] isAutoInsert = new Boolean[DIM*DIM];
     protected int[] mainButtonsText = new int[DIM*DIM];
     protected int[] textColorHints = new int[DIM*DIM];
     protected Boolean[] isBlocked = new Boolean[DIM*DIM];
     protected Boolean[][] isUserHint = new Boolean[DIM*DIM][DIM];
     protected int[][] autoHint = new int[DIM*DIM][DIM];
+    protected int[][] helperBadUserInput = new int[DIM*DIM][DIM];
     protected int arrIdEasyTouchButton;
     protected int requestViewId;
 
@@ -36,6 +37,7 @@ public class SudokuData {
                 for (int k = 0; k < DIM; k++) {
                     isUserHint[arrId][k] = false;
                     autoHint[arrId][k] = 0;
+                    helperBadUserInput[arrId][k] = 0;
                 }
             }
         }
@@ -43,67 +45,54 @@ public class SudokuData {
         requestViewId = -1;
     }
 
-    public void updateAutoHint(int number, int arrId, Button[] mainButtons, TextView[] helperTextViews, Context context, boolean isDeletion) {
-        if (isDeletion) autoHint[arrId][number-1]--;
-        else autoHint[arrId][number-1]++;
-        setHelperTextViewText(arrId, mainButtons, helperTextViews, context, false);
-    }
-
     protected void setAutoHints (int number, int arrId, Button[] mainButtons, TextView[] helperTextViews, Context context, boolean isDeletion) {
-        int ii = arrId / DIM;
-        int jj = arrId % DIM;
-        for (int tempArrId :SudokuGroups.getGroupedGroup(arrId)) {
-            updateAutoHint(number, tempArrId, mainButtons, helperTextViews, context, isDeletion);
-        }
-        for (int i=0; i<DIM; i++) {
-            updateAutoHint(number, i * DIM + jj, mainButtons, helperTextViews, context, isDeletion);
-        }
-        for (int j=0; j<DIM; j++) {
-            updateAutoHint(number, ii * DIM + j, mainButtons, helperTextViews, context, isDeletion);
+        // it does not matter that autoHint++/-- is called thrice for arrId:
+        // 1. the call is symmetric and only > 0 is evaluated
+        // 2. the field is populated
+        for (int tempArrId: SudokuGroups.getStarGroup(arrId)) {
+            autoHint[tempArrId][number-1] += isDeletion?-1:1;
+            setHelperTextViewText(tempArrId, mainButtons, helperTextViews, context, false);
         }
     }
 
     public  void initAutoHints (Button[] mainButtons, TextView[] helperTextViews, Context context) {
-        for (int i = 0; i < DIM; i++) {
-            for (int j = 0; j < DIM; j++) {
-                int arrId = i * DIM + j;
-                for (int k = 0; k < DIM; k++) {
-                    autoHint[arrId][k] = 0;
-                }
-            }
-        }
-        for (int i = 0; i < DIM; i++) {
-            for (int j = 0; j < DIM; j++) {
-                int arrId = i * DIM + j;
-                setAutoHints(mainButtonsText[arrId], arrId, mainButtons, helperTextViews, context, false);
-            }
-        }
+        for (int arrId = 0; arrId < DIM*DIM; arrId++) for (int k = 0; k < DIM; k++) autoHint[arrId][k] = 0;
+        for (int arrId = 0; arrId < DIM*DIM; arrId++)
+            setAutoHints(mainButtonsText[arrId], arrId, mainButtons, helperTextViews, context, false);
     }
 
     public void setMainButtonsText(int number, int arrId, Button[] mainButtons, TextView[] helperTextViews, Context context) {
-        // get value
+        // get
         if (number < 0) number = mainButtonsText[arrId];
-        // set value
+        // set
         else {
             boolean autoHint = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(PreferencesFragment.KEY_PREF_AUTO_HINT, false);
-            if (autoHint && mainButtonsText[arrId] > 0) setAutoHints(mainButtonsText[arrId], arrId, mainButtons, helperTextViews, context, true);
+            // unset
+            if (mainButtonsText[arrId] > 0) {
+                countInput(mainButtonsText[arrId], arrId, mainButtons, context, true);
+                if (autoHint) setAutoHints(mainButtonsText[arrId], arrId, mainButtons, helperTextViews, context, true);
+            }
+            countInput(number, arrId, mainButtons, context, false);
             mainButtonsText[arrId] = number;
-            // we need to change mainButtonsText[arrId] pre in case autoInsert chains
-           if (autoHint && number > 0) setAutoHints(number, arrId, mainButtons, helperTextViews, context, false);
+            // we need to set mainButtonsText[arrId] pre in case autoInsert chains
+            if (autoHint && number > 0) setAutoHints(number, arrId, mainButtons, helperTextViews, context, false);
         }
+
+        // is (now) empty
         if (number == 0) {
             mainButtons[arrId].setText("");
             // making the hint 'visible'; (hint is the background for button!)
             helperTextViews[arrId].setTextColor(textColorHints[arrId]);
         }
+        // is (now) populated
         else {
             mainButtons[arrId].setText(String.valueOf(number));
-            if (isAutoInsert[arrId]) mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorAutoInsert));
-            else if (isBlocked[arrId]) mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorIsBlocked));
-            else mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorUserInput));
+            updateMainButtonColor(number, arrId, mainButtons, context);
+            // SUB auto insert 2 looks at the whole playground, at the end of setMainButtonsText it has a new state
             if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT2, false))
                 autoInsert2(mainButtons, helperTextViews, context);
         }
+        // easy touch -> TODO: cleanup, do in own method + make whole easy touch code more readable
         if (arrId == arrIdEasyTouchButton) {
             helperTextViews[arrId].setBackgroundColor(ContextCompat.getColor(context, R.color.backgroundTouched));
             if (mainButtonsText[arrId] > 0) {
@@ -119,6 +108,22 @@ public class SudokuData {
         }
     }
 
+    protected void updateMainButtonColor(int number, int arrId, Button[] mainButtons, Context context) {
+        if (isBlocked[arrId]) mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorIsBlocked));
+        else if (helperBadUserInput[arrId][number-1] > 1) mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorBadUserInput));
+        else if (isAutoInsert[arrId]) mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorAutoInsert));
+        else mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorUserInput));
+    }
+
+    protected void countInput(int number, int arrId, Button[] mainButtons, Context context, boolean isDeletion) {
+        if (number == 0) return;
+        for (int tempArrId: SudokuGroups.getStarGroup(arrId)) {
+            helperBadUserInput[tempArrId][number-1] += isDeletion?-1:1;
+            if (number == mainButtonsText[tempArrId] && helperBadUserInput[tempArrId][number-1] < 3) updateMainButtonColor(number, tempArrId, mainButtons, context);
+        }
+        helperBadUserInput[arrId][number-1] += isDeletion?+2:-2;
+    }
+
     public void setUserHint(int number, int arrId, Button[] mainButtons, TextView[] helperTextViews, Context context) {
         isUserHint[arrId][number-1] = !isUserHint[arrId][number-1];
         setHelperTextViewText(arrId, mainButtons, helperTextViews, context, false);
@@ -127,10 +132,6 @@ public class SudokuData {
     }
 
     public void setHelperTextViewText(int arrId, Button[] mainButtons, TextView[] helperTextViews, Context context, boolean preventButtonUpdate) {
-        if (!preventButtonUpdate && mainButtonsText[arrId] == 0) {
-            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT1, false))
-                searchAndInsert1(arrId, mainButtons, helperTextViews, context);
-        }
         String text = "";
         boolean userHints = false;
         boolean autoHints = false;
@@ -147,17 +148,10 @@ public class SudokuData {
         if (helperTextViews[arrId].getCurrentTextColor() != ContextCompat.getColor(context, R.color.backgroundUntouched)) {
             helperTextViews[arrId].setTextColor(textColorHints[arrId]);
         }
-    }
-
-    // if we would use Observers or Listeners we could prevent calling a changed value again
-    // with threads we could even notify all as soon as auto insert is activated, but thread safety may be an issue
-    // for the sake of simplicity we call one by one
-    public void initAutoInsert1(Button[] mainButtons, TextView[] helperTextViews, Context context) {
-        for (int i = 0; i < DIM; i++) {
-            for (int j = 0; j < DIM; j++) {
-                int arrId = i * DIM + j;
+        // SUB: auto insert 1 uses hints, if a hint is set setHelperTextViewText is called
+        if (!preventButtonUpdate && mainButtonsText[arrId] == 0) {
+            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT1, false))
                 searchAndInsert1(arrId, mainButtons, helperTextViews, context);
-            }
         }
     }
 
@@ -179,8 +173,8 @@ public class SudokuData {
 
     public void autoInsert2(Button[] mainButtons, TextView[] helperTextViews, Context context) {
         for (int i = 0; i < DIM; i++) {
-            searchAndInsert2Sub(SudokuGroups.HORIZONTAL_GROUPS[i], mainButtons, helperTextViews, context);
             searchAndInsert2Sub(SudokuGroups.VERTICAL_GROUPS[i], mainButtons, helperTextViews, context);
+            searchAndInsert2Sub(SudokuGroups.HORIZONTAL_GROUPS[i], mainButtons, helperTextViews, context);
             searchAndInsert2Sub(SudokuGroups.GROUPED_GROUPS[i], mainButtons, helperTextViews, context);
         }
     }

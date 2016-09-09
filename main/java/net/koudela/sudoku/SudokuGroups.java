@@ -71,13 +71,21 @@ public class SudokuGroups {
               7,1,4,8,2,5,9,3,6,
               8,2,5,9,3,6,1,4,7,
               9,3,6,1,4,7,2,5,8};
-    public static int[] getVerticalGroup(int arr_id) {
-        return SudokuGroups.VERTICAL_GROUPS[SudokuGroups.ID_VERTICAL_GROUPS[arr_id]];
+    public static int[] getVerticalGroup(int arrId) {
+        return SudokuGroups.VERTICAL_GROUPS[SudokuGroups.ID_VERTICAL_GROUPS[arrId]];
     }
-    public static int[] getHorizontalGroup(int arr_id) {
-        return SudokuGroups.HORIZONTAL_GROUPS[SudokuGroups.ID_HORIZONTAL_GROUPS[arr_id]];
+    public static int[] getHorizontalGroup(int arrId) {
+        return SudokuGroups.HORIZONTAL_GROUPS[SudokuGroups.ID_HORIZONTAL_GROUPS[arrId]];
     }
-    public static int[] getGroupedGroup(int arr_id) {
-        return SudokuGroups.GROUPED_GROUPS[SudokuGroups.ID_GROUPED_GROUPS[arr_id]];
+    public static int[] getGroupedGroup(int arrId) {
+        return SudokuGroups.GROUPED_GROUPS[SudokuGroups.ID_GROUPED_GROUPS[arrId]];
+    }
+    public static int[] getStarGroup(int arrId) {
+        int[] starGroup = new int[3 * SudokuData.DIM];
+        int count = 0;
+        for (int tempArrId: getVerticalGroup(arrId)) starGroup[count++] = tempArrId;
+        for (int tempArrId: getHorizontalGroup(arrId)) starGroup[count++] = tempArrId;
+        for (int tempArrId: getGroupedGroup(arrId)) starGroup[count++] = tempArrId;
+        return starGroup; // contains 3 times arrId!
     }
 }
