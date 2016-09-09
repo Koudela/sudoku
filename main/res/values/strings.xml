@@ -33,4 +33,5 @@
     <string name="pref_font_size_input">font size selection</string>
     <string name="pref_font_size_input_default">16</string>
 
+    <string name="delete">del</string>
 </resources>

@@ -45,6 +45,10 @@ public class SudokuData {
         requestViewId = -1;
     }
 
+    public boolean isHint(int number, int arrId) {
+        return (isUserHint[arrId][number-1] || autoHint[arrId][number-1] > 0);
+    }
+
     protected void setAutoHints (int number, int arrId, Button[] mainButtons, TextView[] helperTextViews, Context context, boolean isDeletion) {
         // it does not matter that autoHint++/-- is called thrice for arrId:
         // 1. the call is symmetric and only > 0 is evaluated
