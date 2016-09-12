@@ -6,9 +6,9 @@
         <item>hard</item>
     </string-array>
     <string-array name="pref_level_values">
-        <item>easy</item>
-        <item>medium</item>
-        <item>hard</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
     </string-array>
 
     <string-array name="pref_font_size_main_entries">

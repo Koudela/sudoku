@@ -7,6 +7,7 @@ import android.util.Log;
 
 public class PreferencesFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String KEY_PREF_EASY_TOUCH = "pref_easy_touch";
+    public static final String KEY_PREF_LEVEL = "pref_level";
     public static final String KEY_PREF_AUTO_HINT = "pref_auto_hint";
     public static final String KEY_PREF_FONT_SIZE_MAIN = "pref_font_size_main";
     public static final String KEY_PREF_FONT_SIZE_HELPER = "pref_font_size_helper";

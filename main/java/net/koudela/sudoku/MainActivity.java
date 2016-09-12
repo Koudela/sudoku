@@ -27,11 +27,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        boolean firstRun = false;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         // find the retained fragment on activity restarts
         FragmentManager fm = getSupportFragmentManager();
         if (fm.findFragmentByTag("data") == null) {
+            firstRun = true;
             // create the fragment the first time
             fm.beginTransaction().add(new RetainedFragment(), "data").commit();
         }
@@ -41,6 +43,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // add second(!) the views populating the tableMain <- sudokuData.setMainButtonsText(...) needs helperTextViews populated
         initLayoutLayer("Main");
         setTextSizeMainButtons();
+        if (firstRun) {
+            sudokuData.resetGame(mainButtons, helperTextViews, this);
+        }
         PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
     }
 
@@ -111,11 +116,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.action_new_game:
                 Toast.makeText(this, "New game selected", Toast.LENGTH_SHORT).show();
-                sudokuData.initData();
-                for (int arrId = 0; arrId < DIM * DIM; arrId++) {
-                    sudokuData.setMainButtonsText(-1, arrId, mainButtons, helperTextViews, this);
-                    sudokuData.setHelperTextViewText(arrId, mainButtons, helperTextViews, this, true);
-                }
+                sudokuData.newGame(mainButtons, helperTextViews, this);
             default:
                 break;
         }
@@ -148,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (sudokuData.arrIdEasyTouchButton != arrId) {
             if (sudokuData.arrIdEasyTouchButton >= 0) {
                 helperTextViews[sudokuData.arrIdEasyTouchButton].setBackgroundColor(ContextCompat.getColor(this, R.color.backgroundUntouched));
-                if (!((String) mainButtons[sudokuData.arrIdEasyTouchButton].getText()).equals(""))
+                if (!mainButtons[sudokuData.arrIdEasyTouchButton].getText().equals(""))
                     helperTextViews[sudokuData.arrIdEasyTouchButton].setTextColor(ContextCompat.getColor(this, R.color.backgroundUntouched));
             }
             if (arrId == -1 || sudokuData.isBlocked(arrId)) sudokuData.arrIdEasyTouchButton = -1;
@@ -156,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         if (sudokuData.arrIdEasyTouchButton != -1) {
             helperTextViews[sudokuData.arrIdEasyTouchButton].setBackgroundColor(ContextCompat.getColor(this, R.color.backgroundTouched));
-            if (!((String) mainButtons[sudokuData.arrIdEasyTouchButton].getText()).equals(""))
+            if (!mainButtons[sudokuData.arrIdEasyTouchButton].getText().equals(""))
                 helperTextViews[sudokuData.arrIdEasyTouchButton].setTextColor(ContextCompat.getColor(this, R.color.backgroundTouched));
         }
     }

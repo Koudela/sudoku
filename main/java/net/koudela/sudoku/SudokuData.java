@@ -8,7 +8,8 @@ import android.widget.TextView;
 
 public class SudokuData {
     private static final SudokuData Singleton = new SudokuData();
-    public final static int DIM = 9;
+    public final static int DIM = Sudoku.DIM;
+    protected Sudoku sudoku = Sudoku.getInstance();
     protected Boolean[] isAutoInsert = new Boolean[DIM*DIM];
     protected int[] mainButtonsText = new int[DIM*DIM];
     protected int[] textColorHints = new int[DIM*DIM];
@@ -34,8 +35,6 @@ public class SudokuData {
             for (int j = 0; j < DIM; j++) {
                 int arrId = i * DIM + j;
                 isAutoInsert[arrId] = false;
-                mainButtonsText[arrId] = 0;
-                isBlocked[arrId] = false;
                 for (int k = 0; k < DIM; k++) {
                     isUserHint[arrId][k] = false;
                     autoHint[arrId][k] = 0;
@@ -47,6 +46,23 @@ public class SudokuData {
         }
         arrIdEasyTouchButton = -1;
         requestViewId = -1;
+    }
+
+    public void resetGame(Button[] mainButtons, TextView[] helperTextViews, Context context) {
+        initData();
+        sudoku.setLevel(PreferenceManager.getDefaultSharedPreferences(context).getString(PreferencesFragment.KEY_PREF_LEVEL, "1"));
+        mainButtonsText = sudoku.getSudoku();
+        for (int arrId : Sudoku.ALL_ARR_IDS) isBlocked[arrId] = (mainButtonsText[arrId] != 0);
+        for (int arrId : Sudoku.ALL_ARR_IDS) {
+            setMainButtonsText(-1, arrId, mainButtons, helperTextViews, context);
+            setHelperTextViewText(arrId, mainButtons, helperTextViews, context, true);
+        }
+
+    }
+
+    public void newGame(Button[] mainButtons, TextView[] helperTextViews, Context context) {
+        sudoku.init();
+        resetGame(mainButtons, helperTextViews, context);
     }
 
     public boolean isHint(int number, int arrId) {
