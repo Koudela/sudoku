@@ -201,6 +201,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         switch (key) {
+            case (PreferencesFragment.KEY_PREF_MARK_ERROR):
+                for (int arrId : Sudoku.ALL_ARR_IDS) if (!mainButtons[arrId].getText().equals("")) sudokuData.updateMainButtonColor(arrId, mainButtons, this);
+                break;
             case (PreferencesFragment.KEY_PREF_AUTO_HINT):
                 boolean autoHint = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferencesFragment.KEY_PREF_AUTO_HINT, false);
                 if (autoHint) sudokuData.initAutoHints(mainButtons, helperTextViews, this);
@@ -229,11 +232,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 break;
             case (PreferencesFragment.KEY_PREF_AUTO_INSERT1):
-                if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT1, false))
-                    for (int arrId = 0; arrId < DIM*DIM; arrId++) sudokuData.searchAndInsert1(arrId, mainButtons, helperTextViews, this);
+            case (PreferencesFragment.KEY_PREF_AUTO_INSERT1HINT):
+                if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT1, false)
+                        || PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT1HINT, false))
+                    for (int arrId: Sudoku.ALL_ARR_IDS) sudokuData.searchAndInsert1(arrId, mainButtons, helperTextViews, this);
                 break;
             case (PreferencesFragment.KEY_PREF_AUTO_INSERT2):
-                if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT2, false))
+            case (PreferencesFragment.KEY_PREF_AUTO_INSERT2HINT):
+                if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT2, false)
+                        || PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT2HINT, false))
                     sudokuData.autoInsert2(mainButtons, helperTextViews, this);
                 break;
         }

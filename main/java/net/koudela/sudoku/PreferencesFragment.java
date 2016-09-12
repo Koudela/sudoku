@@ -9,6 +9,9 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
     public static final String KEY_PREF_EASY_TOUCH = "pref_easy_touch";
     public static final String KEY_PREF_LEVEL = "pref_level";
     public static final String KEY_PREF_AUTO_HINT = "pref_auto_hint";
+    public static final String KEY_PREF_AUTO_INSERT1HINT = "pref_auto_insert1hint";
+    public static final String KEY_PREF_AUTO_INSERT2HINT = "pref_auto_insert2hint";
+    public static final String KEY_PREF_MARK_ERROR = "pref_mark_error";
     public static final String KEY_PREF_FONT_SIZE_MAIN = "pref_font_size_main";
     public static final String KEY_PREF_FONT_SIZE_HELPER = "pref_font_size_helper";
     public static final String KEY_PREF_FONT_SIZE_INPUT = "pref_font_size_input";

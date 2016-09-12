@@ -49,6 +49,10 @@ public class Sudoku extends SudokuExptimeFunctions {
         return Singleton;
     }
 
+    public int getSolutionField(int arrId) {
+        return solution[arrId];
+    }
+
     public int getSudokuField(int arrId) {
         switch (level) {
             case 0: return solution[arrId];

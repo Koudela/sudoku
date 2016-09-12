@@ -182,7 +182,7 @@ public class SudokuData {
         // is (now) populated
         else {
             mainButtons[arrId].setText(String.valueOf(number));
-            updateMainButtonColor(number, arrId, mainButtons, context);
+            updateMainButtonColor(arrId, mainButtons, context);
             if (!readonly) {
                 if (autoHintAdv1) autoHintsAdv1(mainButtons, helperTextViews, context);
                 // SUB auto insert 2 looks at the whole playground, at the end of setMainButtonsText it has a new state
@@ -206,9 +206,11 @@ public class SudokuData {
         }
     }
 
-    protected void updateMainButtonColor(int number, int arrId, Button[] mainButtons, Context context) {
+    public void updateMainButtonColor(int arrId, Button[] mainButtons, Context context) {
         if (isBlocked[arrId]) mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorIsBlocked));
-        else if (helperBadUserInput[arrId][number-1] > 1) mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorBadUserInput));
+        else if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(PreferencesFragment.KEY_PREF_MARK_ERROR, false)
+            && mainButtonsText[arrId] != sudoku.getSolutionField(arrId)) mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorMarkError));
+        else if (helperBadUserInput[arrId][mainButtonsText[arrId]-1] > 1) mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorBadUserInput));
         else if (isAutoInsert[arrId]) mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorAutoInsert));
         else mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorUserInput));
     }
@@ -217,7 +219,7 @@ public class SudokuData {
         if (number == 0) return;
         for (int tempArrId: SudokuGroups.getStarGroup(arrId)) {
             helperBadUserInput[tempArrId][number-1] += isDeletion?-1:1;
-            if (number == mainButtonsText[tempArrId] && helperBadUserInput[tempArrId][number-1] < 3) updateMainButtonColor(number, tempArrId, mainButtons, context);
+            if (number == mainButtonsText[tempArrId] && helperBadUserInput[tempArrId][number-1] < 3) updateMainButtonColor(tempArrId, mainButtons, context);
         }
         helperBadUserInput[arrId][number-1] += isDeletion?+2:-2;
     }
