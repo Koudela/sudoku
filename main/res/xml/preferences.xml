@@ -62,7 +62,7 @@
             android:title="@string/pref_font_size_input" />
     </PreferenceCategory>
     <PreferenceCategory
-        android:key="@string/pref_development"
+        android:key="pref_development"
         android:title="@string/pref_development">
         <CheckBoxPreference
             android:defaultValue="false"
