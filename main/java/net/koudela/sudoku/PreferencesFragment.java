@@ -15,8 +15,10 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
     public static final String KEY_PREF_FONT_SIZE_MAIN = "pref_font_size_main";
     public static final String KEY_PREF_FONT_SIZE_HELPER = "pref_font_size_helper";
     public static final String KEY_PREF_FONT_SIZE_INPUT = "pref_font_size_input";
+    public static final String KEY_PREF_DEVELOPMENT_OPTIONS = "pref_development_options";
     public static final String KEY_PREF_AUTO_HINT_ADV1 = "pref_auto_hint_adv1";
     public static final String KEY_PREF_AUTO_HINT_ADV2 = "pref_auto_hint_adv2";
+    public static final String KEY_PREF_AUTO_HINT_ADV3 = "pref_auto_hint_adv3";
     public static final String KEY_PREF_AUTO_INSERT1 = "pref_auto_insert1";
     public static final String KEY_PREF_AUTO_INSERT2 = "pref_auto_insert2";
 
@@ -42,19 +44,10 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
 
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         switch (key) {
-            case (PreferencesFragment.KEY_PREF_AUTO_HINT):
-                Log.v(key, "" + sharedPreferences.getBoolean(key, false));
-                break;
             case (PreferencesFragment.KEY_PREF_AUTO_HINT_ADV1):
                 Log.v(key, "" + sharedPreferences.getBoolean(key, false));
                 break;
             case (PreferencesFragment.KEY_PREF_AUTO_HINT_ADV2):
-                Log.v(key, "" + sharedPreferences.getBoolean(key, false));
-                break;
-            case (PreferencesFragment.KEY_PREF_AUTO_INSERT1):
-                Log.v(key, "" + sharedPreferences.getBoolean(key, false));
-                break;
-            case (PreferencesFragment.KEY_PREF_AUTO_INSERT2):
                 Log.v(key, "" + sharedPreferences.getBoolean(key, false));
                 break;
         }

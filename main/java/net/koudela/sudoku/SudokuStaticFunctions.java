@@ -2,6 +2,7 @@ package net.koudela.sudoku;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Set;
 
 public class SudokuStaticFunctions extends SudokuGroups {
     public static int[] getNewEmptyGrid() {
@@ -51,13 +52,12 @@ public class SudokuStaticFunctions extends SudokuGroups {
     }
 
     protected static boolean isAutoInsert2Solvable(int arrId, int[][] hints, int[] sudoku) {
-        if (isAutoInsert2SolvableSub(getVerticalGroup(arrId), arrId, hints, sudoku)) return true;
-        if (isAutoInsert2SolvableSub(getHorizontalGroup(arrId), arrId, hints, sudoku)) return true;
-        if (isAutoInsert2SolvableSub(getGroupedGroup(arrId), arrId, hints, sudoku)) return true;
-        return false;
+        return (isAutoInsert2SolvableSub(getVerticalGroup(arrId), arrId, hints, sudoku)
+                || isAutoInsert2SolvableSub(getHorizontalGroup(arrId), arrId, hints, sudoku)
+                || isAutoInsert2SolvableSub(getGroupedGroup(arrId), arrId, hints, sudoku));
     }
 
-    protected static boolean isAutoInsert2SolvableSub(int[] group, int arrId, int[][] hints, int[] sudoku) {
+    protected static boolean isAutoInsert2SolvableSub(Set<Integer> group, int arrId, int[][] hints, int[] sudoku) {
         for (int tempArrId : group) if (sudoku[tempArrId] == 0 && hints[tempArrId][sudoku[arrId] - 1] == 1) return false;
         return true;
     }

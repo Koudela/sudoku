@@ -51,7 +51,7 @@ public class ChooseInputActivity extends AppCompatActivity implements SharedPref
             if (sudokuData.mainButtonsText[arrId] == i) {
                 button.setTextColor(ContextCompat.getColor(this, R.color.textColorBadUserInput));
                 button.setText(getResources().getString(R.string.delete));
-            } else if (sudokuData.isHint(i, arrId)) {
+            } else if (sudokuData.isHint(i, arrId, sudokuData.isPrefAutoHint(this))) {
                 button.setTextColor(ContextCompat.getColor(this, R.color.userHints));
             }
         }
