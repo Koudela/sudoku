@@ -4,8 +4,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="net.koudela.sudoku.MainActivity">
     <item
-        android:id="@+id/action_new_game"
+        android:id="@+id/action_suggest_field"
+        android:orderInCategory="0"
+        android:title="@string/action_suggest_field"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_reset"
         android:orderInCategory="1"
+        android:title="@string/action_reset"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_new_game"
+        android:orderInCategory="10"
         android:title="@string/action_new_game"
         app:showAsAction="never" />
     <item
