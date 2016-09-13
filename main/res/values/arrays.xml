@@ -1,14 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="pref_level_entries">
+        <item>very easy</item>
         <item>easy</item>
+        <item>moderate easy</item>
         <item>medium</item>
+        <item>moderate hard</item>
         <item>hard</item>
+        <item>very hard</item>
     </string-array>
     <string-array name="pref_level_values">
         <item>1</item>
         <item>2</item>
         <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
     </string-array>
 
     <string-array name="pref_font_size_main_entries">

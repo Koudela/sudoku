@@ -21,7 +21,7 @@
     <string name="pref_auto_insert2hint">automatic insert hint 2</string>
     <string name="pref_auto_insert2hint_summ">if a number is missing only once in 9 hints vertical, horizontal or group wise, the sudoku field is activated (as easy touch)</string>
     <string name="pref_mark_error">mark error</string>
-    <string name="pref_mark_error_summ">mark fields with a wrong input</string>
+    <string name="pref_mark_error_summ">mark fields with a input not equal to the solution\n(duplicate inputs vertical, horizontal or group wise get marked by default)</string>
 
     <string name="pref_development_options">automatic play</string>
     <string name="pref_development_options_summ">let the device play for you</string>

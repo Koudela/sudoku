@@ -292,9 +292,9 @@ public class SudokuData {
 
     public void updateMainButtonColor(int arrId, Button[] mainButtons, Context context) {
         if (isBlocked[arrId]) mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorIsBlocked));
+        else if (autoHint[arrId][mainButtonsText[arrId] - 1] > 1) mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorBadUserInput));
         else if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(PreferencesFragment.KEY_PREF_MARK_ERROR, false)
             && mainButtonsText[arrId] != sudoku.getSolutionField(arrId)) mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorMarkError));
-        else if (autoHint[arrId][mainButtonsText[arrId] - 1] > 3) mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorBadUserInput));
         else if (isAutoInsert[arrId]) mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorAutoInsert));
         else mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorUserInput));
     }

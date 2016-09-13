@@ -106,12 +106,14 @@ public class SudokuGroups {
         return groupedGroup;
     }
 
+    // in the old version it contained 3 times arrId and 4 other ids were included twice!
+    // now its a set, all ids are contained only once!
     public static Set<Integer> getStarGroup(int arrId) {
         Set<Integer> starGroup = new LinkedHashSet<>();
         for (int tempArrId: getVerticalGroup(arrId)) starGroup.add(tempArrId);
         for (int tempArrId: getHorizontalGroup(arrId)) starGroup.add(tempArrId);
         for (int tempArrId: getGroupedGroup(arrId)) starGroup.add(tempArrId);
-        return starGroup; // contains 3 times arrId!
+        return starGroup;
     }
 
     public static Set<Integer> getComplementVerticalGroup(int arrId) {

@@ -62,7 +62,7 @@ public class SudokuExptimeFunctions extends SudokuStaticFunctions {
         int[] sudoku = getNewEmptyGrid();
         Integer[] arrIds = getRandomizedArrIds();
         int[][] hints = new int[DIM * DIM][DIM];
-        List<List> numbersLeft = new ArrayList<>();
+        List<List<Integer>> numbersLeft = new ArrayList<>();
         // init
         for (int arrId :ALL_ARR_IDS) {
             numbersLeft.add(new ArrayList<Integer>());
@@ -76,7 +76,7 @@ public class SudokuExptimeFunctions extends SudokuStaticFunctions {
         for (int i = 0; i < DIM * DIM;) {
             int arrId = arrIds[i];
             do {
-                sudoku[arrId] = (Integer) numbersLeft.get(arrId).get(0);
+                sudoku[arrId] = numbersLeft.get(arrId).get(0);
                 numbersLeft.get(arrId).remove(0);
             } while (hints[arrId][sudoku[arrId] - 1] > 1);
             int isSudoku = isSudoku(sudoku);
@@ -112,7 +112,7 @@ public class SudokuExptimeFunctions extends SudokuStaticFunctions {
         int[] sudoku = getNewEmptyGrid();
         Integer[] arrIds = getRandomizedArrIds();
         int[][] hints = new int[DIM * DIM][DIM];
-        List<List> numbersLeft = new ArrayList<>();
+        List<List<Integer>> numbersLeft = new ArrayList<>();
         // init
         for (int arrId : Sudoku.ALL_ARR_IDS) {
             arrIds[arrId] = arrId;
@@ -127,7 +127,7 @@ public class SudokuExptimeFunctions extends SudokuStaticFunctions {
         for (int i = 0; i < DIM * DIM;) {
             int arrId = arrIds[i];
             do {
-                sudoku[arrId] = (Integer) numbersLeft.get(arrId).get(0);
+                sudoku[arrId] = numbersLeft.get(arrId).get(0);
                 numbersLeft.get(arrId).remove(0);
             } while (hints[arrId][sudoku[arrId] - 1] > 1);
             int isSudoku = isSudoku(sudoku);
