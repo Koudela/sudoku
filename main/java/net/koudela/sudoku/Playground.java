@@ -1,5 +1,7 @@
 package net.koudela.sudoku;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,18 +34,18 @@ public class Playground {
             pField[arrId] = 0;
         }
     }
-    
+
     public void init(int[] cloneField) {
         populatedArrIds.clear();
         notPopulatedArrIds.clear();
         for (int arrId : Sudoku.ALL_ARR_IDS) {
-						if (cloneField[arrId] < 0 || cloneField[arrId] > DIM)
-								throw new IllegalArgumentException("value must be within [0, " + DIM + "]; value was " + cloneField[arrId]);
+            if (cloneField[arrId] < 0 || cloneField[arrId] > DIM)
+                throw new IllegalArgumentException("value must be within [0, " + DIM + "]; value was " + cloneField[arrId]);
             pField[arrId] = cloneField[arrId];
             if (cloneField[arrId] != 0) populatedArrIds.put(arrId, arrId);
             else notPopulatedArrIds.put(arrId, arrId);
         }
-		}
+    }
 
     public void init(Playground clone) {
         populatedArrIds.clear();
@@ -170,7 +172,7 @@ public class Playground {
 	private static int[] renameEntries(int[] pField, List<Integer> renameRelation) {
 		int[] newField = new int[DIM * DIM];
 		for (int arrId : Sudoku.ALL_ARR_IDS) {
-			if (pField[arrId] == 0) newField[arrId] = renameRelation.get(pField[arrId]);
+			if (pField[arrId] != 0) newField[arrId] = renameRelation.get(pField[arrId] - 1);
 			else newField[arrId] = 0;
 		}
 		return newField;
@@ -195,12 +197,12 @@ public class Playground {
 		int newArrId;
 		int[] newField = new int[DIM * DIM];
 		for (int cnt = 0; cnt < 3; cnt++)
-			for (int i = 0; i < DIM; i++)
-				for (int j = 0; j < 3; j++) {
-					oldArrId = (cnt * 3 + j) * DIM + i;
-					newArrId = (flipRelation.get(cnt) * 3 + j) * DIM + j;
-					newField[newArrId] = pField[oldArrId];
-				}
+            for (int i = 0; i < DIM; i++)
+                for (int j = 0; j < 3; j++) {
+                    oldArrId = (cnt * 3 + j) * DIM + i;
+                    newArrId = (flipRelation.get(cnt) * 3 + j) * DIM + i;
+                    newField[newArrId] = pField[oldArrId];
+                }
 		return newField;
 	}
 
@@ -209,24 +211,34 @@ public class Playground {
 		int newArrId;
 		int[] newField = new int[DIM * DIM];
 		for (int cnt = 0; cnt < 3; cnt++)
-			for (int i = 0; i < DIM; i++) {
-				oldArrId = i * DIM + (cnt + groupId * 3);
-				newArrId = i * DIM + (flipRelation.get(cnt) + groupId * 3);
-				newField[newArrId] = pField[oldArrId];
-			}
+			for (int i = 0; i < DIM; i++)
+                for (int j = 0; j < 3; j++)
+                    if (j == groupId) {
+                        oldArrId = i * DIM + (cnt + groupId * 3);
+                        newArrId = i * DIM + (flipRelation.get(cnt) + groupId * 3);
+                        newField[newArrId] = pField[oldArrId];
+                    } else {
+                        newArrId = i * DIM + (cnt + j * 3);
+                        newField[newArrId] = pField[newArrId];
+                    }
 		return newField;
 	}
 
 	private static int[] flipVerticalInGroups(int[] pField, int groupId, List<Integer> flipRelation) {
 		int oldArrId;
 		int newArrId;
-		int[] newField = new int[DIM * DIM];
-		for (int cnt = 0; cnt < 3; cnt++)
-			for (int i = 0; i < DIM; i++) {
-				oldArrId = (cnt + groupId * 3) * DIM + i;
-				newArrId = (flipRelation.get(cnt) + groupId * 3) * DIM + i;
-				newField[newArrId] = pField[oldArrId];
-			}
+        int[] newField = new int[DIM * DIM];
+        for (int cnt = 0; cnt < 3; cnt++)
+            for (int i = 0; i < DIM; i++)
+                for (int j = 0; j < 3; j++)
+                    if (j == groupId) {
+                        oldArrId = (cnt + groupId * 3) * DIM + i;
+                        newArrId = (flipRelation.get(cnt) + groupId * 3) * DIM + i;
+                        newField[newArrId] = pField[oldArrId];
+                    } else {
+                        newArrId = (cnt + j * 3) * DIM + i;
+                        newField[newArrId] = pField[newArrId];
+                    }
 		return newField;
 	}
 
@@ -279,21 +291,33 @@ public class Playground {
         Collections.shuffle(flipHorizontalInGroupsRelation1);
         Collections.shuffle(flipHorizontalInGroupsRelation2);
 
+        int log = 0;
+        Log.v("0"+(log++), toString());
         switch (rotate.get(0)) {
             case 1: pField = rotate90Degree(pField, true); break;
             case 2: pField = rotate180Degree(pField); break;
             case 3: pField = rotate90Degree(pField, false); break;
             default: break;
         }
+        Log.v("0"+(log++), toString());
         pField = renameEntries(pField, renameRelation);
+        Log.v("0"+(log++), toString());
         pField = flipVerticalGroups(pField, flipVerticalGroupsRelation);
+        Log.v("0"+(log++), toString());
         pField = flipHorizontalGroups(pField, flipHorizontalGroupsRelation);
+        Log.v("0"+(log++), toString());
         pField = flipHorizontalInGroups(pField, 0, flipHorizontalInGroupsRelation0);
+        Log.v("0"+(log++), toString());
         pField = flipHorizontalInGroups(pField, 1, flipHorizontalInGroupsRelation1);
+        Log.v("0"+(log++), toString());
         pField = flipHorizontalInGroups(pField, 2, flipHorizontalInGroupsRelation2);
+        Log.v("0"+(log++), toString());
         pField = flipVerticalInGroups(pField, 0, flipVerticalInGroupsRelation0);
+        Log.v("0"+(log++), toString());
         pField = flipVerticalInGroups(pField, 1, flipVerticalInGroupsRelation1);
+        Log.v("0"+(log++), toString());
         pField = flipVerticalInGroups(pField, 2, flipVerticalInGroupsRelation2);
+        Log.v("0"+(log++), toString());
         init(pField);
     }
 

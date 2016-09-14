@@ -38,7 +38,9 @@ public class Sudoku extends SudokuExptimeFunctions {
     }
 
     public void makeNewSolution() {
+        Log.v("solution", solution.toString());
         solution.init(TRUE_GRID);
+        Log.v("solution", solution.toString());
         solution.shuffle();
         Log.v("solution", solution.toString());
     }
