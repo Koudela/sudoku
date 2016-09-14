@@ -1,5 +1,7 @@
 package net.koudela.sudoku;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -101,8 +103,11 @@ public class SudokuExptimeFunctions extends SudokuStaticFunctions {
         Collections.shuffle(Arrays.asList(arrIds));
         // erase values
         for (int arrId : arrIds) {
+            if (sudoku[arrId] == 0) continue;
+            Log.v("inspect", ""+arrId);
             sudoku[arrId] = 0;
             if (isSudoku(sudoku) == 0) sudoku[arrId] = trueGrid[arrId];
+            else Log.v("removed", ""+arrId);
         }
         return sudoku;
     }

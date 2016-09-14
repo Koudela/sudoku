@@ -1,5 +1,7 @@
 package net.koudela.sudoku;
 
+import android.util.Log;
+
 public class Sudoku extends SudokuExptimeFunctions {
     private static final Sudoku Singleton = new Sudoku();
     public int[] solution = new int[DIM * DIM];
@@ -23,10 +25,17 @@ public class Sudoku extends SudokuExptimeFunctions {
     public Sudoku init() {
         // TODO: Construct (fast computed) arbitrary starting grid
         solution = TRUE_GRID;//makeTrueGridByBruteForceBacktracking();
+        Log.v("solution", sudokuToString(solution));
         level1Sudoku = makeLevelOneSudoku(solution);
+        Log.v("level1Sudoku", sudokuToString(level1Sudoku));
         level2Sudoku = makeLevelTwoSudoku(level1Sudoku);
+        Log.v("level2Sudoku", sudokuToString(level2Sudoku));
         level3Sudoku = makeLevelThreeSudoku(level2Sudoku);
+        Log.v("level3Sudoku", sudokuToString(level3Sudoku));
         level4Sudoku = makeLevelFourSudoku(level3Sudoku);
+        Log.v("level4Sudoku", sudokuToString(level4Sudoku));
+        level5Sudoku = makeMinimalSudokuByBruteForceBacktrackingOutOfTrueGrid(level4Sudoku);
+        Log.v("level5Sudoku", sudokuToString(level5Sudoku));
         return Singleton;
     }
 
@@ -47,12 +56,13 @@ public class Sudoku extends SudokuExptimeFunctions {
     public Sudoku setLevel(String level) {
         switch (level) {
             case "0": this.level = 0; break;
-            case "easy":
             case "1": this.level = 1; break;
-            case "medium":
             case "2": this.level = 2; break;
-            case "hard":
             case "3": this.level = 3; break;
+            case "4": this.level = 4; break;
+            case "5": this.level = 5; break;
+            case "6": this.level = 6; break;
+            case "7": this.level = 7; break;
             default: throw new IndexOutOfBoundsException(level);
         }
         return Singleton;
