@@ -3,145 +3,153 @@ package net.koudela.sudoku;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class SudokuExptimeFunctions extends SudokuStaticFunctions {
 
     // be careful, this algorithm resides in EXPTIME
-    protected static int[] solveByBacktracking(int[] sudoku, boolean countDown) {
-        int[][] hints = new int[DIM * DIM][DIM];
-        int[] computedSolution = new int[DIM * DIM];
-        int initValue = countDown?10:0;
-        // init
-        for (int arrId = 0; arrId < DIM * DIM; arrId++) for (int number = 0; number < DIM; number++) hints[arrId][number] = 0;
-        for (int arrId = 0; arrId < DIM * DIM; arrId++) {
-            if (sudoku[arrId] != 0) {
-                computedSolution[arrId] = sudoku[arrId];
-                for (int tempArrId : SudokuGroups.getStarGroup(arrId)) hints[tempArrId][computedSolution[arrId] - 1]++;
-            } else computedSolution[arrId] = initValue;
+    public static Set<Set<Integer>> powerSet(Set<Integer> originalSet) {
+        Set<Set<Integer>> sets = new HashSet<>();
+        if (originalSet.isEmpty()) {
+            sets.add(new HashSet<Integer>());
+            return sets;
         }
+        List<Integer> list = new ArrayList<>(originalSet);
+        Integer head = list.get(0);
+        Set<Integer> rest = new HashSet<>(list.subList(1, list.size()));
+        for (Set<Integer> set : powerSet(rest)) {
+            Set<Integer> newSet = new HashSet<>();
+            newSet.add(head);
+            newSet.addAll(set);
+            sets.add(newSet);
+            sets.add(set);
+        }
+        return sets;
+    }
+
+    // be careful, this algorithm resides in EXPTIME
+    protected static Playground solveByBacktracking(Playground sudoku, boolean countDown) {
+        Hint hint = new Hint();
+        Playground computedSolution = new Playground(sudoku);
+        int initValue = countDown?9:1;
+        // init
+        Hints.populatePlainHints(hint, computedSolution);
         // initial check
-        for (int arrId = 0; arrId < DIM * DIM; arrId++) for (int number = 0; number < DIM; number++) if (hints[arrId][number] > 3) return null; // -> Sudoku is not solvable
+        for (int arrId : ALL_ARR_IDS)
+            for (int num = 0; num < DIM; num++)
+                if (hint.get(arrId, num) > 3) return null; // -> Sudoku is not solvable
         // backtrack
         for (int arrId = 0; arrId < DIM * DIM; ) {
-            if (sudoku[arrId] != 0) {
+            if (sudoku.isPopulated(arrId)) {
                 arrId++;
                 continue;
             }
-            do {
-                computedSolution[arrId] += countDown?-1:1;
+            computedSolution.set(arrId, initValue);
+            boolean outOfBound = false;
+            while (outOfBound || computedSolution.get(arrId) > 9 || computedSolution.get(arrId) < 1 || hint.isHint(arrId, computedSolution.get(arrId) - 1)) {
+                try {
+                    outOfBound = false;
+                    computedSolution.set(arrId, computedSolution.get(arrId) + (countDown ? -1 : 1));
+                } catch (IllegalArgumentException e) {
+                    outOfBound = true;
+                }
                 // step back
-                if (computedSolution[arrId] > 9 || computedSolution[arrId] < 1) {
+                if (outOfBound || computedSolution.get(arrId) > 9 || computedSolution.get(arrId) < 1) {
                     if (arrId == 0) return null; // -> Sudoku is not solvable
-                    computedSolution[arrId] = initValue;
                     arrId--;
-                    while (sudoku[arrId] != 0) {
+                    while (sudoku.isPopulated(arrId)) {
                         if (arrId == 0) return null; // -> Sudoku is not solvable
                         arrId--;
                     }
-                    for (int tempArrId : SudokuGroups.getStarGroup(arrId)) hints[tempArrId][computedSolution[arrId] - 1]--;
-                    computedSolution[arrId] += countDown?-1:1;
+                    Hints.decrementStarGroup(arrId, computedSolution.get(arrId) - 1, hint);
+                    try {
+                        outOfBound = false;
+                        computedSolution.set(arrId, computedSolution.get(arrId) + (countDown ? -1 : 1));
+                    } catch (IllegalArgumentException e) {
+                        outOfBound = true;
+                    }
                 }
-            } while(computedSolution[arrId] > 9 || computedSolution[arrId] < 1 || hints[arrId][computedSolution[arrId] - 1] > 0);
-            for (int tempArrId : SudokuGroups.getStarGroup(arrId)) hints[tempArrId][computedSolution[arrId] - 1]++;
+            }
+            Hints.incrementStarGroup(arrId, computedSolution.get(arrId) - 1, hint);
             arrId++;
         }
         return computedSolution;
     }
 
     // be careful, this algorithm resides in EXPTIME
-    public static int isSudoku(int[] sudoku) {
-        int[] possibleSolution = solveByBacktracking(sudoku, false);
+    public static int isSudoku(Playground sudoku) {
+        Playground possibleSolution = solveByBacktracking(sudoku, false);
         if (possibleSolution == null) return -1; // -> Sudoku is not solvable
-        if (Arrays.equals(possibleSolution, solveByBacktracking(sudoku, true))) return 1; // -> Sudoku is a valid Sudoku
+        if (possibleSolution.equals(solveByBacktracking(sudoku, true))) return 1; // -> Sudoku is a valid Sudoku
         return 0; // -> Sudoku has more than one possible solution
     }
 
     // be careful, this algorithm resides in EXPTIME
-    public static int[] makeTrueGridByBruteForceBacktracking() {
-        int[] sudoku = getNewEmptyGrid();
-        Integer[] arrIds = getRandomizedArrIds();
-        int[][] hints = new int[DIM * DIM][DIM];
+    public static Playground makeTrueGridByBruteForceBacktracking() {
+        Playground sudoku = new Playground();
+        Hint hint = new Hint();
         List<List<Integer>> numbersLeft = new ArrayList<>();
         // init
         for (int arrId :ALL_ARR_IDS) {
             numbersLeft.add(new ArrayList<Integer>());
-            for (int number = 0; number < DIM; number++) {
-                hints[arrId][number] = 0;
-                numbersLeft.get(arrId).add(number + 1);
-            }
-            Collections.shuffle(numbersLeft.get(arrId));
+            for (int number = 1; number <= DIM; number++) numbersLeft.get(arrId).add(number);
         }
         // set value
-        for (int i = 0; i < DIM * DIM;) {
-            int arrId = arrIds[i];
+        int isSudoku;
+        for (int arrId : getRandomizedArrIds())
             do {
-                sudoku[arrId] = numbersLeft.get(arrId).get(0);
-                numbersLeft.get(arrId).remove(0);
-            } while (hints[arrId][sudoku[arrId] - 1] > 1);
-            int isSudoku = isSudoku(sudoku);
-            if (isSudoku == 1) return solveByBacktracking(sudoku, false);
-            else if (isSudoku == 0) {
-                for (int tempArrId : SudokuGroups.getStarGroup(arrId)) hints[tempArrId][sudoku[arrId] - 1]++;
-                i++;
-            }
-        }
+                do {
+                    sudoku.set(arrId, numbersLeft.get(arrId).get(0));
+                    numbersLeft.get(arrId).remove(0);
+                } while (hint.get(arrId, sudoku.get(arrId) - 1) > 1);
+                isSudoku = isSudoku(sudoku);
+                if (isSudoku == 1) return solveByBacktracking(sudoku, false);
+                if (isSudoku == 0) Hints.incrementStarGroup(arrId, sudoku.get(arrId) - 1, hint);
+
+            } while (isSudoku == -1) ;
         return sudoku;
     }
 
-    // be careful, this algorithm resides in EXPTIME
-    public static int[] makeMinimalSudokuByBruteForceBacktrackingOutOfTrueGrid(int[] trueGrid) {
-        int[] sudoku = new int[DIM * DIM];
-        Integer[] arrIds = new Integer[DIM * DIM];
-        // init
-        for (int arrId = 0; arrId < DIM * DIM; arrId++) {
-            arrIds[arrId] = arrId;
-            sudoku[arrId] = trueGrid[arrId];
-        }
-        Collections.shuffle(Arrays.asList(arrIds));
+        // be careful, this algorithm resides in EXPTIME
+    public static Playground makeMinimalSudokuByBruteForceBacktrackingOutOfTrueGrid(int[] trueGrid) {
+        Playground sudoku = new Playground(trueGrid);
         // erase values
-        for (int arrId : arrIds) {
-            if (sudoku[arrId] == 0) continue;
-            Log.v("inspect", ""+arrId);
-            sudoku[arrId] = 0;
-            if (isSudoku(sudoku) == 0) sudoku[arrId] = trueGrid[arrId];
-            else Log.v("removed", ""+arrId);
-        }
+        for (int arrId : getRandomizedArrIds())
+            if (sudoku.isPopulated(arrId)) {
+                Log.v("inspect", ""+arrId);
+                sudoku.set(arrId, 0);
+                if (isSudoku(sudoku) == 0) sudoku.set(arrId, trueGrid[arrId]);
+                else Log.v("removed", ""+arrId);
+            }
         return sudoku;
     }
 
     // be careful, this algorithm resides in EXPTIME
-    public static int[] makeMinimalSudokuByBruteForceBacktracking() {
-        int[] sudoku = getNewEmptyGrid();
-        Integer[] arrIds = getRandomizedArrIds();
-        int[][] hints = new int[DIM * DIM][DIM];
+    public static Playground makeMinimalSudokuByBruteForceBacktracking() {
+        Playground sudoku = new Playground();
+        Hint hint = new Hint();
         List<List<Integer>> numbersLeft = new ArrayList<>();
         // init
         for (int arrId : Sudoku.ALL_ARR_IDS) {
-            arrIds[arrId] = arrId;
             numbersLeft.add(new ArrayList<Integer>());
-            for (int number = 0; number < DIM; number++) {
-                hints[arrId][number] = 0;
-                numbersLeft.get(arrId).add(number + 1);
-            }
+            for (int number = 1; number <= DIM; number++) numbersLeft.get(arrId).add(number);
             Collections.shuffle(numbersLeft.get(arrId));
         }
         // set value
-        for (int i = 0; i < DIM * DIM;) {
-            int arrId = arrIds[i];
+        int isSudoku;
+        for (int arrId : getRandomizedArrIds())
             do {
-                sudoku[arrId] = numbersLeft.get(arrId).get(0);
-                numbersLeft.get(arrId).remove(0);
-            } while (hints[arrId][sudoku[arrId] - 1] > 1);
-            int isSudoku = isSudoku(sudoku);
-            if (isSudoku == 1) return sudoku;
-            else if (isSudoku == 0) {
-                for (int tempArrId : SudokuGroups.getStarGroup(arrId)) hints[tempArrId][sudoku[arrId] - 1]++;
-                i++;
-            }
-        }
+                do {
+                    sudoku.set(arrId, numbersLeft.get(arrId).get(0));
+                    numbersLeft.get(arrId).remove(0);
+                } while (hint.get(arrId, sudoku.get(arrId) - 1) > 1);
+                isSudoku = isSudoku(sudoku);
+                if (isSudoku == 1) return sudoku;
+                if (isSudoku == 0) Hints.incrementStarGroup(arrId, sudoku.get(arrId) - 1, hint);
+            } while (isSudoku == -1) ;
         return sudoku;
     }
 }

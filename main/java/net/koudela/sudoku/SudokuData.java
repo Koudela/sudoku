@@ -14,7 +14,7 @@ public class SudokuData {
     public final static int DIM = Sudoku.DIM;
     protected Sudoku sudoku = Sudoku.getInstance();
     protected Boolean[] isAutoInsert = new Boolean[DIM*DIM];
-    protected int[] mainButtonsText = new int[DIM*DIM];
+    protected Playground mainButtonsText = new Playground();
     protected int[] textColorHints = new int[DIM*DIM];
     protected Boolean[] isBlocked = new Boolean[DIM*DIM];
     protected Boolean[][] isUserHint = new Boolean[DIM*DIM][DIM];
@@ -46,13 +46,13 @@ public class SudokuData {
 
     public void resetGame(Button[] mainButtons, TextView[] helperTextViews, Context context) {
         initData();
-        sudoku.setLevel(PreferenceManager.getDefaultSharedPreferences(context).getString(PreferencesFragment.KEY_PREF_LEVEL, "1"));
-        mainButtonsText = sudoku.getSudoku();
+        sudoku.setLevel(Integer.valueOf(PreferenceManager.getDefaultSharedPreferences(context).getString(PreferencesFragment.KEY_PREF_LEVEL, "1")));
+        mainButtonsText = sudoku.get();
         resetAutoHints(context);
         resetAutoHintsAdv1(context);
         resetAutoHintsAdv2(context);
         resetAutoHintsAdv3(context);
-        for (int arrId : Sudoku.ALL_ARR_IDS) isBlocked[arrId] = (mainButtonsText[arrId] != 0);
+        for (int arrId : Sudoku.ALL_ARR_IDS) isBlocked[arrId] = (mainButtonsText.isPopulated(arrId));
         for (int arrId : Sudoku.ALL_ARR_IDS) {
             setMainButtonsContent(-1, arrId, mainButtons, helperTextViews, context, true);
             setHelperTextViewContent(arrId, mainButtons, helperTextViews, context, true);
@@ -124,8 +124,8 @@ public class SudokuData {
         initAutoHints();
         if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(PreferencesFragment.KEY_PREF_AUTO_HINT, false))
             for (int arrId : Sudoku.ALL_ARR_IDS)
-                if (mainButtonsText[arrId] != 0)
-                    for (int tempArrId : Sudoku.getStarGroup(arrId)) autoHint[tempArrId][mainButtonsText[arrId] - 1]++;
+                if (mainButtonsText.isPopulated(arrId))
+                    for (int tempArrId : Sudoku.getStarGroup(arrId)) autoHint[tempArrId][mainButtonsText.get(arrId) - 1]++;
     }
 
     // returns the arrIds of the manipulated hints
@@ -136,7 +136,7 @@ public class SudokuData {
         if (number == 0) return new LinkedHashSet<Integer>(){};
         for (int tempArrId: SudokuGroups.getStarGroup(arrId)) {
             autoHint[tempArrId][number - 1] += isDeletion ? -1 : 1;
-            if (number == mainButtonsText[tempArrId]) updateMainButtonColor(tempArrId, mainButtons, context);
+            if (number == mainButtonsText.get(tempArrId)) updateMainButtonColor(tempArrId, mainButtons, context);
         }
         if (isPrefAutoHint(context)) return SudokuGroups.getStarGroup(arrId);
         else return new LinkedHashSet<Integer>(){};
@@ -156,7 +156,7 @@ public class SudokuData {
                     // check vertical
                     int tempArrId = -1;
                     for (int arrId : SudokuGroups.GROUPED_GROUPS[cnt])
-                        if (!isHint(number, arrId, isPrefAutoHint(context)) && mainButtonsText[arrId] == 0)
+                        if (!isHint(number, arrId, isPrefAutoHint(context)) && !mainButtonsText.isPopulated(arrId))
                             if (tempArrId == -1) tempArrId = arrId;
                             else if (arrId != tempArrId + 1 && arrId != tempArrId + 2) {
                                 tempArrId = -1;
@@ -170,7 +170,7 @@ public class SudokuData {
                     // check horizontal
                     tempArrId = -1;
                     for (int arrId : SudokuGroups.GROUPED_GROUPS[cnt])
-                        if (!isHint(number, arrId, isPrefAutoHint(context)) && mainButtonsText[arrId] == 0)
+                        if (!isHint(number, arrId, isPrefAutoHint(context)) && !mainButtonsText.isPopulated(arrId))
                             if (tempArrId == -1) tempArrId = arrId;
                             else if (arrId != tempArrId + 9 && arrId != tempArrId + 18) {
                                 tempArrId = -1;
@@ -210,12 +210,12 @@ public class SudokuData {
 
 
     public void onUnsetMainButtonContent(int arrId, Button[] mainButtons, TextView[] helperTextViews, Context context) {
-        Set<Integer> group = setAutoHints(mainButtonsText[arrId], arrId, mainButtons, context, true);
+        Set<Integer> group = setAutoHints(mainButtonsText.get(arrId), arrId, mainButtons, context, true);
         for (Integer tempArrId : group) setHelperTextViewContent(tempArrId, mainButtons, helperTextViews, context, true);
     }
 
     public void onSetMainButtonContent(int arrId, Button[] mainButtons, TextView[] helperTextViews, Context context) {
-        Set<Integer> group = setAutoHints(mainButtonsText[arrId], arrId, mainButtons, context, false);
+        Set<Integer> group = setAutoHints(mainButtonsText.get(arrId), arrId, mainButtons, context, false);
         if (isPrefAutoHintAdv1(context))
             group.addAll(resetAutoHintsAdv1(context));
         if (isPrefAutoHintAdv2(context))
@@ -238,11 +238,11 @@ public class SudokuData {
 
     public void setMainButtonsContent(int number, int arrId, Button[] mainButtons, TextView[] helperTextViews, Context context, boolean preventOnUpdate) {
         // get
-        if (number < 0) number = mainButtonsText[arrId];
+        if (number < 0) number = mainButtonsText.get(arrId);
             // set
         else {
             if (!preventOnUpdate) onUnsetMainButtonContent(arrId, mainButtons, helperTextViews, context);
-            mainButtonsText[arrId] = number;
+            mainButtonsText.set(arrId, number);
             if (!preventOnUpdate) onSetMainButtonContent(arrId, mainButtons, helperTextViews, context);
         }
         // is (now) empty
@@ -262,13 +262,13 @@ public class SudokuData {
     public void setBackgroundWithRespectToEasyTouchArea(int arrId, TextView[] helperTextViews, Context context) {
         if (arrId == arrIdEasyTouchButton) {
             helperTextViews[arrId].setBackgroundColor(ContextCompat.getColor(context, R.color.backgroundTouched));
-            if (mainButtonsText[arrId] > 0) {
+            if (mainButtonsText.isPopulated(arrId)) {
                 // making the hint 'invisible'; (hint is the background for button!)
                 helperTextViews[arrId].setTextColor(ContextCompat.getColor(context, R.color.backgroundTouched));
             }
         } else {
             helperTextViews[arrId].setBackgroundColor(ContextCompat.getColor(context, R.color.backgroundUntouched));
-            if (mainButtonsText[arrId] > 0) {
+            if (mainButtonsText.isPopulated(arrId)) {
                 // making the hint 'invisible'; (hint is the background for button!)
                 helperTextViews[arrId].setTextColor(ContextCompat.getColor(context, R.color.backgroundUntouched));
             }
@@ -278,30 +278,30 @@ public class SudokuData {
     public void setEasyTouchArea(int arrId, TextView[] helperTextViews, Context context) {
         if (arrIdEasyTouchButton != arrId && arrIdEasyTouchButton >= 0) {
             helperTextViews[arrIdEasyTouchButton].setBackgroundColor(ContextCompat.getColor(context, R.color.backgroundUntouched));
-            if (mainButtonsText[arrIdEasyTouchButton] != 0)
+            if (mainButtonsText.isPopulated(arrIdEasyTouchButton))
                 helperTextViews[arrIdEasyTouchButton].setTextColor(ContextCompat.getColor(context, R.color.backgroundUntouched));
         }
         if (arrId != -1 && isBlocked[arrId]) arrIdEasyTouchButton = -1;
         else arrIdEasyTouchButton = arrId;
         if (arrIdEasyTouchButton != -1) {
             helperTextViews[arrIdEasyTouchButton].setBackgroundColor(ContextCompat.getColor(context, R.color.backgroundTouched));
-            if (mainButtonsText[arrIdEasyTouchButton] != 0)
+            if (mainButtonsText.isPopulated(arrIdEasyTouchButton))
                 helperTextViews[arrIdEasyTouchButton].setTextColor(ContextCompat.getColor(context, R.color.backgroundTouched));
         }
     }
 
     public void updateMainButtonColor(int arrId, Button[] mainButtons, Context context) {
         if (isBlocked[arrId]) mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorIsBlocked));
-        else if (autoHint[arrId][mainButtonsText[arrId] - 1] > 1) mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorBadUserInput));
+        else if (autoHint[arrId][mainButtonsText.get(arrId) - 1] > 1) mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorBadUserInput));
         else if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(PreferencesFragment.KEY_PREF_MARK_ERROR, false)
-            && mainButtonsText[arrId] != sudoku.getSolutionField(arrId)) mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorMarkError));
+            && mainButtonsText.get(arrId) != sudoku.get(0).get(arrId)) mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorMarkError));
         else if (isAutoInsert[arrId]) mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorAutoInsert));
         else mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorUserInput));
     }
 
     public void onUpdateHelperTextViewContent(int arrId, Button[] mainButtons, TextView[] helperTextViews, Context context) {
         // SUB: auto insert 1 uses hints, if a hint is set setHelperTextViewContent is called
-        if (mainButtonsText[arrId] == 0) {
+        if (!mainButtonsText.isPopulated(arrId)) {
             if (isPrefAutoInsert1(context)) {
                 Integer[] ai1arr = getAutoInsert1ByField(arrId, context);
                 if (ai1arr != null) {
@@ -338,7 +338,7 @@ public class SudokuData {
 
     // if exact 8 hints are displayed it returns the missing number, null otherwise
     public Integer[] getAutoInsert1ByField(int arrId, Context context) {
-        if (mainButtonsText[arrId] != 0) return null;
+        if (mainButtonsText.isPopulated(arrId)) return null;
         int number = 0;
         for (int num = 1; num <= DIM; num++) if (!isHint(num, arrId, isPrefAutoHint(context))) {
             if (number != 0) return null;
@@ -356,7 +356,7 @@ public class SudokuData {
             int count = 0;
             int tempArrId = -1;
             for (int arrId : group) {
-                if (mainButtonsText[arrId] != 0 || isHint(num, arrId, isPrefAutoHint(context))) count++;
+                if (mainButtonsText.isPopulated(arrId) || isHint(num, arrId, isPrefAutoHint(context))) count++;
                 else if (tempArrId == -1) tempArrId = arrId;
                 else break;
             }
