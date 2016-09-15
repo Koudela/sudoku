@@ -23,7 +23,7 @@ public class Sudoku extends SudokuExptimeFunctions {
     }
 
     public Sudoku init() {
-
+        makeNewSolution();
         level1Sudoku = null;
         level2Sudoku = null;
         level3Sudoku = null;

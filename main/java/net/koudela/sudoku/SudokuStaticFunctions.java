@@ -19,7 +19,7 @@ public class SudokuStaticFunctions extends SudokuGroups {
     public static Playground solveSudoku(int deletionAtArrId, Playground sudoku, boolean byAutoInsert1, boolean byAutoInsert2, boolean byAutoHintAdv1, boolean byAutoHintAdv2, boolean byAutoHintAdv3) {
         Playground solution = new Playground(sudoku);
         if (deletionAtArrId > -1) solution.set(deletionAtArrId, 0);
-        Hints hints = new Hints();
+        Hints hints = new Hints(true, byAutoHintAdv1, byAutoHintAdv2, byAutoHintAdv3);
         hints.populatePlainHints(solution);
         int newHintsFound;
         boolean changedSolution;

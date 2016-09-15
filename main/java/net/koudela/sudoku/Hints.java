@@ -18,6 +18,15 @@ public class Hints {
     protected boolean useAdv2 = false;
     protected boolean useAdv3 = false;
 
+    public Hints() {}
+
+    public Hints(boolean usePlain, boolean useAdv1, boolean useAdv2, boolean useAdv3) {
+        this.usePlain = usePlain;
+        this.useAdv1 = useAdv1;
+        this.useAdv2 = useAdv2;
+        this.useAdv3 = useAdv3;
+    }
+
     public boolean isHint(int arrId, int num) {
         return (usePlain && hint.isHint(arrId, num)
                 || useAdv1 && hintAdv1.isHint(arrId, num)
