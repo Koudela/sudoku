@@ -4,14 +4,14 @@ import android.util.Log;
 
 import java.util.Set;
 
-public class Sudoku extends SudokuExptimeFunctions {
+public class Sudoku extends SudokuExptimeFunctions implements Runnable {
     private static final Sudoku Singleton = new Sudoku();
     public Playground solution = new Playground(TRUE_GRID);
-    public Playground level1Sudoku;
-    public Playground level2Sudoku;
-    public Playground level3Sudoku;
-    public Playground level4Sudoku;
-    public Playground level5Sudoku;
+    public Playground level1Sudoku = new Playground();
+    public Playground level2Sudoku = new Playground();
+    public Playground level3Sudoku = new Playground();
+    public Playground level4Sudoku = new Playground();
+    public Playground level5Sudoku = new Playground();
     protected int level = 1;
 
     protected Sudoku() {
@@ -24,16 +24,16 @@ public class Sudoku extends SudokuExptimeFunctions {
 
     public Sudoku init() {
         makeNewSolution();
-        level1Sudoku = null;
-        level2Sudoku = null;
-        level3Sudoku = null;
-        level4Sudoku = null;
-        level5Sudoku = null;
+        level1Sudoku.init();
+        level2Sudoku.init();
+        level3Sudoku.init();
+        level4Sudoku.init();
+        level5Sudoku.init();
         makeLevelOneSudoku();
         makeLevelTwoSudoku();
         makeLevelThreeSudoku();
         makeLevelFourSudoku();
-        level5Sudoku = makeMinimalSudokuByBruteForceBacktrackingOutOfTrueGrid(level4Sudoku.getPField());
+        new Thread(this).start();
         return Singleton;
     }
 
@@ -97,7 +97,7 @@ public class Sudoku extends SudokuExptimeFunctions {
 
     // a level two sudoku gets constructed by using AutoInsert1 and AutoInsert2 logic
     public void makeLevelTwoSudoku() {
-        if (level1Sudoku == null) makeLevelOneSudoku();
+        if (level1Sudoku.getPopulatedArrIds().size() == 0) makeLevelOneSudoku();
         Log.v("makeLevelTwoSudoku","start");
         level2Sudoku = new Playground(level1Sudoku);
         Hint hint = new Hint();
@@ -114,7 +114,7 @@ public class Sudoku extends SudokuExptimeFunctions {
 
     // a level three sudoku is solvable by using AutoInsert1, AutoInsert2
     public void makeLevelThreeSudoku() {
-        if (level2Sudoku == null) makeLevelTwoSudoku();
+        if (level2Sudoku.getPopulatedArrIds().size() == 0) makeLevelTwoSudoku();
         Log.v("makeLevelThreeSudoku","start");
         level3Sudoku = new Playground(level2Sudoku);
         for (int arrId : getRandomizedArrIds())
@@ -130,7 +130,7 @@ public class Sudoku extends SudokuExptimeFunctions {
 
     // a level four sudoku is solvable by using AutoInsert1, AutoInsert2, AutoHintAdv1, AutoHintAdv3
     public void makeLevelFourSudoku() {
-        if (level3Sudoku == null) makeLevelThreeSudoku();
+        if (level3Sudoku.getPopulatedArrIds().size() == 0) makeLevelThreeSudoku();
         Log.v("makeLevelFourSudoku","start");
         level4Sudoku = new Playground(level3Sudoku);
         for (int arrId : getRandomizedArrIds())
@@ -153,22 +153,21 @@ public class Sudoku extends SudokuExptimeFunctions {
         switch (level) {
             case 0: return solution;
             case 1:
-                if (level1Sudoku == null) makeLevelOneSudoku();
+                if (level1Sudoku.getPopulatedArrIds().size() == 0) makeLevelOneSudoku();
                 return level1Sudoku;
             case 2:
-                if (level2Sudoku == null) makeLevelTwoSudoku();
+                if (level2Sudoku.getPopulatedArrIds().size() == 0) makeLevelTwoSudoku();
                 return level2Sudoku;
             case 3:
-                if (level3Sudoku == null) makeLevelThreeSudoku();
+                if (level3Sudoku.getPopulatedArrIds().size() == 0) makeLevelThreeSudoku();
                 return level3Sudoku;
             case 4:
-                if (level4Sudoku == null) makeLevelFourSudoku();
+                if (level4Sudoku.getPopulatedArrIds().size() == 0) makeLevelFourSudoku();
                 return level4Sudoku;
             case 5:
-                if (level1Sudoku == null) {
-                    if (level4Sudoku == null) makeLevelFourSudoku();
-                    level5Sudoku = makeMinimalSudokuByBruteForceBacktrackingOutOfTrueGrid(level4Sudoku.getPField());
-                    Log.v("level5Sudoku", level5Sudoku.toString());
+                if (level5Sudoku.getPopulatedArrIds().size() == 0) {
+                    if (level4Sudoku.getPopulatedArrIds().size() == 0) makeLevelFourSudoku();
+                    new Thread(this).start();
                 }
                 return level5Sudoku;
             default: throw new IndexOutOfBoundsException();
@@ -177,5 +176,10 @@ public class Sudoku extends SudokuExptimeFunctions {
 
     public Playground get() {
         return get(level);
+    }
+
+    public void run() {
+        level5Sudoku = makeMinimalSudokuByBruteForceBacktrackingOutOfTrueGrid(level4Sudoku.getPField());
+        Log.v("level5Sudoku", level5Sudoku.toString());
     }
 }

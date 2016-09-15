@@ -113,7 +113,7 @@ public class SudokuExptimeFunctions extends SudokuStaticFunctions {
         return sudoku;
     }
 
-        // be careful, this algorithm resides in EXPTIME
+    // be careful, this algorithm resides in EXPTIME
     public static Playground makeMinimalSudokuByBruteForceBacktrackingOutOfTrueGrid(int[] trueGrid) {
         Playground sudoku = new Playground(trueGrid);
         // erase values
