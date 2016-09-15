@@ -13,6 +13,7 @@ public class Sudoku extends SudokuExptimeFunctions implements Runnable {
     public Playground level4Sudoku = new Playground();
     public Playground level5Sudoku = new Playground();
     protected int level = 1;
+    protected Playground onTheRun = null;
 
     protected Sudoku() {
         makeNewSolution();
@@ -38,17 +39,16 @@ public class Sudoku extends SudokuExptimeFunctions implements Runnable {
     }
 
     public void makeNewSolution() {
-        Log.v("solution", solution.toString());
         solution.init(TRUE_GRID);
-        Log.v("solution", solution.toString());
         solution.shuffle();
-        Log.v("solution", solution.toString());
+        Log.i("solution", solution.toString());
     }
 
     public Sudoku setLevel(int level) {
         if (level < 0 || level > 5)
             throw new IllegalArgumentException("level must be within [0, 5]; level was " + level);
         this.level = level;
+        Log.v("Sudoku setLevel", this.level+"");
         return Singleton;
     }
 
@@ -79,7 +79,7 @@ public class Sudoku extends SudokuExptimeFunctions implements Runnable {
                 for (int tempArrId : getStarGroup(arrId)) hint.decrement(tempArrId, level1Sudoku.get(arrId) - 1);
                 level1Sudoku.set(arrId, 0);
             }
-        Log.v("level1Sudoku", level1Sudoku.toString());
+        Log.i("level1Sudoku", level1Sudoku.toString());
     }
 
     protected static boolean isAutoInsert2Solvable(int arrId, Hint hint, Playground sudoku) {
@@ -109,7 +109,7 @@ public class Sudoku extends SudokuExptimeFunctions implements Runnable {
                 for (int tempArrId : getStarGroup(arrId)) hint.decrement(tempArrId, level2Sudoku.get(arrId) - 1);
                 level2Sudoku.set(arrId, 0);
             }
-        Log.v("level2Sudoku", level2Sudoku.toString());
+        Log.i("level2Sudoku", level2Sudoku.toString());
     }
 
     // a level three sudoku is solvable by using AutoInsert1, AutoInsert2
@@ -125,7 +125,7 @@ public class Sudoku extends SudokuExptimeFunctions implements Runnable {
                     level3Sudoku.set(arrId, 0);
                 }
             }
-        Log.v("level3Sudoku", level3Sudoku.toString());
+        Log.i("level3Sudoku", level3Sudoku.toString());
     }
 
     // a level four sudoku is solvable by using AutoInsert1, AutoInsert2, AutoHintAdv1, AutoHintAdv3
@@ -141,7 +141,7 @@ public class Sudoku extends SudokuExptimeFunctions implements Runnable {
                     level4Sudoku.set(arrId, 0);
                 }
             }
-        Log.v("level4Sudoku", level4Sudoku.toString());
+        Log.i("level4Sudoku", level4Sudoku.toString());
     }
 
     @Override
@@ -154,22 +154,22 @@ public class Sudoku extends SudokuExptimeFunctions implements Runnable {
             case 0: return solution;
             case 1:
                 if (level1Sudoku.getPopulatedArrIds().size() == 0) makeLevelOneSudoku();
-                return level1Sudoku;
+                return new Playground(level1Sudoku);
             case 2:
                 if (level2Sudoku.getPopulatedArrIds().size() == 0) makeLevelTwoSudoku();
-                return level2Sudoku;
+                return new Playground(level2Sudoku);
             case 3:
                 if (level3Sudoku.getPopulatedArrIds().size() == 0) makeLevelThreeSudoku();
-                return level3Sudoku;
+                return new Playground(level3Sudoku);
             case 4:
                 if (level4Sudoku.getPopulatedArrIds().size() == 0) makeLevelFourSudoku();
-                return level4Sudoku;
+                return new Playground(level4Sudoku);
             case 5:
                 if (level5Sudoku.getPopulatedArrIds().size() == 0) {
                     if (level4Sudoku.getPopulatedArrIds().size() == 0) makeLevelFourSudoku();
                     new Thread(this).start();
                 }
-                return level5Sudoku;
+                return new Playground(level5Sudoku);
             default: throw new IndexOutOfBoundsException();
         }
     }
@@ -179,7 +179,16 @@ public class Sudoku extends SudokuExptimeFunctions implements Runnable {
     }
 
     public void run() {
-        level5Sudoku = makeMinimalSudokuByBruteForceBacktrackingOutOfTrueGrid(level4Sudoku.getPField());
-        Log.v("level5Sudoku", level5Sudoku.toString());
+        try {
+            if (onTheRun == null) onTheRun = solution;
+            else if (onTheRun.equals(solution)) return;
+            else throw new InterruptedException();
+
+            level5Sudoku = makeMinimalSudokuByBruteForceBacktrackingOutOfTrueGrid(level4Sudoku.getPField());
+            Log.i("level5Sudoku", level5Sudoku.toString());
+        } catch (Exception e) {
+            onTheRun = null;
+            return;
+        }
     }
 }

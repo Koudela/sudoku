@@ -12,7 +12,7 @@ import java.util.Set;
 public class SudokuData {
     private static final SudokuData Singleton = new SudokuData();
     public final static int DIM = Sudoku.DIM;
-    protected Sudoku sudoku = Sudoku.getInstance();
+    public Sudoku sudoku = Sudoku.getInstance();
     protected Boolean[] isAutoInsert = new Boolean[DIM*DIM];
     protected Playground mainButtonsText = new Playground();
     protected int[] textColorHints = new int[DIM*DIM];

@@ -112,6 +112,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         switch (id) {
             case R.id.action_info:
+                Log.i("solution(" + sudokuData.sudoku.solution.getPopulatedArrIds().size() + ")", sudokuData.sudoku.solution.toString());
+                Log.i("level1sudoku(" + sudokuData.sudoku.level1Sudoku.getPopulatedArrIds().size() + ")", sudokuData.sudoku.level1Sudoku.toString());
+                Log.i("level2sudoku(" + sudokuData.sudoku.level2Sudoku.getPopulatedArrIds().size() + ")", sudokuData.sudoku.level2Sudoku.toString());
+                Log.i("level3sudoku(" + sudokuData.sudoku.level3Sudoku.getPopulatedArrIds().size() + ")", sudokuData.sudoku.level3Sudoku.toString());
+                Log.i("level4sudoku(" + sudokuData.sudoku.level4Sudoku.getPopulatedArrIds().size() + ")", sudokuData.sudoku.level4Sudoku.toString());
+                Log.i("level5sudoku(" + sudokuData.sudoku.level5Sudoku.getPopulatedArrIds().size() + ")", sudokuData.sudoku.level5Sudoku.toString());
                 Toast.makeText(this, "Info selected", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.action_settings:
