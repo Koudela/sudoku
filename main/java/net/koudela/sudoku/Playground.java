@@ -262,9 +262,16 @@ public class Playground {
     // It is known that 6,670,903,752,021,072,936,960 (6.67×10^21)
     // distinct solutions exists. We are way behind! Should we care? ;)
     public void shuffle() {
+        shuffle(getShuffleRelations());
+    }
+
+    public List<List<Integer>> getShuffleRelations() {
         List<List<Integer>> relations = new ArrayList<>();
         relations.add(new ArrayList<Integer>() {{
-            add(0); add(1); add(2); add(3);
+            add(0);
+            add(1);
+            add(2);
+            add(3);
         }});
         Collections.shuffle(relations.get(0));
         relations.add(new ArrayList<Integer>());
@@ -275,11 +282,14 @@ public class Playground {
         for (int cnt = 0; cnt < 8; cnt++) {
             relations.add(new ArrayList<Integer>());
             for (int i = 0; i < 3; i++) {
-                relations.get(cnt+2).add(i);
+                relations.get(cnt + 2).add(i);
             }
-            Collections.shuffle(relations.get(cnt+2));
+            Collections.shuffle(relations.get(cnt + 2));
         }
+        return relations;
+    }
 
+    public void shuffle(List<List<Integer>> relations) {
         int relNr = 0;
         Log.v("0"+(relNr), toString());
         switch (relations.get(relNr++).get(0)) {
