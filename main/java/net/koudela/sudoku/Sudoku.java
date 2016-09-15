@@ -118,10 +118,12 @@ public class Sudoku extends SudokuExptimeFunctions {
         Log.v("makeLevelThreeSudoku","start");
         level3Sudoku = new Playground(level2Sudoku);
         for (int arrId : getRandomizedArrIds())
-            if (level3Sudoku.isPopulated(arrId)
-                    && isSolvableSudoku(arrId, level3Sudoku, true, true, false, false, false)) {
-                Log.v("removed", arrId + " (" + level3Sudoku.get(arrId) + ")");
-                level3Sudoku.set(arrId, 0);
+            if (level3Sudoku.isPopulated(arrId)) {
+                Log.v("inspect", ""+arrId);
+                if(isSolvableSudoku(arrId, level3Sudoku, true, true, false, false, false)) {
+                    Log.v("removed", arrId + " (" + level3Sudoku.get(arrId) + ")");
+                    level3Sudoku.set(arrId, 0);
+                }
             }
         Log.v("level3Sudoku", level3Sudoku.toString());
     }
@@ -132,10 +134,12 @@ public class Sudoku extends SudokuExptimeFunctions {
         Log.v("makeLevelFourSudoku","start");
         level4Sudoku = new Playground(level3Sudoku);
         for (int arrId : getRandomizedArrIds())
-            if (level4Sudoku.isPopulated(arrId)
-                    && isSolvableSudoku(arrId, level4Sudoku, true, true, true, true, true)) {
-                Log.v("removed", arrId + " (" + level4Sudoku.get(arrId) + ")");
-                level4Sudoku.set(arrId, 0);
+            if (level4Sudoku.isPopulated(arrId)) {
+                Log.v("inspect", ""+arrId);
+                if(isSolvableSudoku(arrId, level4Sudoku, true, true, true, true, true)) {
+                    Log.v("removed", arrId + " (" + level4Sudoku.get(arrId) + ")");
+                    level4Sudoku.set(arrId, 0);
+                }
             }
         Log.v("level4Sudoku", level4Sudoku.toString());
     }

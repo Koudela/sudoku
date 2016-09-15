@@ -144,12 +144,13 @@ public class Playground {
     }
 
 	private static int[] rotate90Degree(int[] pField, boolean left) {
+        Log.v("rotate90Degree", (left?"left":"right"));
 		int[] newField = new int[DIM * DIM];
 		int oldArrId;
 		int newArrId;
 		for (int i = 0; i < DIM; i++) {
 			for (int j = 0; j < DIM; j++) {
-				if (left) {
+				if (!left) {
 					oldArrId = (DIM - (j+1)) * DIM + i;
 					newArrId = i * DIM + j;
 				} else {
@@ -163,6 +164,7 @@ public class Playground {
 	}
 
 	private static int[] rotate180Degree(int[] pField) {
+        Log.v("rotate180Degree", "...");
 		int[] newField = new int[DIM * DIM];
 		for (int newArrId : Sudoku.ALL_ARR_IDS)
 			newField[newArrId] = pField[(DIM * DIM - 1) - newArrId];
@@ -170,6 +172,7 @@ public class Playground {
 	}
 
 	private static int[] renameEntries(int[] pField, List<Integer> renameRelation) {
+        Log.v("renameEntries", renameRelation.toString() + "; " + relationToString(renameRelation));
 		int[] newField = new int[DIM * DIM];
 		for (int arrId : Sudoku.ALL_ARR_IDS) {
 			if (pField[arrId] != 0) newField[arrId] = renameRelation.get(pField[arrId] - 1);
@@ -178,7 +181,8 @@ public class Playground {
 		return newField;
 	}
 
-	private static int[] flipHorizontalGroups(int[] pField, List<Integer> flipRelation) {
+	private static int[] flipVerticalGroupsHorizontally(int[] pField, List<Integer> flipRelation) {
+        Log.v("flipVerticalGroupsH.", flipRelation.toString() + "; " + relationToString(flipRelation));
 		int oldArrId;
 		int newArrId;
 		int[] newField = new int[DIM * DIM];
@@ -192,7 +196,8 @@ public class Playground {
 		return newField;
 	}
 
-	private static int[] flipVerticalGroups(int[] pField, List<Integer> flipRelation) {
+	private static int[] flipHorizontalGroupsVertically(int[] pField, List<Integer> flipRelation) {
+        Log.v("flipHorizontalGroupsV.", flipRelation.toString() + "; " + relationToString(flipRelation));
 		int oldArrId;
 		int newArrId;
 		int[] newField = new int[DIM * DIM];
@@ -206,8 +211,9 @@ public class Playground {
 		return newField;
 	}
 
-	private static int[] flipHorizontalInGroups(int[] pField, int groupId, List<Integer> flipRelation) {
-		int oldArrId;
+	private static int[] flipInVerticalGroupsHorizontally(int[] pField, int groupId, List<Integer> flipRelation) {
+        Log.v("flipInVerticalGroupsH.", groupId + ":" + flipRelation.toString() + "; " + relationToString(flipRelation));
+        int oldArrId;
 		int newArrId;
 		int[] newField = new int[DIM * DIM];
 		for (int cnt = 0; cnt < 3; cnt++)
@@ -224,8 +230,9 @@ public class Playground {
 		return newField;
 	}
 
-	private static int[] flipVerticalInGroups(int[] pField, int groupId, List<Integer> flipRelation) {
-		int oldArrId;
+	private static int[] flipInHorizontalInGroupsVertically(int[] pField, int groupId, List<Integer> flipRelation) {
+        Log.v("flipInH.GroupsV.", groupId + ":" + flipRelation.toString() + "; " + relationToString(flipRelation));
+        int oldArrId;
 		int newArrId;
         int[] newField = new int[DIM * DIM];
         for (int cnt = 0; cnt < 3; cnt++)
@@ -255,70 +262,60 @@ public class Playground {
     // It is known that 6,670,903,752,021,072,936,960 (6.67×10^21)
     // distinct solutions exists. We are way behind! Should we care? ;)
     public void shuffle() {
-        List<Integer> rotate = new ArrayList<Integer>() {{
+        List<List<Integer>> relations = new ArrayList<>();
+        relations.add(new ArrayList<Integer>() {{
             add(0); add(1); add(2); add(3);
-        }};
-        List<Integer> renameRelation = new ArrayList<>();
+        }});
+        Collections.shuffle(relations.get(0));
+        relations.add(new ArrayList<Integer>());
         for (int i = 1; i <= DIM; i++) {
-            renameRelation.add(i);
+            relations.get(1).add(i);
         }
-        List<Integer> flipVerticalGroupsRelation = new ArrayList<>();
-        List<Integer> flipHorizontalGroupsRelation = new ArrayList<>();
-        List<Integer> flipVerticalInGroupsRelation0 = new ArrayList<>();
-        List<Integer> flipVerticalInGroupsRelation1 = new ArrayList<>();
-        List<Integer> flipVerticalInGroupsRelation2 = new ArrayList<>();
-        List<Integer> flipHorizontalInGroupsRelation0 = new ArrayList<>();
-        List<Integer> flipHorizontalInGroupsRelation1 = new ArrayList<>();
-        List<Integer> flipHorizontalInGroupsRelation2 = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
-            flipVerticalGroupsRelation.add(i);
-            flipHorizontalGroupsRelation.add(i);
-            flipVerticalInGroupsRelation0.add(i);
-            flipVerticalInGroupsRelation1.add(i);
-            flipVerticalInGroupsRelation2.add(i);
-            flipHorizontalInGroupsRelation0.add(i);
-            flipHorizontalInGroupsRelation1.add(i);
-            flipHorizontalInGroupsRelation2.add(i);
+        Collections.shuffle(relations.get(1));
+        for (int cnt = 0; cnt < 8; cnt++) {
+            relations.add(new ArrayList<Integer>());
+            for (int i = 0; i < 3; i++) {
+                relations.get(cnt+2).add(i);
+            }
+            Collections.shuffle(relations.get(cnt+2));
         }
-        Collections.shuffle(rotate);
-        Collections.shuffle(renameRelation);
-        Collections.shuffle(flipVerticalGroupsRelation);
-        Collections.shuffle(flipHorizontalGroupsRelation);
-        Collections.shuffle(flipVerticalInGroupsRelation0);
-        Collections.shuffle(flipVerticalInGroupsRelation1);
-        Collections.shuffle(flipVerticalInGroupsRelation2);
-        Collections.shuffle(flipHorizontalInGroupsRelation0);
-        Collections.shuffle(flipHorizontalInGroupsRelation1);
-        Collections.shuffle(flipHorizontalInGroupsRelation2);
 
-        int log = 0;
-        Log.v("0"+(log++), toString());
-        switch (rotate.get(0)) {
+        int relNr = 0;
+        Log.v("0"+(relNr), toString());
+        switch (relations.get(relNr++).get(0)) {
             case 1: pField = rotate90Degree(pField, true); break;
             case 2: pField = rotate180Degree(pField); break;
             case 3: pField = rotate90Degree(pField, false); break;
             default: break;
         }
-        Log.v("0"+(log++), toString());
-        pField = renameEntries(pField, renameRelation);
-        Log.v("0"+(log++), toString());
-        pField = flipVerticalGroups(pField, flipVerticalGroupsRelation);
-        Log.v("0"+(log++), toString());
-        pField = flipHorizontalGroups(pField, flipHorizontalGroupsRelation);
-        Log.v("0"+(log++), toString());
-        pField = flipHorizontalInGroups(pField, 0, flipHorizontalInGroupsRelation0);
-        Log.v("0"+(log++), toString());
-        pField = flipHorizontalInGroups(pField, 1, flipHorizontalInGroupsRelation1);
-        Log.v("0"+(log++), toString());
-        pField = flipHorizontalInGroups(pField, 2, flipHorizontalInGroupsRelation2);
-        Log.v("0"+(log++), toString());
-        pField = flipVerticalInGroups(pField, 0, flipVerticalInGroupsRelation0);
-        Log.v("0"+(log++), toString());
-        pField = flipVerticalInGroups(pField, 1, flipVerticalInGroupsRelation1);
-        Log.v("0"+(log++), toString());
-        pField = flipVerticalInGroups(pField, 2, flipVerticalInGroupsRelation2);
-        Log.v("0"+(log++), toString());
+        Log.v("0"+(relNr), toString());
+        pField = renameEntries(pField, relations.get(relNr++));
+        Log.v("0"+(relNr), toString());
+        pField = flipHorizontalGroupsVertically(pField, relations.get(relNr++));
+        Log.v("0"+(relNr), toString());
+        pField = flipVerticalGroupsHorizontally(pField, relations.get(relNr++));
+        Log.v("0"+(relNr), toString());
+        pField = flipInHorizontalInGroupsVertically(pField, 0, relations.get(relNr++));
+        Log.v("0"+(relNr), toString());
+        pField = flipInHorizontalInGroupsVertically(pField, 1, relations.get(relNr++));
+        Log.v("0"+(relNr), toString());
+        pField = flipInHorizontalInGroupsVertically(pField, 2, relations.get(relNr++));
+        Log.v("0"+(relNr), toString());
+        pField = flipInVerticalGroupsHorizontally(pField, 0, relations.get(relNr++));
+        Log.v("0"+(relNr), toString());
+        pField = flipInVerticalGroupsHorizontally(pField, 1, relations.get(relNr++));
+        Log.v("0"+(relNr), toString());
+        pField = flipInVerticalGroupsHorizontally(pField, 2, relations.get(relNr++));
+        Log.v("0"+(relNr), toString());
         init(pField);
+    }
+
+
+    public static String relationToString(List<Integer> list) {
+        String relationString = "[";
+        for (int i = 0; i < list.size(); i++)
+            relationString += i + " => " + list.get(i) + ", ";
+        return relationString + "]";
     }
 
     @Override
