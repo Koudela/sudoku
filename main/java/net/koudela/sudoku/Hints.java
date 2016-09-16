@@ -1,38 +1,28 @@
 package net.koudela.sudoku;
 
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 public class Hints {
-    protected static final int DIM = Sudoku.DIM;
-    protected Hint hint = new Hint();
-    protected Hint hintAdv1 = new Hint();
-    protected Hint hintAdv2 = new Hint();
-    protected Hint hintAdv3 = new Hint();
-    protected boolean usePlain = true;
-    protected boolean useAdv1 = false;
-    protected boolean useAdv2 = false;
-    protected boolean useAdv3 = false;
+    private static final int DIM = Sudoku.DIM;
+    private Hint hint = new Hint();
+    private Hint hintAdv1 = new Hint();
+    private Hint hintAdv2 = new Hint();
+    private Hint hintAdv3 = new Hint();
+    private boolean usePlain = true;
+    private boolean useAdv1 = false;
+    private boolean useAdv2 = false;
+    private boolean useAdv3 = false;
 
     public Hints() {}
 
-    public Hints(boolean usePlain, boolean useAdv1, boolean useAdv2, boolean useAdv3) {
+    public Hints(final boolean usePlain, final boolean useAdv1, final boolean useAdv2, final boolean useAdv3) {
         this.usePlain = usePlain;
         this.useAdv1 = useAdv1;
         this.useAdv2 = useAdv2;
         this.useAdv3 = useAdv3;
-    }
-
-    public boolean isHint(int arrId, int num) {
-        return (usePlain && hint.isHint(arrId, num)
-                || useAdv1 && hintAdv1.isHint(arrId, num)
-                || useAdv2 && hintAdv2.isHint(arrId, num)
-                || useAdv3 && hintAdv3.isHint(arrId, num)
-        );
     }
 
     public void init() {
@@ -42,31 +32,43 @@ public class Hints {
         hintAdv3.init();
     }
 
-    public static void incrementStarGroup(int arrId, int num, Hint hint) {
+    public boolean isHint(final int arrId, final int num) {
+        return (usePlain && hint.isHint(arrId, num)
+                || useAdv1 && hintAdv1.isHint(arrId, num)
+                || useAdv2 && hintAdv2.isHint(arrId, num)
+                || useAdv3 && hintAdv3.isHint(arrId, num)
+        );
+    }
+
+    public static void incrementStarGroup(final int arrId, final int num, Hint hint) {
         for (int tempArrId : Sudoku.getStarGroup(arrId))
             hint.increment(tempArrId, num);
     }
 
-    public void incrementStarGroup(int arrId, int num) {
+    public void incrementStarGroup(final int arrId, final int num) {
         incrementStarGroup(arrId, num, hint);
     }
 
-    public static void decrementStarGroup(int arrId, int num, Hint hint) {
+    public static void decrementStarGroup(final int arrId, final int num, Hint hint) {
         for (int tempArrId : Sudoku.getStarGroup(arrId))
             hint.decrement(tempArrId, num);
     }
 
-    public static void populatePlainHints(Hint hint, Playground pField) {
-        for (Map.Entry<Integer, Integer> arrId : pField.getPopulatedArrIds().entrySet())
-            incrementStarGroup(arrId.getValue(), pField.get(arrId.getValue()) - 1, hint);
+    public void decrementStarGroup(final int arrId, final int num) {
+        decrementStarGroup(arrId, num, hint);
     }
 
-    public void populatePlainHints(Playground pField) {
+    public static void populatePlainHints(Hint hint, final Playground pField) {
+        for (int arrId : pField.getPopulatedArrIds())
+            incrementStarGroup(arrId, pField.get(arrId) - 1, hint);
+    }
+
+    public void populatePlainHints(final Playground pField) {
         populatePlainHints(hint, pField);
     }
 
     // if a number is group wise bounded to a specific row/column, in the same row/column other groups get hints
-    public int setAutoHintsAdv1(Playground pField) {
+    public int setAutoHintsAdv1(final Playground pField) {
         int changed = 0;
         for (int num = 0; num < DIM; num++)
             for (int cnt = 0; cnt < DIM; cnt++) {
@@ -107,37 +109,46 @@ public class Hints {
     }
 
     // if in a group/row/column are n fields with the same n hints or less missing, hints get set on the same numbers on the other fields
-    protected int setAutoHintsAdv2ByGroup(Integer[] group, Playground pField) {
+    private int setAutoHintsAdv2ByGroup(final Integer[] group, final Playground pField) {
         int changed = 0;
+        int populatedFieldsCount;
+        Set<Integer> missing = new HashSet<>(16);
+        Set<Integer> notMissing = new HashSet<>(16);
+        Set<Integer> otherArrIds = new HashSet<>(16);
         for (int arrId : group) {
             if (pField.isPopulated(arrId)) continue;
-            Set<Integer> missing = new LinkedHashSet<>();
-            Set<Integer> notMissing = new TreeSet<>();
-            Set<Integer> otherArrIds = new LinkedHashSet<>();
+            missing.clear();
+            notMissing.clear();
+            otherArrIds.clear();
+            // Looking at a specific unpopulated field
             for (int num = 0; num < DIM; num++)
                 if (isHint(arrId, num)) notMissing.add(num);
                 else missing.add(num);
-            if (missing.size() == 0 || notMissing.size() == 0) continue;
-            int populatedFieldsCount = 0;
+            // If no hints are set, we move on
+            if (notMissing.size() == 0) continue;
+            populatedFieldsCount = 0;
+            // Looking at the other fields
             for (int tempArrIds : group) {
                 if (tempArrIds == arrId) continue;
                 if (pField.isPopulated(tempArrIds)) {
                     populatedFieldsCount++;
                     continue;
                 }
-                if (notMissing.size() < otherArrIds.size()) break;
+                if (notMissing.size() < otherArrIds.size() + populatedFieldsCount) break;
+                // mark all Fields that don't fit in our scheme, meaning other hints are missing
                 for (int num = 0; num < DIM; num++)
                     if (!isHint(tempArrIds, num) && notMissing.contains(num)) {
                         otherArrIds.add(tempArrIds);
                         break;
                     }
             }
-            if (notMissing.size() == otherArrIds.size() + populatedFieldsCount) changed += setAutoHintsAdv2ByGroupSub(missing, otherArrIds);
+            // there are fields to process && missing size equals the count of similar fields
+            if (otherArrIds.size() != 0 && notMissing.size() == otherArrIds.size() + populatedFieldsCount) changed += setAutoHintsAdv2ByGroupSub(missing, otherArrIds);
         }
         return changed;
     }
 
-    protected int setAutoHintsAdv2ByGroupSub(Set<Integer> missing, Set<Integer> otherArrIds) {
+    private int setAutoHintsAdv2ByGroupSub(final Set<Integer> missing, final Set<Integer> otherArrIds) {
         int changed = 0;
         for (int arrId : otherArrIds)
             for (int num : missing)
@@ -148,7 +159,7 @@ public class Hints {
         return changed;
     }
 
-    public int setAutoHintsAdv2(Playground pField) {
+    public int setAutoHintsAdv2(final Playground pField) {
         int changed = 0;
         for (int i = 0; i < DIM; i++) {
             changed += setAutoHintsAdv2ByGroup(Sudoku.VERTICAL_GROUPS[i], pField);
@@ -160,12 +171,12 @@ public class Hints {
 
     // if in a group/row/column are n missing hints distributed over n fields only, then hints get set on the other numbers on the same n fields
     // be careful, this algorithm resides in EXPTIME
-    protected int setAutoHintsAdv3ByGroup(Integer[] group, Playground pField) {
+    private int setAutoHintsAdv3ByGroup(final Integer[] group, final Playground pField) {
         int changed = 0;
-        Map<Integer, Set<Integer>> missing = new LinkedHashMap<>();
+        Map<Integer, Set<Integer>> missing = new HashMap<>();
         Set<Integer> fields = new HashSet<>();
         for (int num = 0; num < DIM; num++) {
-            missing.put(num, new LinkedHashSet<Integer>());
+            missing.put(num, new HashSet<Integer>());
             for (int arrId : group)
                 if (!pField.isPopulated(arrId) && !isHint(arrId, num)) {
                     missing.get(num).add(arrId);
@@ -189,7 +200,7 @@ public class Hints {
         return changed;
     }
 
-    public int setAutoHintsAdv3(Playground pField) {
+    public int setAutoHintsAdv3(final Playground pField) {
         int changed = 0;
         for (int i = 0; i < DIM; i++) {
             changed += setAutoHintsAdv3ByGroup(Sudoku.VERTICAL_GROUPS[i], pField);

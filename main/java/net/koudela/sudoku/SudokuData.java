@@ -6,6 +6,7 @@ import android.support.v4.content.ContextCompat;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -60,7 +61,7 @@ public class SudokuData {
     }
 
     public void newGame(Button[] mainButtons, TextView[] helperTextViews, Context context) {
-        sudoku.init();
+        sudoku.getNewSudoku();
         resetGame(mainButtons, helperTextViews, context);
     }
 
@@ -165,7 +166,7 @@ public class SudokuData {
                     // add hints vertical
                     if (tempArrId != -1) {
                         for (int arrId : SudokuGroups.getComplementVerticalGroup(tempArrId)) autoHintAdv1[arrId][number-1]++;
-                        returnSet.addAll(SudokuGroups.getComplementVerticalGroup(tempArrId));
+                        returnSet.addAll(Arrays.asList(SudokuGroups.getComplementVerticalGroup(tempArrId)));
                     }
                     // check horizontal
                     tempArrId = -1;
@@ -179,7 +180,7 @@ public class SudokuData {
                     // add hints vertical
                     if (tempArrId != -1) {
                         for (int arrId : SudokuGroups.getComplementHorizontalGroup(tempArrId)) autoHintAdv1[arrId][number-1]++;
-                        returnSet.addAll(SudokuGroups.getComplementHorizontalGroup(tempArrId));
+                        returnSet.addAll(Arrays.asList(SudokuGroups.getComplementHorizontalGroup(tempArrId)));
                     }
                 }
         return returnSet;
@@ -194,14 +195,14 @@ public class SudokuData {
     }
 
     // if in a group/row/column are n-fields with the same 9 minus n hints, hints get set in the other fields of the same group/row/column
-    public Set<Integer> resetAutoHintsAdv2(Context context) {
+    public Integer[] resetAutoHintsAdv2(Context context) {
         initAutoHintsAdv2();
         //TODO...resetAutoHintsAdv2 body
         return Sudoku.ALL_ARR_IDS;
     }
 
     // if in a group/row/column are n-fields with the same n hints or less missing, hints get set on the other numbers on the same fields
-    public Set<Integer> resetAutoHintsAdv3(Context context) {
+    public Integer[] resetAutoHintsAdv3(Context context) {
         initAutoHintsAdv3();
         //TODO...resetAutoHintsAdv3 body
         return Sudoku.ALL_ARR_IDS;
@@ -219,9 +220,9 @@ public class SudokuData {
         if (isPrefAutoHintAdv1(context))
             group.addAll(resetAutoHintsAdv1(context));
         if (isPrefAutoHintAdv2(context))
-            group.addAll(resetAutoHintsAdv2(context));
+            group.addAll(Arrays.asList(resetAutoHintsAdv2(context)));
         if (isPrefAutoHintAdv3(context))
-            group.addAll(resetAutoHintsAdv3(context));
+            group.addAll(Arrays.asList(resetAutoHintsAdv3(context)));
         for (Integer tempArrId : group) setHelperTextViewContent(tempArrId, mainButtons, helperTextViews, context, false);
         // SUB auto insert 2 looks at the whole playground, at the end of setMainButtonsContent it has a new state
         if (isPrefAutoInsert2(context)) {

@@ -4,6 +4,8 @@
     <string name="action_reset">Restart</string>
     <string name="action_new_game">New game</string>
     <string name="action_settings">Settings</string>
+    <string name="action_transform">Transform</string>
+    <string name="action_transform_back">Transform reversion</string>
     <string name="action_info">Info</string>
 
     <string name="resultNumber">is</string>

@@ -3,6 +3,7 @@ package net.koudela.sudoku;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.Set;
 public class SudokuExptimeFunctions extends SudokuStaticFunctions {
 
     // be careful, this algorithm resides in EXPTIME
-    public static Set<Set<Integer>> powerSet(Set<Integer> originalSet) {
+    public static Set<Set<Integer>> powerSet(final Set<Integer> originalSet) {
         Set<Set<Integer>> sets = new HashSet<>();
         if (originalSet.isEmpty()) {
             sets.add(new HashSet<Integer>());
@@ -31,7 +32,7 @@ public class SudokuExptimeFunctions extends SudokuStaticFunctions {
     }
 
     // be careful, this algorithm resides in EXPTIME
-    protected static Playground solveByBacktracking(Playground sudoku, boolean countDown) {
+    protected static Playground solveByBacktracking(final Playground sudoku, final boolean countDown) {
         Hint hint = new Hint();
         Playground computedSolution = new Playground(sudoku);
         int initValue = countDown?9:1;
@@ -80,7 +81,7 @@ public class SudokuExptimeFunctions extends SudokuStaticFunctions {
     }
 
     // be careful, this algorithm resides in EXPTIME
-    public static int isSudoku(Playground sudoku) {
+    public static int isSudoku(final Playground sudoku) {
         Playground possibleSolution = solveByBacktracking(sudoku, false);
         if (possibleSolution == null) return -1; // -> Sudoku is not solvable
         if (possibleSolution.equals(solveByBacktracking(sudoku, true))) return 1; // -> Sudoku is a valid Sudoku
@@ -108,21 +109,20 @@ public class SudokuExptimeFunctions extends SudokuStaticFunctions {
                 isSudoku = isSudoku(sudoku);
                 if (isSudoku == 1) return solveByBacktracking(sudoku, false);
                 if (isSudoku == 0) Hints.incrementStarGroup(arrId, sudoku.get(arrId) - 1, hint);
-
             } while (isSudoku == -1) ;
         return sudoku;
     }
 
     // be careful, this algorithm resides in EXPTIME
-    public static Playground makeMinimalSudokuByBruteForceBacktrackingOutOfTrueGrid(int[] trueGrid) {
+    public static Playground makeMinimalSudokuByBruteForceBacktrackingOutOfTrueGrid(final int[] trueGrid, boolean verbose) {
         Playground sudoku = new Playground(trueGrid);
         // erase values
         for (int arrId : getRandomizedArrIds())
             if (sudoku.isPopulated(arrId)) {
-                Log.v("inspect", ""+arrId);
+                if (verbose) Log.d("inspect", ""+arrId);
                 sudoku.set(arrId, 0);
                 if (isSudoku(sudoku) == 0) sudoku.set(arrId, trueGrid[arrId]);
-                else Log.v("removed", ""+arrId);
+                else if (verbose) Log.d("removed", ""+arrId);
             }
         return sudoku;
     }
@@ -134,10 +134,10 @@ public class SudokuExptimeFunctions extends SudokuStaticFunctions {
         List<List<Integer>> numbersLeft = new ArrayList<>();
         // init
         for (int arrId : Sudoku.ALL_ARR_IDS) {
-            numbersLeft.add(new ArrayList<Integer>());
-            for (int number = 1; number <= DIM; number++) numbersLeft.get(arrId).add(number);
+            numbersLeft.add(new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9)));
             Collections.shuffle(numbersLeft.get(arrId));
         }
+        int i = 0;
         // set value
         int isSudoku;
         for (int arrId : getRandomizedArrIds())

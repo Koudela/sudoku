@@ -3,11 +3,9 @@
     <string-array name="pref_level_entries">
         <item>very easy</item>
         <item>easy</item>
-        <item>moderate easy</item>
-        <item>medium</item>
-        <item>moderate hard</item>
+        <item>moderate</item>
         <item>hard</item>
-        <item>very hard</item>
+        <item>freestyle</item>
     </string-array>
     <string-array name="pref_level_values">
         <item>1</item>
@@ -15,8 +13,6 @@
         <item>3</item>
         <item>4</item>
         <item>5</item>
-        <item>6</item>
-        <item>7</item>
     </string-array>
 
     <string-array name="pref_font_size_main_entries">

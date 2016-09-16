@@ -24,8 +24,19 @@
         android:title="@string/action_settings"
         app:showAsAction="never" />
     <item
-        android:id="@+id/action_info"
+        android:id="@+id/action_transform"
         android:orderInCategory="1000"
+        android:title="@string/action_transform"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_transform_back"
+        android:orderInCategory="1000"
+        android:title="@string/action_transform_back"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_info"
+        android:orderInCategory="10000"
         android:title="@string/action_info"
         app:showAsAction="never" />
+
 </menu>
