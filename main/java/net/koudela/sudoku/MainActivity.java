@@ -1,6 +1,7 @@
 package net.koudela.sudoku;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.v4.app.FragmentManager;
 import android.content.Intent;
@@ -23,6 +24,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
+    private static Context context;
     protected final static int DIM = Sudoku.DIM;
     protected final static int CHOOSE_INPUT_REQUEST = 1;
     protected Button[] mainButtons = new Button[DIM * DIM];
@@ -30,8 +32,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     // create or get the retained data object
     protected SudokuData sudokuData = SudokuData.getInstance();
 
+    public static Context getContext() {
+        return context;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        context = this;
         boolean firstRun = false;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
