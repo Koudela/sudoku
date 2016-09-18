@@ -69,11 +69,11 @@ public class Hints {
     }
 
     public void initAdv2() {
-        hintAdv1.init();
+        hintAdv2.init();
     }
 
     public void initAdv3() {
-        hintAdv1.init();
+        hintAdv3.init();
     }
 
     public int getPlainHint(final int arrId, final int num) {

@@ -187,6 +187,7 @@ public class SudokuData {
 
     private void updateSudoku(Set<Integer> arrIdsChangedHints, Set<Integer> arrIdsChangedValues, Button[] mainButtons, TextView[] helperTextViews) {
         Sudoku.updateSudokuStart(arrIdsChangedHints, arrIdsChangedValues, mainButtonsText, hints, useAutoInsert1, useAutoInsert2);
+        Log.v("...", arrIdsChangedHints.toString());
         for (int arrId : arrIdsChangedHints) this.setHelperTextViewContent(arrId, helperTextViews);
         for (int arrId : arrIdsChangedValues) {
             isAutoInsert[arrId] = true;
@@ -199,7 +200,11 @@ public class SudokuData {
         Set<Integer> arrIdsChangedHints = new HashSet<>();
         Set<Integer> arrIdsChangedValues = new HashSet<>();
         if (number != 0) arrIdsChangedHints.addAll(hints.incrementStarGroup(arrId, number - 1, mainButtonsText));
-        else  arrIdsChangedHints.addAll(hints.decrementStarGroup(arrId, mainButtonsText.get(arrId) - 1, mainButtonsText));
+        else {
+            arrIdsChangedHints.addAll(hints.decrementStarGroup(arrId, mainButtonsText.get(arrId) - 1, mainButtonsText));
+            hints.initAdv();
+            arrIdsChangedHints.add(arrId);
+        }
         mainButtonsText.set(arrId, number);
         this.setMainButtonsContent(arrId, mainButtons, helperTextViews);
         updateSudoku(arrIdsChangedHints, arrIdsChangedValues, mainButtons, helperTextViews);
