@@ -112,31 +112,31 @@ public class Playground {
         return number;
     }
 
-    public boolean autoInsert1ByField(final int arrId, Hints hints, final boolean verbose) {
+    public int autoInsert1ByField(final int arrId, Hints hints, final boolean verbose) {
         int number = getAutoInsert1ByField(arrId, hints);
-        if (number == 0) return false;
+        if (number == 0) return 0;
         set(arrId, number);
         hints.incrementStarGroup(arrId, number - 1);
         if (verbose) Log.v("insert by AI1", arrId + " (" + number + ")");
-        return true;
+        return number;
     }
 
-    public int getAutoInsert1byStarGroup(final int arrId, final Hints hints) {
+    public Integer[] getAutoInsert1byStarGroup(final int arrId, final Hints hints) {
         int number;
         for (int tempArrId: Sudoku.getStarGroup(arrId)) {
             number = getAutoInsert1ByField(tempArrId, hints);
-            if (number != 0) return number;
+            if (number != 0) return new Integer[]{tempArrId, number};
         }
-        return 0;
+        return null;
     }
 
-    public int getAutoInsert1(final Hints hints) {
+    public Integer[] getAutoInsert1(final Hints hints) {
         int number;
         for (int arrId : notPopulatedArrIds) {
             number = getAutoInsert1ByField(arrId, hints);
-            if (number != 0) return number;
+            if (number != 0) return new Integer[]{arrId, number};
         }
-        return 0;
+        return null;
     }
 
     // if a number is missing only once in 9 hint fields vertical, horizontal or group wise it gets returned
@@ -160,28 +160,32 @@ public class Playground {
         return false;
     }
 
-    public boolean getAutoInsert2byStarGroup(final int arrId, final Hints hints, Integer[] ai2arr) {
-        return (getAutoInsert2ByGroup(Sudoku.VERTICAL_GROUPS[Sudoku.ID_VERTICAL_GROUPS[arrId]], hints, ai2arr)
-                || getAutoInsert2ByGroup(Sudoku.HORIZONTAL_GROUPS[Sudoku.ID_HORIZONTAL_GROUPS[arrId]], hints, ai2arr)
-                || getAutoInsert2ByGroup(Sudoku.GROUPED_GROUPS[Sudoku.ID_GROUPED_GROUPS[arrId]], hints, ai2arr));
-    }
-
-    public boolean getAutoInsert2(final Hints hints, Integer[] ai2arr) {
-        for (int i = 0; i < DIM; i++) {
-            if (getAutoInsert2ByGroup(Sudoku.VERTICAL_GROUPS[i], hints, ai2arr)) return true;
-            if (getAutoInsert2ByGroup(Sudoku.HORIZONTAL_GROUPS[i], hints, ai2arr)) return true;
-            if (getAutoInsert2ByGroup(Sudoku.GROUPED_GROUPS[i], hints, ai2arr)) return true;
-        }
-        return false;
-    }
-
-    public boolean autoInsert2(Hints hints, final boolean verbose) {
+    public Integer[] getAutoInsert2byStarGroup(final int arrId, final Hints hints) {
         Integer[] ai2arr = {null, null};
-        if (!getAutoInsert2(hints, ai2arr)) return false;
+        if (getAutoInsert2ByGroup(Sudoku.VERTICAL_GROUPS[Sudoku.ID_VERTICAL_GROUPS[arrId]], hints, ai2arr)
+                || getAutoInsert2ByGroup(Sudoku.HORIZONTAL_GROUPS[Sudoku.ID_HORIZONTAL_GROUPS[arrId]], hints, ai2arr)
+                || getAutoInsert2ByGroup(Sudoku.GROUPED_GROUPS[Sudoku.ID_GROUPED_GROUPS[arrId]], hints, ai2arr))
+            return ai2arr;
+        return null;
+    }
+
+    public Integer[] getAutoInsert2(final Hints hints) {
+        Integer[] ai2arr = {null, null};
+        for (int i = 0; i < DIM; i++) {
+            if (getAutoInsert2ByGroup(Sudoku.VERTICAL_GROUPS[i], hints, ai2arr)) return ai2arr;
+            if (getAutoInsert2ByGroup(Sudoku.HORIZONTAL_GROUPS[i], hints, ai2arr)) return ai2arr;
+            if (getAutoInsert2ByGroup(Sudoku.GROUPED_GROUPS[i], hints, ai2arr)) return ai2arr;
+        }
+        return null;
+    }
+
+    public Integer[] autoInsert2(Hints hints, final boolean verbose) {
+        Integer[] ai2arr = getAutoInsert2(hints);
+        if (ai2arr == null) return null;
         set(ai2arr[0], ai2arr[1]);
         hints.incrementStarGroup(ai2arr[0], ai2arr[1] - 1);
         if (verbose) Log.v("insert by AI2", ai2arr[0] + " (" + ai2arr[1] + ")");
-        return true;
+        return ai2arr;
     }
 
 	private static int[] rotate90Degree(final int[] pField, final boolean left) {
@@ -343,14 +347,7 @@ public class Playground {
             relationString += i + " => " + list.get(i) + ", ";
         return relationString + "]";
     }
-/*
-    public boolean equals(Playground testObj) {
-        if (testObj == null) return false;
-        for (int arrId : Sudoku.ALL_ARR_IDS)
-            if (testObj.get(arrId) != pField[arrId]) return false;
-        return true;
-    }
-*/
+
     @Override
     public String toString() {
         String pFieldString = "";

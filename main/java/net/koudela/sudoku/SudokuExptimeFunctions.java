@@ -137,7 +137,6 @@ public class SudokuExptimeFunctions extends SudokuStaticFunctions {
             numbersLeft.add(new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9)));
             Collections.shuffle(numbersLeft.get(arrId));
         }
-        int i = 0;
         // set value
         int isSudoku;
         for (int arrId : getRandomizedArrIds())

@@ -62,11 +62,21 @@ public class SudokuBuilder extends Thread {
     private void writeSudokuStackToFile() {
         String filename = "SudokuBuilder.SudokuStack.sav";
         FileOutputStream fos;
+        ArrayList<ArrayList<int[]>> serializableList = new ArrayList<>();
+        int count = -1;
+        for (Playground[] pFamily : sudokuStack) {
+            serializableList.add(++count, new ArrayList<int[]>());
+            for (Playground playground : pFamily)
+                if (playground != null)
+                    serializableList.get(count)
+                          .add(playground
+                                .getPField());
+        }
         try {
             Context context = MainActivity.getContext();
             fos = context.openFileOutput(filename, Context.MODE_PRIVATE);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeObject(sudokuStack);
+            oos.writeObject(serializableList);
             oos.close();
             fos.close();
         } catch (Exception e) {
@@ -82,12 +92,15 @@ public class SudokuBuilder extends Thread {
             Context context = MainActivity.getContext();
             fis = context.openFileInput(filename);
             ObjectInputStream ois = new ObjectInputStream(fis);
-
-            {
-                 sudokuStack = (List<Playground[]>) ois.readObject();
-            }
+            ArrayList<ArrayList<int[]>> serializableList = (ArrayList<ArrayList<int[]>>) ois.readObject();
             ois.close();
             fis.close();
+            int count = -1;
+            for (ArrayList<int[]> pFamily : serializableList) {
+                sudokuStack.add(++count, new Playground[6]);
+                int i = 0;
+                for (int[] playground : pFamily) sudokuStack.get(count)[i++] = new Playground(playground);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

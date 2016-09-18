@@ -29,9 +29,9 @@
     <string name="pref_auto_hint_adv1">automatic hints (adv 1)</string>
     <string name="pref_auto_hint_adv1_summ">if a number is group wise bounded to a specific row/column, in the same row/column other groups get hints</string>
     <string name="pref_auto_hint_adv2">automatic hints (adv 2)</string>
-    <string name="pref_auto_hint_adv2_summ">if in a group/row/column are n-fields with the same 9 minus n hints, hints get set in the other fields of the same group/row/column</string>
+    <string name="pref_auto_hint_adv2_summ">if in a group/row/column are n fields with the same n hints or less missing, hints get set on the same numbers on the other fields</string>
     <string name="pref_auto_hint_adv3">automatic hints (adv 3)</string>
-    <string name="pref_auto_hint_adv3_summ">if in a group/row/column are n-fields with the same n hints or less missing, hints get set on the other numbers on the same fields</string>
+    <string name="pref_auto_hint_adv3_summ">if in a group/row/column are n missing hints distributed over n fields only, then hints get set on the other numbers on the same n fields</string>
     <string name="pref_auto_insert1">automatic insert 1</string>
     <string name="pref_auto_insert1_summ">if 8 hints are displayed, the missing number is inserted into the sudoku field</string>
     <string name="pref_auto_insert2">automatic insert 2</string>
