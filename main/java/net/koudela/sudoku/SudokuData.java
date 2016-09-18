@@ -67,7 +67,7 @@ public class SudokuData {
         hints.init(mainButtonsText);
         for (int arrId : Sudoku.ALL_ARR_IDS) isBlocked[arrId] = (mainButtonsText.isPopulated(arrId));
         for (int arrId : Sudoku.ALL_ARR_IDS) {
-            setMainButtonsContent(-1, arrId, mainButtons, helperTextViews);
+            setMainButtonsContent(arrId, mainButtons, helperTextViews);
             setHelperTextViewContent(arrId, helperTextViews);
         }
     }
@@ -77,12 +77,9 @@ public class SudokuData {
         resetGame(mainButtons, helperTextViews);
     }
 
-    public void setMainButtonsContent(int number, final int arrId, Button[] mainButtons, TextView[] helperTextViews) {
+    public void setMainButtonsContent(final int arrId, Button[] mainButtons, TextView[] helperTextViews) {
+        int number = mainButtonsText.get(arrId);
         Log.v("setMainBC", number + ";" + arrId);
-        // get
-        if (number < 0) number = mainButtonsText.get(arrId);
-        // set
-        else mainButtonsText.set(arrId, number);
         // is (now) empty
         if (number == 0) {
             // we don't know witch advanced hints are invalid
@@ -193,16 +190,18 @@ public class SudokuData {
         for (int arrId : arrIdsChangedHints) this.setHelperTextViewContent(arrId, helperTextViews);
         for (int arrId : arrIdsChangedValues) {
             isAutoInsert[arrId] = true;
-            this.setMainButtonsContent(-1, arrId, mainButtons, helperTextViews);
+            this.setMainButtonsContent(arrId, mainButtons, helperTextViews);
         }
         suggestField(helperTextViews);
 
     }
     public void updateSudoku(final int number, final int arrId, Button[] mainButtons, TextView[] helperTextViews) {
-        Set<Integer> arrIdsChangedHints = hints.incrementStarGroup(arrId, number - 1, mainButtonsText);
+        Set<Integer> arrIdsChangedHints = new HashSet<>();
         Set<Integer> arrIdsChangedValues = new HashSet<>();
+        if (number != 0) arrIdsChangedHints.addAll(hints.incrementStarGroup(arrId, number - 1, mainButtonsText));
+        else  arrIdsChangedHints.addAll(hints.decrementStarGroup(arrId, mainButtonsText.get(arrId) - 1, mainButtonsText));
         mainButtonsText.set(arrId, number);
-        this.setMainButtonsContent(-1, arrId, mainButtons, helperTextViews);
+        this.setMainButtonsContent(arrId, mainButtons, helperTextViews);
         updateSudoku(arrIdsChangedHints, arrIdsChangedValues, mainButtons, helperTextViews);
     }
 

@@ -123,6 +123,15 @@ public class Hints {
         incrementStarGroup(arrId, num, hint);
     }
 
+    public Set<Integer> decrementStarGroup(final int arrId, final int num, final Playground pField) {
+        Set<Integer> changed = new HashSet<>();
+        for (int tempArrId : Sudoku.getStarGroup(arrId)) {
+            hint.decrement(tempArrId, num);
+            if (!pField.isPopulated(tempArrId) && hint.get(tempArrId, num) == 0) changed.add(tempArrId);
+        }
+        return changed;
+    }
+
     public static void decrementStarGroup(final int arrId, final int num, Hint hint) {
         for (int tempArrId : Sudoku.getStarGroup(arrId))
             hint.decrement(tempArrId, num);

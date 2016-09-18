@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mainButtons[arrId].setBackgroundResource(0);
         mainButtons[arrId].setOnClickListener(this);
         mainButtons[arrId].setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
-        sudokuData.setMainButtonsContent(-1, arrId, mainButtons, helperTextViews);
+        sudokuData.setMainButtonsContent(arrId, mainButtons, helperTextViews);
     }
 
     public void initHelperTextViews(final int arrId) {

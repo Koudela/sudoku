@@ -100,6 +100,7 @@ public class SudokuBuilder extends Thread {
                 sudokuStack.add(++count, new Playground[6]);
                 int i = 0;
                 for (int[] playground : pFamily) sudokuStack.get(count)[i++] = new Playground(playground);
+                if (sudokuStack.get(count)[5] == null) sudokuStack.remove(count--);
             }
         } catch (Exception e) {
             e.printStackTrace();
