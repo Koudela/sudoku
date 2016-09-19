@@ -110,7 +110,7 @@ public class SudokuBuilder extends Thread {
     @Override
     public void run() {
         // we try to have true  opened and closed
-        while (sudokuStack.size() < 100) {
+        while (sudokuStack.size() < 10000) {
             synchronized (this) {
                 opened++;
             }
