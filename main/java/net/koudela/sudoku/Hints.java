@@ -312,11 +312,11 @@ public class Hints {
         int arrId;
         if (getOnly) for (int i = 0; i < DIM; i++) {
             arrId = setAutoHintsAdv3ByGroup(Sudoku.VERTICAL_GROUPS[i], pField, true);
-            if (arrId != -1) return -1;
+            if (arrId != -1) return arrId;
             arrId = setAutoHintsAdv3ByGroup(Sudoku.HORIZONTAL_GROUPS[i], pField, true);
-            if (arrId != -1) return -1;
+            if (arrId != -1) return arrId;
             arrId = setAutoHintsAdv3ByGroup(Sudoku.GROUPED_GROUPS[i], pField, true);
-            if (arrId != -1) return -1;
+            if (arrId != -1) return arrId;
         } else for (int i = 0; i < DIM; i++) {
             changed += setAutoHintsAdv3ByGroup(Sudoku.VERTICAL_GROUPS[i], pField, false);
             changed += setAutoHintsAdv3ByGroup(Sudoku.HORIZONTAL_GROUPS[i], pField, false);

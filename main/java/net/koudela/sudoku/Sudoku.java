@@ -21,7 +21,8 @@ public class Sudoku extends SudokuExptimeFunctions {
     }
 
     public void startBuilder() {
-        sudokuBuilder.start();
+        if (!sudokuBuilder.isAlive())
+            sudokuBuilder.start();
     }
 
     public static Sudoku getInstance() {
