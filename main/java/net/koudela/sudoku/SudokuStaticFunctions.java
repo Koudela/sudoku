@@ -38,12 +38,12 @@ public class SudokuStaticFunctions extends SudokuGroups {
                     changedHints = newHintsFound;
                 }
                 if (byAutoHintAdv2) {
-                    newHintsFound = hints.setAutoHintsAdv2(solution);
+                    newHintsFound = hints.setAutoHintsAdv2(solution, false);
                     changedHints += newHintsFound;
                     if (verbose && newHintsFound != 0) Log.v("hintsAdv2", ""+newHintsFound);
                 }
                 if (byAutoHintAdv3) {
-                    newHintsFound = hints.setAutoHintsAdv3(solution);
+                    newHintsFound = hints.setAutoHintsAdv3(solution, false);
                     changedHints += newHintsFound;
                     if (verbose && newHintsFound != 0) Log.v("hintsAdv3", ""+newHintsFound);
                 }

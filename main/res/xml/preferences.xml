@@ -31,6 +31,21 @@
             android:title="@string/pref_auto_insert2hint" />
         <CheckBoxPreference
             android:defaultValue="false"
+            android:key="pref_auto_adv1hint"
+            android:summary="@string/pref_auto_adv1hint_summ"
+            android:title="@string/pref_auto_adv1hint" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="pref_auto_adv2hint"
+            android:summary="@string/pref_auto_adv2hint_summ"
+            android:title="@string/pref_auto_adv2hint" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="pref_auto_adv3hint"
+            android:summary="@string/pref_auto_adv3hint_summ"
+            android:title="@string/pref_auto_adv3hint" />
+        <CheckBoxPreference
+            android:defaultValue="false"
             android:key="pref_mark_error"
             android:summary="@string/pref_mark_error_summ"
             android:title="@string/pref_mark_error" />

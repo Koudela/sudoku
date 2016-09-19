@@ -54,8 +54,8 @@ public class Hints {
         init();
         for (int arrId : pField.getPopulatedArrIds()) incrementStarGroup(arrId, pField.get(arrId) - 1);
         if (useAdv1) setAutoHintsAdv1(pField, false);
-        if (useAdv2) setAutoHintsAdv2(pField);
-        if (useAdv3) setAutoHintsAdv3(pField);
+        if (useAdv2) setAutoHintsAdv2(pField, false);
+        if (useAdv3) setAutoHintsAdv3(pField, false);
     }
 
     public void initAdv() {
@@ -201,7 +201,7 @@ public class Hints {
     }
 
     // if in a group/row/column are n fields with the same n hints or less missing, hints get set on the same numbers on the other fields
-    private int setAutoHintsAdv2ByGroup(final Integer[] group, final Playground pField) {
+    private int setAutoHintsAdv2ByGroup(final Integer[] group, final Playground pField, boolean getOnly) {
         int changed = 0;
         int populatedFieldsCount;
         Set<Integer> missing = new HashSet<>(16);
@@ -235,8 +235,12 @@ public class Hints {
                     }
             }
             // there are fields to process && missing size equals the count of similar fields
-            if (otherArrIds.size() != 0 && notMissing.size() == otherArrIds.size() + populatedFieldsCount) changed += setAutoHintsAdv2ByGroupSub(missing, otherArrIds);
+            if (otherArrIds.size() != 0 && notMissing.size() == otherArrIds.size() + populatedFieldsCount) {
+                if (getOnly) for (int tempArrId : otherArrIds) if (tempArrId != -1) return tempArrId;
+                changed += setAutoHintsAdv2ByGroupSub(missing, otherArrIds);
+            }
         }
+        if (getOnly) return -1;
         return changed;
     }
 
@@ -251,19 +255,28 @@ public class Hints {
         return changed;
     }
 
-    public int setAutoHintsAdv2(final Playground pField) {
+    public int setAutoHintsAdv2(final Playground pField, boolean getOnly) {
         int changed = 0;
-        for (int i = 0; i < DIM; i++) {
-            changed += setAutoHintsAdv2ByGroup(Sudoku.VERTICAL_GROUPS[i], pField);
-            changed += setAutoHintsAdv2ByGroup(Sudoku.HORIZONTAL_GROUPS[i], pField);
-            changed += setAutoHintsAdv2ByGroup(Sudoku.GROUPED_GROUPS[i], pField);
+        int arrId;
+        if (getOnly) for (int i = 0; i < DIM; i++) {
+            arrId = setAutoHintsAdv2ByGroup(Sudoku.VERTICAL_GROUPS[i], pField, true);
+            if (arrId != -1) return arrId;
+            arrId = setAutoHintsAdv2ByGroup(Sudoku.HORIZONTAL_GROUPS[i], pField, true);
+            if (arrId != -1) return arrId;
+            arrId = setAutoHintsAdv2ByGroup(Sudoku.GROUPED_GROUPS[i], pField, true);
+            if (arrId != -1) return arrId;
+        } else for (int i = 0; i < DIM; i++) {
+            changed += setAutoHintsAdv2ByGroup(Sudoku.VERTICAL_GROUPS[i], pField, false);
+            changed += setAutoHintsAdv2ByGroup(Sudoku.HORIZONTAL_GROUPS[i], pField, false);
+            changed += setAutoHintsAdv2ByGroup(Sudoku.GROUPED_GROUPS[i], pField, false);
         }
+        if (getOnly) return -1;
         return changed;
     }
 
     // if in a group/row/column are n missing hints distributed over n fields only, then hints get set on the other numbers on the same n fields
     // be careful, this algorithm resides in EXPTIME
-    private int setAutoHintsAdv3ByGroup(final Integer[] group, final Playground pField) {
+    private int setAutoHintsAdv3ByGroup(final Integer[] group, final Playground pField, boolean getOnly) {
         int changed = 0;
         Map<Integer, Set<Integer>> missing = new HashMap<>();
         Set<Integer> fields = new HashSet<>();
@@ -285,20 +298,31 @@ public class Hints {
                 if (!subset.contains(num))
                     for (int arrId : distributedOverFields)
                         if (!hintAdv3.isHint(arrId, num)) {
+                            if (getOnly) return arrId;
                             hintAdv3.increment(arrId, num);
                             changed++;
                         }
         }
+        if (getOnly) return -1;
         return changed;
     }
 
-    public int setAutoHintsAdv3(final Playground pField) {
+    public int setAutoHintsAdv3(final Playground pField, boolean getOnly) {
         int changed = 0;
-        for (int i = 0; i < DIM; i++) {
-            changed += setAutoHintsAdv3ByGroup(Sudoku.VERTICAL_GROUPS[i], pField);
-            changed += setAutoHintsAdv3ByGroup(Sudoku.HORIZONTAL_GROUPS[i], pField);
-            changed += setAutoHintsAdv3ByGroup(Sudoku.GROUPED_GROUPS[i], pField);
+        int arrId;
+        if (getOnly) for (int i = 0; i < DIM; i++) {
+            arrId = setAutoHintsAdv3ByGroup(Sudoku.VERTICAL_GROUPS[i], pField, true);
+            if (arrId != -1) return -1;
+            arrId = setAutoHintsAdv3ByGroup(Sudoku.HORIZONTAL_GROUPS[i], pField, true);
+            if (arrId != -1) return -1;
+            arrId = setAutoHintsAdv3ByGroup(Sudoku.GROUPED_GROUPS[i], pField, true);
+            if (arrId != -1) return -1;
+        } else for (int i = 0; i < DIM; i++) {
+            changed += setAutoHintsAdv3ByGroup(Sudoku.VERTICAL_GROUPS[i], pField, false);
+            changed += setAutoHintsAdv3ByGroup(Sudoku.HORIZONTAL_GROUPS[i], pField, false);
+            changed += setAutoHintsAdv3ByGroup(Sudoku.GROUPED_GROUPS[i], pField, false);
         }
+        if (getOnly) return -1;
         return changed;
     }
 

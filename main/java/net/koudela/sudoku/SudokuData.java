@@ -34,6 +34,10 @@ public class SudokuData {
         initData();
     }
 
+    public void startBuilder() {
+        sudoku.startBuilder();
+    }
+
     public static SudokuData getInstance() {
         return Singleton;
     }
@@ -180,6 +184,18 @@ public class SudokuData {
         if (arrId != -1) {
             setEasyTouchArea(arrId, helperTextViews);
             Toast.makeText(MainActivity.getContext(), "Hint Advanced 1", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        arrId = hints.setAutoHintsAdv2(mainButtonsText, true);
+        if (arrId != -1) {
+            setEasyTouchArea(arrId, helperTextViews);
+            Toast.makeText(MainActivity.getContext(), "Hint Advanced 2", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        arrId = hints.setAutoHintsAdv3(mainButtonsText, true);
+        if (arrId != -1) {
+            setEasyTouchArea(arrId, helperTextViews);
+            Toast.makeText(MainActivity.getContext(), "Hint Advanced 3", Toast.LENGTH_SHORT).show();
             return;
         }
         Toast.makeText(MainActivity.getContext(), "No Hint available", Toast.LENGTH_SHORT).show();

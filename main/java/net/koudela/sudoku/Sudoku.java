@@ -16,9 +16,12 @@ public class Sudoku extends SudokuExptimeFunctions {
     private List<int[]> workbenchPopSize = new ArrayList<>(); // for development use, i.e. deeper inspection of probability
 
     private Sudoku() {
-        sudokuBuilder.start();
         sudoku = sudokuBuilder.getResult(lastTrueStackPosition);
         getNewSudoku();
+    }
+
+    public void startBuilder() {
+        sudokuBuilder.start();
     }
 
     public static Sudoku getInstance() {
@@ -143,7 +146,7 @@ public class Sudoku extends SudokuExptimeFunctions {
                     sudoku[3].getSizePopulatedArrIds(),
                     sudoku[4].getSizePopulatedArrIds(),
                     sudoku[5].getSizePopulatedArrIds()});
-            if (sudoku[3].getSizePopulatedArrIds() < sudoku[4].getSizePopulatedArrIds()) {
+            if (sudoku[3].getSizePopulatedArrIds() > sudoku[4].getSizePopulatedArrIds()) {
                 lastTrueStackPosition = lastStackPosition;
                 sudoku = sudokuBuilder.getResult(lastTrueStackPosition);
                 return true;

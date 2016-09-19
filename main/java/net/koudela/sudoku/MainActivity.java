@@ -57,7 +57,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // add second(!) the views populating the tableMain <- sudokuData.setMainButtonsText(...) needs helperTextViews populated
         initLayoutLayer("Main");
         setTextSizeMainButtons();
-        if (firstRun) sudokuData.resetGame(mainButtons, helperTextViews);
+        if (firstRun) {
+            sudokuData.resetGame(mainButtons, helperTextViews);
+            sudokuData.startBuilder();
+        }
         PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
     }
 
