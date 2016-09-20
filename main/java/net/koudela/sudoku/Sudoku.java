@@ -29,10 +29,31 @@ public class Sudoku extends SudokuExptimeFunctions {
         return Singleton;
     }
 
-    public Sudoku setLevel(final int level) {
-        if (level < 0 || level > 5)
-            throw new IllegalArgumentException("level must be within [0, 5]; level was " + level);
-        this.level = level;
+    public Sudoku setLevel(final String level) {
+        switch (level) {
+            case "1":
+            case "very easy":
+                this.level = 1;
+                break;
+            case "2":
+            case "easy":
+                this.level = 2;
+                break;
+            case "3":
+            case "moderate":
+                this.level = 3;
+                break;
+            case "4":
+            case "hard":
+                this.level = 4;
+                break;
+            case "5":
+            case "freestyle":
+                this.level = 5;
+                break;
+            default:
+                throw new IllegalArgumentException("level must be within [1, 5]; level was " + level);
+        }
         return Singleton;
     }
 
@@ -99,7 +120,7 @@ public class Sudoku extends SudokuExptimeFunctions {
         for (int arrId : getRandomizedArrIds())
             if (level3Sudoku.isPopulated(arrId)) {
                 if (verbose) Log.d("inspect", ""+arrId);
-                if(isSolvableSudoku(arrId, level3Sudoku, true, true, false, false, false, verbose)) {
+                if(isSolvableSudoku(arrId, level3Sudoku, true, true, false, false, false)) {
                     if (verbose) Log.d("removed", arrId + " (" + level3Sudoku.get(arrId) + ")");
                     level3Sudoku.set(arrId, 0);
                 }
@@ -115,7 +136,7 @@ public class Sudoku extends SudokuExptimeFunctions {
         for (int arrId : getRandomizedArrIds())
             if (level4Sudoku.isPopulated(arrId)) {
                 if (verbose) Log.d("inspect", ""+arrId);
-                if(isSolvableSudoku(arrId, level4Sudoku, true, true, true, true, true, verbose)) {
+                if(isSolvableSudoku(arrId, level4Sudoku, true, true, true, true, true)) {
                     if (verbose) Log.d("removed", arrId + " (" + level4Sudoku.get(arrId) + ")");
                     level4Sudoku.set(arrId, 0);
                 }

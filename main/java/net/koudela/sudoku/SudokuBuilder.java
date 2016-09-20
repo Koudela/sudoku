@@ -115,8 +115,9 @@ public class SudokuBuilder extends Thread {
                 opened++;
             }
             Playground[] workbench = new Playground[6];
-            workbench[0] = new Playground(Sudoku.TRUE_GRID);
-            workbench[0].shuffle();
+            //workbench[0] = new Playground(Sudoku.TRUE_GRID);
+            //workbench[0].shuffle();
+            workbench[0] = Sudoku.makeRandomTrueGridByBruteForceBacktracking();
             workbench[1] = Sudoku.makeLevelOneSudoku(workbench[0], verbose);
             workbench[2] = Sudoku.makeLevelTwoSudoku(workbench[1], verbose);
             workbench[3] = Sudoku.makeLevelThreeSudoku(workbench[2], verbose);

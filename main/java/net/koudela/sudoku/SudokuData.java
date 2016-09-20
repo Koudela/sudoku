@@ -49,7 +49,7 @@ public class SudokuData {
         hints.setUseAdv3(devOptionsIsSet && sPrefs.getBoolean(PreferencesFragment.KEY_PREF_AUTO_HINT_ADV3, false));
         useAutoInsert1 = (devOptionsIsSet && sPrefs.getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT1, false));
         useAutoInsert2 = (devOptionsIsSet && sPrefs.getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT2, false));
-        sudoku.setLevel(Integer.valueOf(sPrefs.getString(PreferencesFragment.KEY_PREF_LEVEL, "1")));
+        sudoku.setLevel(sPrefs.getString(PreferencesFragment.KEY_PREF_LEVEL, "1"));
     }
 
     public void initData() {
