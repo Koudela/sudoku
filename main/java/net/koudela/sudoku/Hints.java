@@ -236,8 +236,11 @@ public class Hints {
             }
             // there are fields to process && missing size equals the count of similar fields
             if (otherArrIds.size() != 0 && notMissing.size() == otherArrIds.size() + populatedFieldsCount) {
-                if (getOnly) for (int tempArrId : otherArrIds) if (tempArrId != -1) return tempArrId;
-                changed += setAutoHintsAdv2ByGroupSub(missing, otherArrIds);
+                if (getOnly) {
+                    for (int tempArrId : otherArrIds)
+                        for (int num : missing)
+                            if (!isHint(tempArrId, num)) return tempArrId;
+                } else changed += setAutoHintsAdv2ByGroupSub(missing, otherArrIds);
             }
         }
         if (getOnly) return -1;
@@ -296,12 +299,14 @@ public class Hints {
             if (distributedOverFields.size() > subset.size()) continue;
             for (int num = 0; num < DIM; num++)
                 if (!subset.contains(num))
-                    for (int arrId : distributedOverFields)
-                        if (!hintAdv3.isHint(arrId, num)) {
-                            if (getOnly) return arrId;
+                    for (int arrId : distributedOverFields) {
+                        if (getOnly) {
+                            if (!isHint(arrId,num)) return arrId;
+                        } else if (!hintAdv3.isHint(arrId, num)) {
                             hintAdv3.increment(arrId, num);
                             changed++;
                         }
+                    }
         }
         if (getOnly) return -1;
         return changed;
