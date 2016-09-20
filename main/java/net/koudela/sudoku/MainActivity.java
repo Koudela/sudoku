@@ -16,7 +16,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-//TODO: FIX BUG: User input does not get shown after new launch
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     protected final static int DIM = Sudoku.DIM;
     protected final static int CHOOSE_INPUT_REQUEST = 1;
@@ -37,24 +37,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        boolean firstLaunch = false;
         context = this;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        // find the retained fragment on activity restarts
-        FragmentManager fm = getSupportFragmentManager();
-        if (fm.findFragmentByTag("data") == null) {
-            // create the fragment the first time
-            fm.beginTransaction().add(new RetainedFragment(), "data").commit();
-        }
         for (int arrId : Sudoku.ALL_ARR_IDS) {
             initMainButtons(arrId, true);
             initHelperTextViews(arrId, true);
         }
-        setTextSizeHelperTextViews();
-        setTextSizeMainButtons();
+        // find the retained fragment on activity restarts
+        FragmentManager fm = getSupportFragmentManager();
+        if (fm.findFragmentByTag("data") == null) {
+            firstLaunch = true;
+            // create the fragment the first time
+            fm.beginTransaction().add(new RetainedFragment(), "data").commit();
+        }
         // create or get the retained data object
         sudokuData = SudokuData.getInstance();
-        sudokuData.resetGame(true);
+        if (firstLaunch && !sudokuData.isOldGame()) {
+            sudokuData.resetGame(true);
+        } else {
+            for (int arrId : Sudoku.ALL_ARR_IDS) {
+                sudokuData.setMainButtonsContent(arrId, false);
+                sudokuData.setHelperTextViewContent(arrId);
+            }
+        }
+
+        setTextSizeHelperTextViews();
+        setTextSizeMainButtons();
         // add first(!) the views populating the tableHelper
         initLayoutLayer("Helper");
         // add second(!) the views populating the tableMain <- sudokuData.setMainButtonsText(...) needs helperTextViews populated

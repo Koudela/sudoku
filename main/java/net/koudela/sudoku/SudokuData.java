@@ -78,6 +78,10 @@ public class SudokuData {
         resetGame(false);
     }
 
+    public boolean isOldGame() {
+        return (mainButtonsText.getPopulatedArrIds().size() > 0);
+    }
+
     public void setMainButtonsContent(final int arrId, boolean isInit) {
         int number = mainButtonsText.get(arrId);
         // is (now) empty

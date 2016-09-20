@@ -136,8 +136,12 @@ public class SudokuExptimeFunctions extends SudokuStaticFunctions {
         }
         // set value
         int isSudoku;
-        for (int arrId : getRandomizedArrIds())
+        int count = -1;
+        for (int arrId : getRandomizedArrIds()) {
+            Log.v("makeRandomTrueGrid", (++count)+"");
+            int count1 = 0;
             do {
+                Log.v("makeRandomTrueGrid", count+" ; "+(count1++));
                 do {
                     sudoku.set(arrId, numbersLeft.get(arrId).get(0));
                     numbersLeft.get(arrId).remove(0);
@@ -147,6 +151,7 @@ public class SudokuExptimeFunctions extends SudokuStaticFunctions {
                 if (isSudoku == 1) return solution;
                 if (isSudoku == 0) Hints.incrementStarGroup(arrId, sudoku.get(arrId) - 1, hint);
             } while (isSudoku == -1);
+        }
         return sudoku;
     }
 
