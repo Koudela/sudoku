@@ -15,7 +15,6 @@ public class SudokuBuilder extends Thread {
     private List<Playground[]> sudokuStack = new ArrayList<>();
     private int opened = 0;
     private int closed = 0;
-    public boolean verbose = true;
 
     private SudokuBuilder() {
         readSudokuStackFromFile();
@@ -110,6 +109,7 @@ public class SudokuBuilder extends Thread {
     @Override
     public void run() {
         // we try to have true  opened and closed
+        boolean verbose = (MainActivity.talkativenessToLog >= 4);
         while (sudokuStack.size() < 10000) {
             synchronized (this) {
                 opened++;

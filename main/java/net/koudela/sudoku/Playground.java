@@ -189,7 +189,7 @@ public class Playground {
     }
 
 	private static int[] rotate90Degree(final int[] pField, final boolean left) {
-        Log.v("rotate90Degree", (left?"left":"right"));
+        if (MainActivity.talkativenessToLog >= 4) Log.v("rotate90Degree", (left?"left":"right"));
 		int[] newField = new int[DIM * DIM];
 		int oldArrId;
 		int newArrId;
@@ -209,7 +209,7 @@ public class Playground {
 	}
 
 	private static int[] rotate180Degree(final int[] pField) {
-        Log.v("rotate180Degree", "...");
+        if (MainActivity.talkativenessToLog >= 4) Log.v("rotate180Degree", "...");
 		int[] newField = new int[DIM * DIM];
 		for (int newArrId : Sudoku.ALL_ARR_IDS)
 			newField[newArrId] = pField[(DIM * DIM - 1) - newArrId];
@@ -217,7 +217,7 @@ public class Playground {
 	}
 
 	private static void renameEntries(int[] pField, final List<Integer> renameRelation) {
-        Log.v("renameEntries", relationToString(renameRelation));
+        if (MainActivity.talkativenessToLog >= 4) Log.v("renameEntries", relationToString(renameRelation));
 		for (int arrId : Sudoku.ALL_ARR_IDS) {
 			if (pField[arrId] != 0) pField[arrId] = renameRelation.get(pField[arrId] - 1);
 			else pField[arrId] = 0;
@@ -225,7 +225,7 @@ public class Playground {
 	}
 
 	private static int[] flipVerticalGroupsHorizontally(final int[] pField, final List<Integer> flipRelation) {
-        Log.v("flipVerticalGroupsH.", relationToString(flipRelation));
+        if (MainActivity.talkativenessToLog >= 4) Log.v("flipVerticalGroupsH.", relationToString(flipRelation));
 		int oldArrId;
 		int newArrId;
 		int[] newField = new int[DIM * DIM];
@@ -240,7 +240,7 @@ public class Playground {
 	}
 
 	private static int[] flipHorizontalGroupsVertically(final int[] pField, final List<Integer> flipRelation) {
-        Log.v("flipHorizontalGroupsV.", relationToString(flipRelation));
+        if (MainActivity.talkativenessToLog >= 4) Log.v("flipHorizontalGroupsV.", relationToString(flipRelation));
 		int oldArrId;
 		int newArrId;
 		int[] newField = new int[DIM * DIM];
@@ -255,7 +255,7 @@ public class Playground {
 	}
 
 	private static int[] flipInVerticalGroupsHorizontally(final int[] pField, final int groupId, final List<Integer> flipRelation) {
-        Log.v("flipInVerticalGroupsH.", groupId + ":" + relationToString(flipRelation));
+        if (MainActivity.talkativenessToLog >= 4) Log.v("flipInVerticalGroupsH.", groupId + ":" + relationToString(flipRelation));
         int oldArrId;
 		int newArrId;
 		int[] newField = new int[DIM * DIM];
@@ -274,7 +274,7 @@ public class Playground {
 	}
 
 	private static int[] flipInHorizontalInGroupsVertically(final int[] pField, final int groupId, final List<Integer> flipRelation) {
-        Log.v("flipInH.GroupsV.", groupId + ":" + relationToString(flipRelation));
+        if (MainActivity.talkativenessToLog >= 4) Log.v("flipInH.GroupsV.", groupId + ":" + relationToString(flipRelation));
         int oldArrId;
 		int newArrId;
         int[] newField = new int[DIM * DIM];

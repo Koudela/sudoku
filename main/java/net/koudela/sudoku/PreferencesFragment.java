@@ -3,7 +3,6 @@ package net.koudela.sudoku;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
-import android.util.Log;
 
 public class PreferencesFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String KEY_PREF_EASY_TOUCH = "pref_easy_touch";
@@ -47,12 +46,51 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
     }
 
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        SudokuData sudokuData = SudokuData.getInstance();
         switch (key) {
+            case (PreferencesFragment.KEY_PREF_LEVEL):
+                sudokuData.initPreferences();
+                sudokuData.resetGame(false);
+                break;
+            case (PreferencesFragment.KEY_PREF_MARK_ERROR):
+                for (int arrId : sudokuData.getPopulatedArrIds())
+                    sudokuData.updateMainButtonColor(arrId);
+                break;
+            case (PreferencesFragment.KEY_PREF_FONT_SIZE_MAIN):
+                MainActivity.setTextSizeMainButtons();
+                break;
+            case (PreferencesFragment.KEY_PREF_FONT_SIZE_HELPER):
+                MainActivity.setTextSizeHelperTextViews();
+                break;
+            case (PreferencesFragment.KEY_PREF_AUTO_HINT):
+                sudokuData.initPreferences();
+                sudokuData.redrawHints();
+                break;
             case (PreferencesFragment.KEY_PREF_AUTO_HINT_ADV1):
-                Log.v(key, "" + sharedPreferences.getBoolean(key, false));
+                sudokuData.initPreferences();
+                sudokuData.initAdv1();
+                sudokuData.redrawHints();
                 break;
             case (PreferencesFragment.KEY_PREF_AUTO_HINT_ADV2):
-                Log.v(key, "" + sharedPreferences.getBoolean(key, false));
+                sudokuData.initPreferences();
+                sudokuData.initAdv2();
+                sudokuData.redrawHints();
+                break;
+            case (PreferencesFragment.KEY_PREF_AUTO_HINT_ADV3):
+                sudokuData.initPreferences();
+                sudokuData.initAdv3();
+                sudokuData.redrawHints();
+                break;
+            case (PreferencesFragment.KEY_PREF_DEVELOPMENT_OPTIONS):
+                sudokuData.initPreferences();
+                sudokuData.initAdv();
+                sudokuData.redrawHints();
+                break;
+            case (PreferencesFragment.KEY_PREF_AUTO_INSERT1):
+            case (PreferencesFragment.KEY_PREF_AUTO_INSERT1HINT):
+            case (PreferencesFragment.KEY_PREF_AUTO_INSERT2):
+            case (PreferencesFragment.KEY_PREF_AUTO_INSERT2HINT):
+                sudokuData.initPreferences();
                 break;
         }
     }

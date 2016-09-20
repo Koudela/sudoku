@@ -50,12 +50,16 @@ public class Hints {
         userHint.init();
     }
 
-    public void init(Playground pField) {
-        init();
+    public void init(Playground pField, boolean firstRun) {
+        // on first Run the hints are already initialized
+        if (!firstRun) init();
         for (int arrId : pField.getPopulatedArrIds()) incrementStarGroup(arrId, pField.get(arrId) - 1);
-        if (useAdv1) setAutoHintsAdv1(pField, false);
-        if (useAdv2) setAutoHintsAdv2(pField, false);
-        if (useAdv3) setAutoHintsAdv3(pField, false);
+        // on first Run we wanna skip functions with high execution time costs
+        if (!firstRun) {
+            if (useAdv1) setAutoHintsAdv1(pField, false);
+            if (useAdv2) setAutoHintsAdv2(pField, false);
+            if (useAdv3) setAutoHintsAdv3(pField, false);
+        }
     }
 
     public void initAdv() {

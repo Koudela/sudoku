@@ -2,7 +2,6 @@ package net.koudela.sudoku;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.support.v4.app.FragmentManager;
 import android.content.Intent;
 import android.preference.PreferenceManager;
@@ -18,19 +17,19 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
-    private static Context context;
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     protected final static int DIM = Sudoku.DIM;
     protected final static int CHOOSE_INPUT_REQUEST = 1;
-    protected Button[] mainButtons = new Button[DIM * DIM];
-    protected TextView[] helperTextViews = new TextView[DIM*DIM];
+    private static Context context;
+    protected static Button[] mainButtons = new Button[DIM * DIM];
+    protected static TextView[] helperTextViews = new TextView[DIM*DIM];
     protected SudokuData sudokuData;
     public static final int TALKATIVENESS_TO_LOG_NONE = 0;
     public static final int TALKATIVENESS_TO_LOG_WARN = 1;
     public static final int TALKATIVENESS_TO_LOG_INFO = 2;
     public static final int TALKATIVENESS_TO_LOG_DEBUG = 3;
     public static final int TALKATIVENESS_TO_LOG_VERBOSE = 4;
-    public static int talkativenessToLog = TALKATIVENESS_TO_LOG_VERBOSE;
+    public static int talkativenessToLog = TALKATIVENESS_TO_LOG_NONE;
 
     public static Context getContext() {
         return context;
@@ -39,29 +38,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         context = this;
-        // create or get the retained data object
-        sudokuData = SudokuData.getInstance();
-        boolean firstRun = false;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         // find the retained fragment on activity restarts
         FragmentManager fm = getSupportFragmentManager();
         if (fm.findFragmentByTag("data") == null) {
-            firstRun = true;
             // create the fragment the first time
             fm.beginTransaction().add(new RetainedFragment(), "data").commit();
         }
+        for (int arrId : Sudoku.ALL_ARR_IDS) {
+            initMainButtons(arrId, true);
+            initHelperTextViews(arrId, true);
+        }
+        setTextSizeHelperTextViews();
+        setTextSizeMainButtons();
+        // create or get the retained data object
+        sudokuData = SudokuData.getInstance();
+        sudokuData.resetGame(true);
         // add first(!) the views populating the tableHelper
         initLayoutLayer("Helper");
-        setTextSizeHelperTextViews();
         // add second(!) the views populating the tableMain <- sudokuData.setMainButtonsText(...) needs helperTextViews populated
         initLayoutLayer("Main");
-        setTextSizeMainButtons();
-        if (firstRun) {
-            sudokuData.resetGame(mainButtons, helperTextViews);
-            sudokuData.startBuilder();
-        }
-        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        sudokuData.startBuilder();
     }
 
     public void initLayoutLayer(final String type) {
@@ -80,8 +83,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             for (int j = 0; j < DIM; j++) {
                 int arrId = i * DIM + j;
-                if (type.equals("Main")) initMainButtons(arrId);
-                else initHelperTextViews(arrId);
                 childViewParams[j] = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1);
                 childViewParams[j].setMargins((i % 3) == 0 ? 3 : 1, (j % 3) == 0 ? 3 : 1, 0, 0);
                 layoutCols[i].addView(type.equals("Main") ? mainButtons[arrId] : helperTextViews[arrId], childViewParams[j]);
@@ -89,21 +90,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    public void initMainButtons(final int arrId) {
+    public void initMainButtons(final int arrId, boolean firstRun) {
         mainButtons[arrId] = new Button(this);
         mainButtons[arrId].setTag("main" + arrId);
         mainButtons[arrId].setBackgroundResource(0);
         mainButtons[arrId].setOnClickListener(this);
         mainButtons[arrId].setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
-        sudokuData.setMainButtonsContent(arrId, mainButtons, helperTextViews);
+        if (!firstRun) sudokuData.setMainButtonsContent(arrId, true);
     }
 
-    public void initHelperTextViews(final int arrId) {
+    public void initHelperTextViews(final int arrId, boolean firstRun) {
         helperTextViews[arrId] = new TextView(this);
         helperTextViews[arrId].setTag("helper" + arrId);
         helperTextViews[arrId].setGravity(Gravity.CENTER);
         helperTextViews[arrId].setBackgroundColor(ContextCompat.getColor(this,R.color.backgroundUntouched));
-        sudokuData.setHelperTextViewContent(arrId, helperTextViews);
+        if (!firstRun) sudokuData.setHelperTextViewContent(arrId);
     }
 
     @Override
@@ -131,14 +132,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.action_new_game:
                 Toast.makeText(this, "New game selected", Toast.LENGTH_SHORT).show();
-                sudokuData.newGame(mainButtons, helperTextViews);
+                sudokuData.newGame();
                 break;
             case R.id.action_reset:
                 Toast.makeText(this, "Restart selected", Toast.LENGTH_SHORT).show();
-                sudokuData.resetGame(mainButtons, helperTextViews);
+                sudokuData.resetGame(false);
                 break;
             case R.id.action_suggest_field:
-                sudokuData.suggestField(helperTextViews);
+                sudokuData.suggestField();
             default:
                 break;
         }
@@ -159,10 +160,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if (easyTouch) {
             if (sudokuData.getArrIdEasyTouchButton() != arrId) {
-                sudokuData.setEasyTouchArea(arrId, helperTextViews);
+                sudokuData.setEasyTouchArea(arrId);
                 return;
             }
-        } else sudokuData.setEasyTouchArea(-1, helperTextViews);
+        } else sudokuData.setEasyTouchArea(-1);
         Intent intent = new Intent(this, ChooseInputActivity.class);
         startActivityForResult(intent, CHOOSE_INPUT_REQUEST);
     }
@@ -172,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CHOOSE_INPUT_REQUEST && resultCode == Activity.RESULT_OK && data != null) {
-            sudokuData.setEasyTouchArea(-1, helperTextViews);
+            sudokuData.setEasyTouchArea(-1);
             String chooseInputViewTag = data.getStringExtra("chooseInputViewTag");
             int arrId = sudokuData.getRequestViewId();
 
@@ -180,83 +181,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 String value = chooseInputViewTag.substring(2);
                 int number = Integer.valueOf(value);
                 // if the chosen number already populates the button we delete the text and replace otherwise
-                if (mainButtons[arrId].getText().equals(value)) sudokuData.updateSudoku(0, arrId, mainButtons, helperTextViews);
-                else sudokuData.updateSudoku(number, arrId, mainButtons, helperTextViews);
+                if (mainButtons[arrId].getText().equals(value)) sudokuData.updateSudoku(0, arrId);
+                else sudokuData.updateSudoku(number, arrId);
             } else if (chooseInputViewTag.substring(0,3).equals("not")) {
                 sudokuData.setUserHint(arrId, Integer.valueOf(chooseInputViewTag.substring(3)) - 1);
-                sudokuData.setHelperTextViewContent(arrId, helperTextViews);
-                sudokuData.updateSudoku(mainButtons, helperTextViews);
+                sudokuData.setHelperTextViewContent(arrId);
+                sudokuData.updateSudoku();
             }
 
         }
     }
-
-    public void setTextSizeMainButtons() {
-        float textSize = Float.valueOf(PreferenceManager.getDefaultSharedPreferences(this).getString(PreferencesFragment.KEY_PREF_FONT_SIZE_MAIN, "20"));
-        for (Button button: mainButtons) {
-            button.setTextSize(textSize);
-        }
+    public static void setTextSizeMainButtons() {
+        float textSize = Float.valueOf(PreferenceManager.getDefaultSharedPreferences(MainActivity.getContext()).getString(PreferencesFragment.KEY_PREF_FONT_SIZE_MAIN, "20"));
+        for (Button button: mainButtons) button.setTextSize(textSize);
     }
 
-    public void setTextSizeHelperTextViews() {
-        float textSize = Float.valueOf(PreferenceManager.getDefaultSharedPreferences(this).getString(PreferencesFragment.KEY_PREF_FONT_SIZE_HELPER, "13"));
-        for (TextView textView: helperTextViews) {
-            textView.setTextSize(textSize);
-        }
+    public static void setTextSizeHelperTextViews() {
+        float textSize = Float.valueOf(PreferenceManager.getDefaultSharedPreferences(MainActivity.getContext()).getString(PreferencesFragment.KEY_PREF_FONT_SIZE_HELPER, "13"));
+        for (TextView textView: helperTextViews) textView.setTextSize(textSize);
     }
 
-    public void onSharedPreferenceChanged(final SharedPreferences sharedPreferences, final String key) {
-        switch (key) {
-            case (PreferencesFragment.KEY_PREF_LEVEL):
-                sudokuData.initPreferences();
-                sudokuData.resetGame(mainButtons, helperTextViews);
-                break;
-            case (PreferencesFragment.KEY_PREF_MARK_ERROR):
-                for (int arrId : sudokuData.getPopulatedArrIds())
-                    sudokuData.updateMainButtonColor(arrId, mainButtons);
-                break;
-            case (PreferencesFragment.KEY_PREF_FONT_SIZE_MAIN):
-                setTextSizeMainButtons();
-                break;
-            case (PreferencesFragment.KEY_PREF_FONT_SIZE_HELPER):
-                setTextSizeHelperTextViews();
-                break;
-            case (PreferencesFragment.KEY_PREF_AUTO_HINT):
-                sudokuData.initPreferences();
-                sudokuData.redrawHints(helperTextViews);
-                break;
-            case (PreferencesFragment.KEY_PREF_AUTO_HINT_ADV1):
-                sudokuData.initPreferences();
-                sudokuData.initAdv1();
-                sudokuData.redrawHints(helperTextViews);
-                break;
-            case (PreferencesFragment.KEY_PREF_AUTO_HINT_ADV2):
-                sudokuData.initPreferences();
-                sudokuData.initAdv2();
-                sudokuData.redrawHints(helperTextViews);
-                break;
-            case (PreferencesFragment.KEY_PREF_AUTO_HINT_ADV3):
-                sudokuData.initPreferences();
-                sudokuData.initAdv3();
-                sudokuData.redrawHints(helperTextViews);
-                break;
-            case (PreferencesFragment.KEY_PREF_DEVELOPMENT_OPTIONS):
-                sudokuData.initPreferences();
-                sudokuData.initAdv();
-                sudokuData.redrawHints(helperTextViews);
-                break;
-            case (PreferencesFragment.KEY_PREF_AUTO_INSERT1):
-            case (PreferencesFragment.KEY_PREF_AUTO_INSERT1HINT):
-            case (PreferencesFragment.KEY_PREF_AUTO_INSERT2):
-            case (PreferencesFragment.KEY_PREF_AUTO_INSERT2HINT):
-                sudokuData.initPreferences();
-                break;
-        }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
-    }
 }

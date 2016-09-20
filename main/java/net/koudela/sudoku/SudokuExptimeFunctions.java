@@ -36,13 +36,14 @@ public class SudokuExptimeFunctions extends SudokuStaticFunctions {
     // be careful, this algorithm resides in EXPTIME
     // @computedSolution: input must be null or a clone of sudoku, holds the calculated grid
     protected static int solveByBacktracking(final Playground sudoku, final boolean countDown, Playground computedSolution) {
+        boolean verbose = MainActivity.talkativenessToLog >= 4;
         Hints hints = new Hints();
         Set<Integer> arrIdsChangedHints = new HashSet<>();
         Set<Integer> arrIdsChangedValues = new HashSet<>();
         int initValue = countDown?9:1;
         // initial check
-        // we don't wanna init the advanced hints yet - updateSudokuStart takes care of that
-        hints.init(sudoku);
+        // we don't wanna init the advanced hints yet (if we use them) - updateSudokuStart takes care of that
+        hints.init(sudoku, true);
         for (int arrId : sudoku.getPopulatedArrIds())
              if (hints.getPlainHint(arrId, sudoku.get(arrId) - 1) > 1) return -1; // -> Sudoku is not solvable
         // start the main computing
@@ -57,7 +58,7 @@ public class SudokuExptimeFunctions extends SudokuStaticFunctions {
         Set<Integer> mayBeDependValidValues = new HashSet<>(computedSolution.getPopulatedArrIds());
         Map<Integer, Set<Integer>> dependentValidValues = new HashMap<>();
         // backtrack
-        Log.v("computedSol. - startV.",computedSolution.toString());
+        if (verbose) Log.v("computedSol. - startV.",computedSolution.toString());
         for (int arrId = 0; arrId < DIM * DIM; ) {
             if (computedSolution.isPopulated(arrId)) {
                 arrId++;
@@ -65,14 +66,14 @@ public class SudokuExptimeFunctions extends SudokuStaticFunctions {
             }
             // "first" try
             computedSolution.set(arrId, initValue);
-            Log.v("First try", arrId+": "+initValue);
+            if (verbose) Log.v("First try", arrId+": "+initValue);
             boolean outOfBound = false;
             while (outOfBound || computedSolution.get(arrId) > 9 || computedSolution.get(arrId) < 1 || hints.isHint(arrId, computedSolution.get(arrId) - 1)) {
                 try {
                     outOfBound = false;
                     // new try
                     computedSolution.set(arrId, computedSolution.get(arrId) + (countDown ? -1 : 1));
-                    Log.v("new try 1", arrId+": "+computedSolution.get(arrId));
+                    if (verbose) Log.v("new try 1", arrId+": "+computedSolution.get(arrId));
                 } catch (IllegalArgumentException e) {
                     outOfBound = true;
                 }
@@ -87,9 +88,9 @@ public class SudokuExptimeFunctions extends SudokuStaticFunctions {
                     }
                     // rollback
                     hints.decrementStarGroup(arrId, computedSolution.get(arrId) - 1);
-                    Log.v("rollback","arrId: "+arrId);
-                    Log.v("rollback","mBDVV: "+Arrays.toString(mayBeDependValidValues.toArray()));
-                    Log.v("rollback","dVV: "+Arrays.toString(dependentValidValues.get(arrId).toArray()));
+                    if (verbose) Log.v("rollback","arrId: "+arrId);
+                    if (verbose) Log.v("rollback","mBDVV: "+Arrays.toString(mayBeDependValidValues.toArray()));
+                    if (verbose) Log.v("rollback","dVV: "+Arrays.toString(dependentValidValues.get(arrId).toArray()));
                     for (int tempArrId : dependentValidValues.get(arrId)) {
                         mayBeDependValidValues.remove(tempArrId);
                         hints.decrementStarGroup(tempArrId, computedSolution.get(tempArrId) - 1);
@@ -100,7 +101,7 @@ public class SudokuExptimeFunctions extends SudokuStaticFunctions {
                         outOfBound = false;
                         // new try
                         computedSolution.set(arrId, computedSolution.get(arrId) + (countDown ? -1 : 1));
-                        Log.v("new try 2", arrId+": "+computedSolution.get(arrId));
+                        if (verbose) Log.v("new try 2", arrId+": "+computedSolution.get(arrId));
                     } catch (IllegalArgumentException e) {
                         outOfBound = true;
                     }
@@ -110,13 +111,12 @@ public class SudokuExptimeFunctions extends SudokuStaticFunctions {
             hints.incrementStarGroup(arrId, computedSolution.get(arrId) - 1);
             arrIdsChangedValues.clear();
             updateSudokuStart(arrIdsChangedHints, arrIdsChangedValues, computedSolution, hints, true, true);
-            Log.v("step forward update", "sizeUnpop: "+computedSolution.getSizeNotPopulatedArrIds());
             if (computedSolution.getSizeNotPopulatedArrIds() == 0) return 0; // -> Sudoku may be a valid Sudoku
             dependentValidValues.put(arrId, new HashSet<>(arrIdsChangedValues));
             mayBeDependValidValues.addAll(arrIdsChangedValues);
-            Log.v("step forward","arrId: "+arrId);
-            Log.v("step forward","mBDVV: "+Arrays.toString(mayBeDependValidValues.toArray()));
-            Log.v("step forward","dVV: "+Arrays.toString(dependentValidValues.get(arrId).toArray()));
+            if (verbose) Log.v("step forward","arrId: "+arrId);
+            if (verbose) Log.v("step forward","mBDVV: "+Arrays.toString(mayBeDependValidValues.toArray()));
+            if (verbose) Log.v("step forward","dVV: "+Arrays.toString(dependentValidValues.get(arrId).toArray()));
             arrId++;
         }
         return 0; // Sudoku -> may be a valid Sudoku
@@ -127,7 +127,6 @@ public class SudokuExptimeFunctions extends SudokuStaticFunctions {
     public static int isSudoku(final Playground sudoku, Playground solution) {
         if (solution == null) solution = new Playground(sudoku);
         int result = solveByBacktracking(sudoku, false, solution);
-        Log.v("isSudoku", "result: "+result);
         if (result != 0) return result; // -> -1: Sudoku is not solvable, 1: Sudoku is a valid Sudoku
         Playground possibleSolution = new Playground(solution);
         solution.init(sudoku);

@@ -5,8 +5,6 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -31,7 +29,6 @@ public class SudokuData {
 
     private SudokuData() {
         initPreferences();
-        initData();
     }
 
     public void startBuilder() {
@@ -65,88 +62,86 @@ public class SudokuData {
         for (int arrId : Sudoku.ALL_ARR_IDS) isAutoInsert[arrId] = false;
     }
 
-    public void resetGame(final Button[] mainButtons, final TextView[] helperTextViews) {
+    public void resetGame(boolean firstRun) {
         initData();
         mainButtonsText = sudoku.get();
-        hints.init(mainButtonsText);
-        for (int arrId : Sudoku.ALL_ARR_IDS) isBlocked[arrId] = (mainButtonsText.isPopulated(arrId));
+        hints.init(mainButtonsText, firstRun);
         for (int arrId : Sudoku.ALL_ARR_IDS) {
-            setMainButtonsContent(arrId, mainButtons, helperTextViews);
-            setHelperTextViewContent(arrId, helperTextViews);
+            isBlocked[arrId] = mainButtonsText.isPopulated(arrId);
+            setMainButtonsContent(arrId, true);
+            setHelperTextViewContent(arrId);
         }
     }
 
-    public void newGame(final Button[] mainButtons, final TextView[] helperTextViews) {
+    public void newGame() {
         sudoku.getNewSudoku();
-        resetGame(mainButtons, helperTextViews);
+        resetGame(false);
     }
 
-    public void setMainButtonsContent(final int arrId, Button[] mainButtons, TextView[] helperTextViews) {
+    public void setMainButtonsContent(final int arrId, boolean isInit) {
         int number = mainButtonsText.get(arrId);
-        Log.v("setMainBC", number + ";" + arrId);
         // is (now) empty
         if (number == 0) {
             // we don't know witch advanced hints are invalid
-            hints.initAdv();
-            mainButtons[arrId].setText("");
+            if (!isInit) hints.initAdv();
+            MainActivity.mainButtons[arrId].setText("");
             // making the hint 'visible'; (hint is the background for button!)
-            helperTextViews[arrId].setTextColor(textColorHints[arrId]);
+            if (!isInit) MainActivity.helperTextViews[arrId].setTextColor(textColorHints[arrId]);
         }
         // is (now) populated
         else {
-            mainButtons[arrId].setText(String.valueOf(number));
-            updateMainButtonColor(arrId, mainButtons);
+            MainActivity.mainButtons[arrId].setText(String.valueOf(number));
+            updateMainButtonColor(arrId);
         }
-        setBackgroundWithRespectToEasyTouchArea(arrId, helperTextViews);
+        setBackgroundWithRespectToEasyTouchArea(arrId);
     }
 
-    public void setBackgroundWithRespectToEasyTouchArea(final int arrId, TextView[] helperTextViews) {
+    public void setBackgroundWithRespectToEasyTouchArea(final int arrId) {
         Context context = MainActivity.getContext();
         if (arrId == arrIdEasyTouchButton) {
-            helperTextViews[arrId].setBackgroundColor(ContextCompat.getColor(context, R.color.backgroundTouched));
+            MainActivity.helperTextViews[arrId].setBackgroundColor(ContextCompat.getColor(context, R.color.backgroundTouched));
             if (mainButtonsText.isPopulated(arrId)) {
                 // making the hint 'invisible'; (hint is the background for button!)
-                helperTextViews[arrId].setTextColor(ContextCompat.getColor(context, R.color.backgroundTouched));
+                MainActivity.helperTextViews[arrId].setTextColor(ContextCompat.getColor(context, R.color.backgroundTouched));
             }
         } else {
-            helperTextViews[arrId].setBackgroundColor(ContextCompat.getColor(context, R.color.backgroundUntouched));
+            MainActivity.helperTextViews[arrId].setBackgroundColor(ContextCompat.getColor(context, R.color.backgroundUntouched));
             if (mainButtonsText.isPopulated(arrId)) {
                 // making the hint 'invisible'; (hint is the background for button!)
-                helperTextViews[arrId].setTextColor(ContextCompat.getColor(context, R.color.backgroundUntouched));
+                MainActivity.helperTextViews[arrId].setTextColor(ContextCompat.getColor(context, R.color.backgroundUntouched));
             }
         }
     }
 
-    public void setEasyTouchArea(final int arrId, TextView[] helperTextViews) {
+    public void setEasyTouchArea(final int arrId) {
         Context context = MainActivity.getContext();
         if (arrIdEasyTouchButton != arrId && arrIdEasyTouchButton >= 0) {
-            helperTextViews[arrIdEasyTouchButton].setBackgroundColor(ContextCompat.getColor(context, R.color.backgroundUntouched));
+            MainActivity.helperTextViews[arrIdEasyTouchButton].setBackgroundColor(ContextCompat.getColor(context, R.color.backgroundUntouched));
             if (mainButtonsText.isPopulated(arrIdEasyTouchButton))
-                helperTextViews[arrIdEasyTouchButton].setTextColor(ContextCompat.getColor(context, R.color.backgroundUntouched));
+                MainActivity.helperTextViews[arrIdEasyTouchButton].setTextColor(ContextCompat.getColor(context, R.color.backgroundUntouched));
         }
         if (arrId != -1 && isBlocked[arrId]) arrIdEasyTouchButton = -1;
         else arrIdEasyTouchButton = arrId;
         if (arrIdEasyTouchButton != -1) {
-            helperTextViews[arrIdEasyTouchButton].setBackgroundColor(ContextCompat.getColor(context, R.color.backgroundTouched));
+            MainActivity.helperTextViews[arrIdEasyTouchButton].setBackgroundColor(ContextCompat.getColor(context, R.color.backgroundTouched));
             if (mainButtonsText.isPopulated(arrIdEasyTouchButton))
-                helperTextViews[arrIdEasyTouchButton].setTextColor(ContextCompat.getColor(context, R.color.backgroundTouched));
+                MainActivity.helperTextViews[arrIdEasyTouchButton].setTextColor(ContextCompat.getColor(context, R.color.backgroundTouched));
         }
     }
 
-    public void updateMainButtonColor(final int arrId, Button[] mainButtons) {
+    public void updateMainButtonColor(final int arrId) {
         if (!mainButtonsText.isPopulated(arrId)) return;
         Context context = MainActivity.getContext();
-        if (isBlocked[arrId]) mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorIsBlocked));
-        else if (hints.getPlainHint(arrId, mainButtonsText.get(arrId) - 1) > 1) mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorBadUserInput));
+        if (isBlocked[arrId]) MainActivity.mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorIsBlocked));
+        else if (hints.getPlainHint(arrId, mainButtonsText.get(arrId) - 1) > 1) MainActivity.mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorBadUserInput));
         else if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(PreferencesFragment.KEY_PREF_MARK_ERROR, false)
             && mainButtonsText.get(arrId) != sudoku.get(0).get(arrId))
-            mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorMarkError));
-        else if (isAutoInsert[arrId]) mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorAutoInsert));
-        else mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorUserInput));
+            MainActivity.mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorMarkError));
+        else if (isAutoInsert[arrId]) MainActivity.mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorAutoInsert));
+        else MainActivity.mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorUserInput));
     }
 
-    public void setHelperTextViewContent(final int arrId, TextView[] helperTextViews) {
-        Log.v("setHelperTVC", arrId+"");
+    public void setHelperTextViewContent(final int arrId) {
         String text = "";
         boolean userHints = false;
         boolean autoHints = false;
@@ -158,16 +153,16 @@ public class SudokuData {
             } else if (!autoHints && isHint) autoHints = true;
             if (num % 3 == 2) text += "\n";
         }
-        helperTextViews[arrId].setText(text);
+        MainActivity.helperTextViews[arrId].setText(text);
         Context context = MainActivity.getContext();
         if (userHints) textColorHints[arrId] = ContextCompat.getColor(context, R.color.userHints);
         else if (autoHints) textColorHints[arrId] = ContextCompat.getColor(context, R.color.autoHints);
         else textColorHints[arrId] = ContextCompat.getColor(context, R.color.noHints);
-        if (helperTextViews[arrId].getCurrentTextColor() != ContextCompat.getColor(context, R.color.backgroundUntouched))
-            helperTextViews[arrId].setTextColor(textColorHints[arrId]);
+        if (MainActivity.helperTextViews[arrId].getCurrentTextColor() != ContextCompat.getColor(context, R.color.backgroundUntouched))
+            MainActivity.helperTextViews[arrId].setTextColor(textColorHints[arrId]);
     }
 
-    public void suggestField(TextView[] helperTextViews) {
+    public void suggestField() {
         SharedPreferences sPref = PreferenceManager.getDefaultSharedPreferences(MainActivity.getContext());
         if (!sPref.getBoolean(PreferencesFragment.KEY_PREF_HINT, false)) {
             Toast.makeText(MainActivity.getContext(), "activate hints in settings", Toast.LENGTH_SHORT).show();
@@ -176,7 +171,7 @@ public class SudokuData {
         if (sPref.getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT1HINT, false)) {
             Integer[] ai1arr = mainButtonsText.getAutoInsert1(hints);
             if (ai1arr != null) {
-                setEasyTouchArea(ai1arr[0], helperTextViews);
+                setEasyTouchArea(ai1arr[0]);
                 Toast.makeText(MainActivity.getContext(), "Hint Insert 1", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -184,7 +179,7 @@ public class SudokuData {
         if (sPref.getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT1HINT, false)) {
             Integer[] ai2arr = mainButtonsText.getAutoInsert2(hints);
             if (ai2arr != null) {
-                setEasyTouchArea(ai2arr[0], helperTextViews);
+                setEasyTouchArea(ai2arr[0]);
                 Toast.makeText(MainActivity.getContext(), "Hint Insert 2", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -193,7 +188,7 @@ public class SudokuData {
         if (sPref.getBoolean(PreferencesFragment.KEY_PREF_AUTO_ADV1HINT, false)) {
             arrId = hints.setAutoHintsAdv1(mainButtonsText, true);
             if (arrId != -1) {
-                setEasyTouchArea(arrId, helperTextViews);
+                setEasyTouchArea(arrId);
                 Toast.makeText(MainActivity.getContext(), "Hint Advanced 1", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -201,7 +196,7 @@ public class SudokuData {
         if (sPref.getBoolean(PreferencesFragment.KEY_PREF_AUTO_ADV2HINT, false)) {
             arrId = hints.setAutoHintsAdv2(mainButtonsText, true);
             if (arrId != -1) {
-                setEasyTouchArea(arrId, helperTextViews);
+                setEasyTouchArea(arrId);
                 Toast.makeText(MainActivity.getContext(), "Hint Advanced 2", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -209,7 +204,7 @@ public class SudokuData {
         if (sPref.getBoolean(PreferencesFragment.KEY_PREF_AUTO_ADV3HINT, false)) {
             arrId = hints.setAutoHintsAdv3(mainButtonsText, true);
             if (arrId != -1) {
-                setEasyTouchArea(arrId, helperTextViews);
+                setEasyTouchArea(arrId);
                 Toast.makeText(MainActivity.getContext(), "Hint Advanced 3", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -217,18 +212,18 @@ public class SudokuData {
         Toast.makeText(MainActivity.getContext(), "No Hint available", Toast.LENGTH_SHORT).show();
     }
 
-    private void updateSudoku(Set<Integer> arrIdsChangedHints, Set<Integer> arrIdsChangedValues, Button[] mainButtons, TextView[] helperTextViews) {
+    private void updateSudoku(Set<Integer> arrIdsChangedHints, Set<Integer> arrIdsChangedValues) {
         Sudoku.updateSudokuStart(arrIdsChangedHints, arrIdsChangedValues, mainButtonsText, hints, useAutoInsert1, useAutoInsert2);
         Log.v("...", arrIdsChangedHints.toString());
-        for (int arrId : arrIdsChangedHints) this.setHelperTextViewContent(arrId, helperTextViews);
+        for (int arrId : arrIdsChangedHints) this.setHelperTextViewContent(arrId);
         for (int arrId : arrIdsChangedValues) {
             isAutoInsert[arrId] = true;
-            this.setMainButtonsContent(arrId, mainButtons, helperTextViews);
+            this.setMainButtonsContent(arrId, false);
         }
-        suggestField(helperTextViews);
+        suggestField();
 
     }
-    public void updateSudoku(final int number, final int arrId, Button[] mainButtons, TextView[] helperTextViews) {
+    public void updateSudoku(final int number, final int arrId) {
         Set<Integer> arrIdsChangedHints = new HashSet<>();
         Set<Integer> arrIdsChangedValues = new HashSet<>();
         if (number != 0) arrIdsChangedHints.addAll(hints.incrementStarGroup(arrId, number - 1, mainButtonsText));
@@ -238,19 +233,19 @@ public class SudokuData {
             arrIdsChangedHints.add(arrId);
         }
         mainButtonsText.set(arrId, number);
-        this.setMainButtonsContent(arrId, mainButtons, helperTextViews);
-        updateSudoku(arrIdsChangedHints, arrIdsChangedValues, mainButtons, helperTextViews);
+        this.setMainButtonsContent(arrId, false);
+        updateSudoku(arrIdsChangedHints, arrIdsChangedValues);
     }
 
-    public void updateSudoku(Button[] mainButtons, TextView[] helperTextViews) {
+    public void updateSudoku() {
         HashSet<Integer> arrIdsChangedHints = new HashSet<>();
         HashSet<Integer> arrIdsChangedValues = new HashSet<>();
-        updateSudoku(arrIdsChangedHints, arrIdsChangedValues, mainButtons, helperTextViews);
+        updateSudoku(arrIdsChangedHints, arrIdsChangedValues);
     }
 
-    public void redrawHints(TextView[] helperTextViews) {
+    public void redrawHints() {
         for (int arrId : new ArrayList<>(mainButtonsText.getNotPopulatedArrIds()))
-            setHelperTextViewContent(arrId, helperTextViews);
+            setHelperTextViewContent(arrId);
     }
 
     public void initAdv() {
