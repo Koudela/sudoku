@@ -68,7 +68,7 @@ public class SudokuData {
         hints.init(mainButtonsText, firstRun);
         for (int arrId : Sudoku.ALL_ARR_IDS) {
             isBlocked[arrId] = mainButtonsText.isPopulated(arrId);
-            setMainButtonsContent(arrId, true);
+            setMainButtonsContent(arrId, false);
             setHelperTextViewContent(arrId);
         }
     }
