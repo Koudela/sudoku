@@ -192,7 +192,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 int number = Integer.valueOf(value);
                 // if the chosen number already populates the button we delete the text and replace otherwise
                 if (mainButtons[arrId].getText().equals(value)) sudokuData.updateSudoku(0, arrId);
-                else sudokuData.updateSudoku(number, arrId);
+                else {
+                    // if the button is already populated by another number we delete it first
+                    // otherwise the hints would not get updated
+                    if (!mainButtons[arrId].getText().equals("")) sudokuData.updateSudoku(0, arrId);
+                    sudokuData.updateSudoku(number, arrId);
+                }
             } else if (chooseInputViewTag.substring(0,3).equals("not")) {
                 sudokuData.setUserHint(arrId, Integer.valueOf(chooseInputViewTag.substring(3)) - 1);
                 sudokuData.setHelperTextViewContent(arrId);
