@@ -318,18 +318,18 @@ public class Hints {
 
     public int setAutoHintsAdv3(final Playground pField, boolean getOnly) {
         int changed = 0;
-        int arrId;
+        Set<Integer> arrId;
         if (getOnly) for (int i = 0; i < DIM; i++) {
-            arrId = setAutoHintsAdv3ByGroup(Sudoku.VERTICAL_GROUPS[i], pField, true);
-            if (arrId != -1) return arrId;
-            arrId = setAutoHintsAdv3ByGroup(Sudoku.HORIZONTAL_GROUPS[i], pField, true);
-            if (arrId != -1) return arrId;
-            arrId = setAutoHintsAdv3ByGroup(Sudoku.GROUPED_GROUPS[i], pField, true);
-            if (arrId != -1) return arrId;
+            arrId = setAutoHintsAdv4ByGroupPlus(Sudoku.VERTICAL_GROUPS[i], pField, true);
+            if (arrId.size() == 1) return ((Integer[]) arrId.toArray())[0];
+            arrId = setAutoHintsAdv4ByGroupPlus(Sudoku.HORIZONTAL_GROUPS[i], pField, true);
+            if (arrId.size() == 1) return ((Integer[]) arrId.toArray())[0];
+            arrId = setAutoHintsAdv4ByGroupPlus(Sudoku.GROUPED_GROUPS[i], pField, true);
+            if (arrId.size() == 1) return ((Integer[]) arrId.toArray())[0];
         } else for (int i = 0; i < DIM; i++) {
-            changed += setAutoHintsAdv3ByGroup(Sudoku.VERTICAL_GROUPS[i], pField, false);
-            changed += setAutoHintsAdv3ByGroup(Sudoku.HORIZONTAL_GROUPS[i], pField, false);
-            changed += setAutoHintsAdv3ByGroup(Sudoku.GROUPED_GROUPS[i], pField, false);
+            changed += setAutoHintsAdv4ByGroupPlus(Sudoku.VERTICAL_GROUPS[i], pField, false).size();
+            changed += setAutoHintsAdv4ByGroupPlus(Sudoku.HORIZONTAL_GROUPS[i], pField, false).size();
+            changed += setAutoHintsAdv4ByGroupPlus(Sudoku.GROUPED_GROUPS[i], pField, false).size();
         }
         if (getOnly) return -1;
         return changed;
@@ -400,7 +400,7 @@ public class Hints {
                     continue;
                 }
                 if (notMissing.size() < otherArrIds.size() + populatedFieldsCount) break;
-                // mark all Fields that don't fit in our scheme, meaning other hints are missing
+                // mark all fields that don't fit in our scheme, meaning other hints are missing
                 for (int num = 0; num < DIM; num++)
                     if (!isHint(tempArrIds, num) && notMissing.contains(num)) {
                         otherArrIds.add(tempArrIds);
@@ -460,9 +460,9 @@ public class Hints {
 
     public void setAutoHintsAdv3Plus(final Playground pField, Set<Integer> changed) {
         for (int i = 0; i < DIM; i++) {
-            setAutoHintsAdv3ByGroupPlus(Sudoku.VERTICAL_GROUPS[i], pField, changed);
-            setAutoHintsAdv3ByGroupPlus(Sudoku.HORIZONTAL_GROUPS[i], pField, changed);
-            setAutoHintsAdv3ByGroupPlus(Sudoku.GROUPED_GROUPS[i], pField, changed);
+            changed.addAll(setAutoHintsAdv4ByGroupPlus(Sudoku.VERTICAL_GROUPS[i], pField, false));
+            changed.addAll(setAutoHintsAdv4ByGroupPlus(Sudoku.HORIZONTAL_GROUPS[i], pField, false));
+            changed.addAll(setAutoHintsAdv4ByGroupPlus(Sudoku.GROUPED_GROUPS[i], pField, false));
         }
     }
 
