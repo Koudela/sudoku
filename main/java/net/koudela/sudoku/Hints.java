@@ -465,4 +465,57 @@ public class Hints {
             setAutoHintsAdv3ByGroupPlus(Sudoku.GROUPED_GROUPS[i], pField, changed);
         }
     }
+
+    /**
+      *    We calculate the following: If in a group/row/column are n missing hints distributed over n fields only, then hints get set on the other numbers on the same n fields.
+      *    We use a powerSet to search for combinations that fit the if-clause, therefore we get a time complexity of O(2^n).
+      *    But if we think outside the box, instead of searching the fields, we can search for n hints, missing the same or less n boxes. Hints.setAutoHintsAdv2 does something similar:
+      *    If in a group/row/column are n fields with the same n hints or less missing, ... This search is done in O(n³).
+      *    Therefore rewriting H.sAHA2 in the right way, can do the job.
+      **/
+    // polynomial time version of setAutoHintsAdv3ByGroupsPlus (to include getOnly the input/return type is altered!)
+    // if in a group/row/column are n hints witch are missing on the same n fields or less, hints get set on the other numbers on the same n fields
+    private Set<Integer> setAutoHintsAdv4ByGroupPlus(final Integer[] group, final Playground pField, boolean getOnly) {
+        Set<Integer> changed = new HashSet<>(8);
+        Set<Integer> missing = new HashSet<>(16);
+        Set<Integer> notMissing = new HashSet<>(16);
+        Set<Integer> otherNumbers = new HashSet<>(16);
+        int populatedFieldsCount;
+        for (int num = 0; num < DIM; num++) {
+            missing.clear();
+            notMissing.clear();
+            otherNumbers.clear();
+            populatedFieldsCount = 0;
+            // Looking at a specific number
+            for (int arrId : group)
+                if (!pField.isPopulated(arrId)) populatedFieldsCount++;
+                else if (isHint(arrId, num)) notMissing.add(arrId);
+                else missing.add(arrId);
+            // if all fields miss the hint, we move on
+            if (notMissing.size() == 0) continue;
+            // Looking at the other numbers
+            for (int otherNum = 0; otherNum < DIM; otherNum++) {
+                if (otherNum == num) continue;
+                // mark all numbers that don't fit in our scheme, meaning they are missing on other fields
+                for (int arrId : group)
+                    if (!pField.isPopulated(arrId)
+                            && !isHint(arrId, otherNum)
+                            && notMissing.contains(arrId)) {
+                        otherNumbers.add(otherNum);
+                        break;
+                    }
+            }
+            // there are numbers to process && missing size equals the count of similar numbers
+            if (otherNumbers.size() != 0 && missing.size() == DIM - (otherNumbers.size() + populatedFieldsCount))
+                // hints get set on the other numbers on the same n fields.
+                for (int otherNum : otherNumbers)
+                    for (int arrId : missing)
+                        if (!hintAdv3.isHint(arrId, otherNum)) {
+                            changed.add(arrId);
+                            if (getOnly) return changed;
+                            hintAdv3.increment(arrId, otherNum);
+                        }
+        }
+        return changed;
+    }
 }
