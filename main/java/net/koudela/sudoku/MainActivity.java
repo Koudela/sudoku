@@ -17,28 +17,36 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.lang.ref.WeakReference;
+//TODO: Bug: Sometimes insert hint 2 does not get set (but get found as hint)
+//TODO: UNDO Button
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     protected final static int DIM = Sudoku.DIM;
     protected final static int CHOOSE_INPUT_REQUEST = 1;
-    private static Context context;
+    private static WeakReference<Context> context;
     protected static Button[] mainButtons = new Button[DIM * DIM];
     protected static TextView[] helperTextViews = new TextView[DIM*DIM];
     protected SudokuData sudokuData;
+    @SuppressWarnings("unused")
     public static final int TALKATIVENESS_TO_LOG_NONE = 0;
+    @SuppressWarnings("unused")
     public static final int TALKATIVENESS_TO_LOG_WARN = 1;
+    @SuppressWarnings("unused")
     public static final int TALKATIVENESS_TO_LOG_INFO = 2;
+    @SuppressWarnings("unused")
     public static final int TALKATIVENESS_TO_LOG_DEBUG = 3;
+    @SuppressWarnings("unused")
     public static final int TALKATIVENESS_TO_LOG_VERBOSE = 4;
     public static int talkativenessToLog = TALKATIVENESS_TO_LOG_NONE;
 
     public static Context getContext() {
-        return context;
+        return context.get();
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         boolean firstLaunch = false;
-        context = this;
+        context = new WeakReference<Context>(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         for (int arrId : Sudoku.ALL_ARR_IDS) {
@@ -215,5 +223,4 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         float textSize = Float.valueOf(PreferenceManager.getDefaultSharedPreferences(MainActivity.getContext()).getString(PreferencesFragment.KEY_PREF_FONT_SIZE_HELPER, "13"));
         for (TextView textView: helperTextViews) textView.setTextSize(textSize);
     }
-
 }

@@ -11,6 +11,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+/**
+ * This Activity handles the input UI.
+ *
+ * @author Thomas Koudela
+ * @version 1.0 stable
+ */
 public class ChooseInputActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +39,7 @@ public class ChooseInputActivity extends AppCompatActivity implements SharedPref
         }
     }
 
-    protected void setTextSize() {
+    private void setTextSize() {
         float textSize = Float.valueOf(PreferenceManager.getDefaultSharedPreferences(this).getString(PreferencesFragment.KEY_PREF_FONT_SIZE_INPUT, "16"));
         ((TextView) findViewById(R.id.chooseInputIs0)).setTextSize(textSize);
         ((TextView) findViewById(R.id.chooseInputNot0)).setTextSize(textSize);
@@ -43,7 +49,7 @@ public class ChooseInputActivity extends AppCompatActivity implements SharedPref
         }
     }
 
-    protected  void setColor() {
+    private void setColor() {
         SudokuData sudokuData = SudokuData.getInstance();
         for (int i=1; i<=9; i++) {
             Button button = (Button) findViewById(getResources().getIdentifier("chooseInputIs" + i, "id", getPackageName()));

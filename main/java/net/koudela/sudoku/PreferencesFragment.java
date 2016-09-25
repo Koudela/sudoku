@@ -4,6 +4,12 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 
+/**
+ * This fragment defines the handling of the settings UI for {@link  PreferencesActivity}.
+ *
+ * @author Thomas Koudela
+ * @version 0.? stable
+ */
 public class PreferencesFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String KEY_PREF_EASY_TOUCH = "pref_easy_touch";
     public static final String KEY_PREF_LEVEL = "pref_level";
