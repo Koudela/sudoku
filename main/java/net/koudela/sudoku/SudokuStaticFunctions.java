@@ -67,12 +67,17 @@ class SudokuStaticFunctions extends SudokuGroups {
                                   Playground sudoku, Hints hints, final boolean byAutoInsert1,
                                   final boolean byAutoInsert2, final boolean useRelaxation) {
         // principle: we use the cheaper solving methods first as long as they return results
-        HashSetLIFOQueue arrIdsNotTestedHints = new HashSetLIFOQueue(sudoku.getNotPopulatedArrIds());
-        int countChanged;
+        HashSetLIFOQueue arrIdsNotTestedHints = new HashSetLIFOQueue();
+        HashSetLIFOQueue idsNotTestedVerticalGroups = new HashSetLIFOQueue();
+        HashSetLIFOQueue idsNotTestedHorizontalGroups = new HashSetLIFOQueue();
+        HashSetLIFOQueue idsNotTestedGroupedGroups = new HashSetLIFOQueue();
+        updateSudokuUpdateHints(idsNotTestedVerticalGroups, idsNotTestedHorizontalGroups,
+                idsNotTestedGroupedGroups, arrIdsNotTestedHints, sudoku.getNotPopulatedArrIds());
         Set<Integer> changed;
         while (true) {
-            updateSudoku(arrIdsNotTestedHints, arrIdsChangedHints, arrIdsChangedValues, sudoku, hints,
-                    byAutoInsert1, byAutoInsert2);
+            updateSudoku(idsNotTestedVerticalGroups, idsNotTestedHorizontalGroups,
+                    idsNotTestedGroupedGroups, arrIdsNotTestedHints, arrIdsChangedHints,
+                    arrIdsChangedValues, sudoku, hints, byAutoInsert1, byAutoInsert2);
             // no auto insert possible - update the advanced (cheap/relaxed versions)
             changed = hints.updateAdvanced(sudoku, true);
             if (changed.size() == 0 && !useRelaxation)
@@ -80,54 +85,82 @@ class SudokuStaticFunctions extends SudokuGroups {
                 changed = hints.updateAdvanced2plus3(sudoku, false);
             if (changed.size() != 0) {
                 arrIdsChangedHints.addAll(changed);
-                arrIdsNotTestedHints.addAll(changed);
-            } else break;
+                updateSudokuUpdateHints(idsNotTestedVerticalGroups, idsNotTestedHorizontalGroups,
+                        idsNotTestedGroupedGroups, arrIdsNotTestedHints, changed);
+            }
+            else break;
+        }
+    }
+
+    static void updateSudokuUpdateHints(HashSetLIFOQueue idsNotTestedVerticalGroups,
+                                        HashSetLIFOQueue idsNotTestedHorizontalGroups,
+                                        HashSetLIFOQueue idsNotTestedGroupedGroups,
+                                        HashSetLIFOQueue arrIdsNotTestedHints,
+                                        Set<Integer> changed) {
+        for (int arrId : changed) {
+            idsNotTestedVerticalGroups.push(ID_VERTICAL_GROUPS[arrId]);
+            idsNotTestedHorizontalGroups.push(ID_HORIZONTAL_GROUPS[arrId]);
+            idsNotTestedGroupedGroups.push(ID_GROUPED_GROUPS[arrId]);
+            arrIdsNotTestedHints.push(arrId);
         }
     }
 
     /**
      * Updates the sudoku/plain hints with Playground.getAutoInsert1 and/or Playground.getAutoInsert2
      * as far as possible.
-     * @param arrIdsNotTestedHints tracks the ids of the fields where hints where updated but not
-     *                             checked with respect to hint/value insertion
+     * @param idsNotTestedVerticalGroups tracks the ids of the vertical groups with hints that are
+     *                                   updated but not checked with respect to value insertion
+     * @param idsNotTestedHorizontalGroups tracks the ids of the horizontal groups with hints...
+     * @param idsNotTestedGroupedGroups tracks the ids of the vertical groups with hints...
+     * @param arrIdsNotTestedHints tracks the ids of the fields with hints...
      * @param arrIdsChangedHints ids of fields where hints get added in the process are added here
      * @param arrIdsChangedValues ids of fields where values get added in the process are added here
-     * @param sudoku the sudoku to solve/holds the as far as possible solved sudoku
-     * @param hints the hints to process/holds the updated hints
+     * @param sudoku the sudoku to solve; holds the as far as possible solved sudoku
+     * @param hints the hints to process; holds the updated hints
      * @param byAutoInsert1 if true Playground.getAutoInsert1 is used
      * @param byAutoInsert2 if true Playground.getAutoInsert2 is used
      */
-    private static void updateSudoku(HashSetLIFOQueue arrIdsNotTestedHints, Set<Integer> arrIdsChangedHints,
+    private static void updateSudoku(HashSetLIFOQueue idsNotTestedVerticalGroups,
+                                     HashSetLIFOQueue idsNotTestedHorizontalGroups,
+                                     HashSetLIFOQueue idsNotTestedGroupedGroups,
+                                     HashSetLIFOQueue arrIdsNotTestedHints,
+                                     Set<Integer> arrIdsChangedHints,
                                      Set<Integer> arrIdsChangedValues, Playground sudoku, Hints hints,
                                      final boolean byAutoInsert1, final boolean byAutoInsert2) {
         int arrId;
         Set<Integer> changed;
         int number;
-        Integer[] ai2arr;
-        while (!arrIdsNotTestedHints.isEmpty()) {
-            arrId = arrIdsNotTestedHints.pop();
-            if (arrIdsChangedValues.contains(arrId)) continue;
+        Integer[] ai2arr = {null, null};
+        while (true) {
             if (byAutoInsert1) {
-                number = sudoku.getAutoInsert1ByField(arrId, hints);
-                if (number != 0) {
-                    sudoku.set(arrId, number);
-                    arrIdsChangedValues.add(arrId);
-                    changed = hints.incrementStarGroup(arrId, number - 1, sudoku);
-                    arrIdsNotTestedHints.addAll(changed);
-                    arrIdsChangedHints.addAll(changed);
-                    continue;
+                while (!arrIdsNotTestedHints.isEmpty()) {
+                    arrId = arrIdsNotTestedHints.pop();
+                    if (sudoku.isPopulated(arrId)) continue;
+                    number = sudoku.getAutoInsert1ByField(arrId, hints);
+                    if (number != 0) {
+                        sudoku.set(arrId, number);
+                        arrIdsChangedValues.add(arrId);
+                        changed = hints.incrementStarGroup(arrId, number - 1, sudoku);
+                        arrIdsChangedHints.addAll(changed);
+                        updateSudokuUpdateHints(idsNotTestedVerticalGroups, idsNotTestedHorizontalGroups,
+                                idsNotTestedGroupedGroups, arrIdsNotTestedHints, changed);
+                    }
                 }
             }
             if (byAutoInsert2) {
-                ai2arr = sudoku.getAutoInsert2byStarGroup(arrId, hints);
-                if (ai2arr != null) {
-                    sudoku.set(ai2arr[0], ai2arr[1]);
-                    arrIdsChangedValues.add(ai2arr[0]);
-                    changed = hints.incrementStarGroup(ai2arr[0], ai2arr[1] - 1, sudoku);
-                    arrIdsNotTestedHints.addAll(changed);
-                    arrIdsChangedHints.addAll(changed);
-                }
-            }
+                if ((idsNotTestedVerticalGroups.isEmpty() || !sudoku.getAutoInsert2ByGroup(
+                        VERTICAL_GROUPS[idsNotTestedVerticalGroups.pop()], hints, ai2arr))
+                        && (idsNotTestedHorizontalGroups.isEmpty() || !sudoku.getAutoInsert2ByGroup(
+                        HORIZONTAL_GROUPS[idsNotTestedHorizontalGroups.pop()], hints, ai2arr))
+                        && (idsNotTestedGroupedGroups.isEmpty() || !sudoku.getAutoInsert2ByGroup(
+                        GROUPED_GROUPS[idsNotTestedGroupedGroups.pop()], hints, ai2arr))) break;
+                sudoku.set(ai2arr[0], ai2arr[1]);
+                arrIdsChangedValues.add(ai2arr[0]);
+                changed = hints.incrementStarGroup(ai2arr[0], ai2arr[1] - 1, sudoku);
+                arrIdsChangedHints.addAll(changed);
+                updateSudokuUpdateHints(idsNotTestedVerticalGroups, idsNotTestedHorizontalGroups,
+                        idsNotTestedGroupedGroups, arrIdsNotTestedHints, changed);
+            } else break;
         }
     }
 

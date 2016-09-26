@@ -142,7 +142,7 @@ class Playground {
      *               playground value
      * @return true if a hint is missing only once in the fields of the group, false otherwise
      */
-    private boolean getAutoInsert2ByGroup(final Integer[] group, final Hints hints, Integer[] ai2arr) {
+    boolean getAutoInsert2ByGroup(final Integer[] group, final Hints hints, Integer[] ai2arr) {
         for (int num = 0; num < DIM; num++) {
             int count = 0;
             ai2arr[0] = -1;

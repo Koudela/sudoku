@@ -17,10 +17,13 @@ import java.util.HashSet;
  * @author Thomas Koudela
  * @version 1.0 stable
  */
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"WeakerAccess", "unused"})
 class HashSetLIFOQueue {
     private ArrayDeque<Integer> deque = new ArrayDeque<>();
     private HashSet<Integer> set = new HashSet<>();
+
+    HashSetLIFOQueue() {
+    }
 
     HashSetLIFOQueue(Collection<Integer> collection) {
         set.addAll(collection);
