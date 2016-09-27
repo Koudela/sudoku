@@ -13,10 +13,9 @@ import java.util.List;
 import static net.koudela.sudoku.SudokuGroups.ALL_ARR_IDS;
 import static net.koudela.sudoku.SudokuGroups.getGroupedGroup;
 import static net.koudela.sudoku.SudokuGroups.getHorizontalGroup;
+import static net.koudela.sudoku.SudokuGroups.getRandomizedArrIds;
 import static net.koudela.sudoku.SudokuGroups.getStarGroup;
 import static net.koudela.sudoku.SudokuGroups.getVerticalGroup;
-import static net.koudela.sudoku.SudokuStaticFunctions.getRandomizedArrIds;
-import static net.koudela.sudoku.SudokuStaticFunctions.isSolvableSudoku;
 
 /**
  * Singleton responsible for loading, saving and building sudokus. (The building process has its own
@@ -31,6 +30,7 @@ class SudokuBuilder extends Thread {
     private List<Playground[]> sudokuStack = new ArrayList<>();
     private int opened = 0;
     private int closed = 0;
+    private SudokuSolver solver = new SudokuSolver();
 
     private SudokuBuilder() {
         readSudokuStackFromFile();
@@ -171,13 +171,13 @@ class SudokuBuilder extends Thread {
      * @param verbose if true, this method logs its progress
      * @return a random level 3 sudoku
      */
-    private static Playground makeLevelThreeSudoku(final Playground startingSudoku, final boolean verbose) {
+    private Playground makeLevelThreeSudoku(final Playground startingSudoku, final boolean verbose) {
         if (verbose) Log.v("makeLevelThreeSudoku","start");
         Playground level3Sudoku = new Playground(startingSudoku);
         for (int arrId : getRandomizedArrIds())
             if (level3Sudoku.isPopulated(arrId)) {
                 if (verbose) Log.v("inspect", ""+arrId);
-                if(isSolvableSudoku(arrId, level3Sudoku, true, true, false, false, false, true)) {
+                if(solver.isSolvableSudoku(arrId, level3Sudoku, true, true, false, false, false, true)) {
                     if (verbose) Log.v("removed", arrId + " (" + level3Sudoku.get(arrId) + ")");
                     level3Sudoku.set(arrId, 0);
                 }
@@ -193,13 +193,13 @@ class SudokuBuilder extends Thread {
      * @param verbose if true, this method logs its progress
      * @return a random level 4 sudoku
      */
-    private static Playground makeLevelFourSudoku(final Playground startingSudoku, final boolean verbose) {
+    private Playground makeLevelFourSudoku(final Playground startingSudoku, final boolean verbose) {
         if (verbose) Log.v("makeLevelFourSudoku","start");
         Playground level4Sudoku = new Playground(startingSudoku);
         for (int arrId : getRandomizedArrIds())
             if (level4Sudoku.isPopulated(arrId)) {
                 if (verbose) Log.v("inspect", ""+arrId);
-                if(isSolvableSudoku(arrId, level4Sudoku, true, true, true, true, true, true)) {
+                if(solver.isSolvableSudoku(arrId, level4Sudoku, true, true, true, true, true, true)) {
                     if (verbose) Log.v("removed", arrId + " (" + level4Sudoku.get(arrId) + ")");
                     level4Sudoku.set(arrId, 0);
                 }
@@ -215,13 +215,13 @@ class SudokuBuilder extends Thread {
      * @param verbose if true, this method logs its progress
      * @return a random level 5 sudoku
      */
-    private static Playground makeLevelFiveSudoku(final Playground startingSudoku, final boolean verbose) {
+    private Playground makeLevelFiveSudoku(final Playground startingSudoku, final boolean verbose) {
         if (verbose) Log.v("makeLevelFiveSudoku","start");
         Playground level4Sudoku = new Playground(startingSudoku);
         for (int arrId : getRandomizedArrIds())
             if (level4Sudoku.isPopulated(arrId)) {
                 if (verbose) Log.v("inspect", ""+arrId);
-                if(isSolvableSudoku(arrId, level4Sudoku, true, true, true, true, true, false)) {
+                if(solver.isSolvableSudoku(arrId, level4Sudoku, true, true, true, true, true, false)) {
                     if (verbose) Log.v("removed", arrId + " (" + level4Sudoku.get(arrId) + ")");
                     level4Sudoku.set(arrId, 0);
                 }
@@ -311,12 +311,12 @@ class SudokuBuilder extends Thread {
             workbench[3] = makeLevelThreeSudoku(workbench[2], verbose);
             workbench[6] = Sudoku.makeMinimalSudokuByBacktrackingOutOfTrueGrid(workbench[3].getPField(), verbose);
             if (workbench[3].getSizePopulatedArrIds() == workbench[6].getSizePopulatedArrIds()
-                    || Sudoku.isSolvableSudoku(-1, workbench[6], true, true, true, true, true, true)) {
+                    || solver.isSolvableSudoku(-1, workbench[6], true, true, true, true, true, true)) {
                 workbench[4] = new Playground(workbench[6]);
                 workbench[5] = new Playground(workbench[6]);
             } else {
                 workbench[4] = makeLevelFourSudoku(workbench[3], verbose);
-                if (Sudoku.isSolvableSudoku(-1, workbench[6], true, true, true, true, true, false))
+                if (solver.isSolvableSudoku(-1, workbench[6], true, true, true, true, true, false))
                     workbench[5] = new Playground(workbench[6]);
                 else workbench[5] = makeLevelFiveSudoku(workbench[4], verbose);
             }

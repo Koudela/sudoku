@@ -26,6 +26,7 @@ import java.util.Set;
 class SudokuData {
     private static final SudokuData Singleton = new SudokuData();
     private final static int DIM = Sudoku.DIM;
+    private SudokuSolver solver = new SudokuSolver();
     private Sudoku sudoku = Sudoku.getInstance();
     private Playground mainButtonsText = new Playground();
     // plain hints even get calculated if they don't get shown to the user,
@@ -249,8 +250,8 @@ class SudokuData {
     }
 
     private void updateSudoku(Set<Integer> arrIdsChangedHints, Set<Integer> arrIdsChangedValues) {
-        Sudoku.updateSudokuStart(arrIdsChangedHints, arrIdsChangedValues, mainButtonsText, hints, useAutoInsert1, useAutoInsert2, true);
-        Log.v("...", arrIdsChangedHints.toString());
+        solver.init(mainButtonsText, hints, arrIdsChangedHints, arrIdsChangedValues, useAutoInsert1, useAutoInsert2, true);
+        solver.updateSudoku(false);
         for (int arrId : arrIdsChangedHints) this.setHelperTextViewContent(arrId);
         for (int arrId : arrIdsChangedValues) {
             isAutoInsert[arrId] = true;

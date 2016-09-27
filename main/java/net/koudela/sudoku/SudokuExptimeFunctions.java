@@ -20,7 +20,7 @@ import java.util.Set;
  * @version 0.? beta
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
-class SudokuExptimeFunctions extends SudokuStaticFunctions {
+class SudokuExptimeFunctions extends SudokuGroups {
 
     /**
      * A backtracking sudoku solver, using the auto insert and auto hint methods of the Playground
@@ -34,7 +34,8 @@ class SudokuExptimeFunctions extends SudokuStaticFunctions {
      *         1 if sudoku is a valid sudoku
      */
     private static int solveByBacktracking(final Playground sudoku, final boolean countDown,
-                                           Playground computedSolution) {
+                                           Playground computedSolution, final  boolean verbose) {
+        SudokuSolver solver = new SudokuSolver();
         Hints hints = new Hints(true, true, true, true, false);
         Set<Integer> arrIdsChangedHints = new HashSet<>();
         Set<Integer> arrIdsChangedValues = new HashSet<>();
@@ -48,8 +49,8 @@ class SudokuExptimeFunctions extends SudokuStaticFunctions {
              if (hints.getPlainHint(arrId, sudoku.get(arrId) - 1) > 1) return -1;
         // start the main computing
         if (computedSolution == null) computedSolution = new Playground(sudoku);
-        updateSudokuStart(arrIdsChangedHints, arrIdsChangedValues, computedSolution, hints, true,
-                true, false);
+        solver.init(computedSolution, hints, arrIdsChangedHints, arrIdsChangedValues, true, true, false);
+        solver.updateSudoku(verbose);
         // -> Sudoku is a valid Sudoku
         if (computedSolution.getSizeNotPopulatedArrIds() == 0) return 1;
         Set<Integer> mayBeDependValidValues = new HashSet<>(computedSolution.getPopulatedArrIds());
@@ -110,8 +111,7 @@ class SudokuExptimeFunctions extends SudokuStaticFunctions {
                 Log.v("solveByBacktracking","take ("+arrId+";"+computedSolution.get(arrId)+") - " + count);
             hints.incrementStarGroup(arrId, computedSolution.get(arrId) - 1);
             arrIdsChangedValues.clear();
-            updateSudokuStart(arrIdsChangedHints, arrIdsChangedValues, computedSolution, hints, true,
-                    true, false);
+            solver.updateSudoku(verbose);
             // -> Sudoku may be a valid Sudoku
             if (computedSolution.getSizeNotPopulatedArrIds() == 0) return 0;
             dependentValidValues.put(arrId, new HashSet<>(arrIdsChangedValues));
@@ -132,6 +132,10 @@ class SudokuExptimeFunctions extends SudokuStaticFunctions {
         List<Integer> numbersLeft;
         Set<Integer> arrIdsChangedHints = new HashSet<>();
         Set<Integer> arrIdsChangedValues = new HashSet<>();
+        SudokuSolver solver = new SudokuSolver();
+        // we need to use the solver without relaxation, or we may run into half way solutions
+        // which can not be completed
+        solver.init(solution, hints, arrIdsChangedHints, arrIdsChangedValues, true, true, false);
         for (int arrId :ALL_ARR_IDS) {
             if (solution.isPopulated(arrId)) continue;
             numbersLeft = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9));
@@ -147,10 +151,7 @@ class SudokuExptimeFunctions extends SudokuStaticFunctions {
             arrIdsChangedValues.clear();
             hints.incrementStarGroup(arrId, solution.get(arrId) - 1);
             // the advanced hints are getting updated in updateSudokuStart
-            // we need to use the solver without relaxation, or we may run into half way solutions
-            // which can not be completed
-            updateSudokuStart(arrIdsChangedHints, arrIdsChangedValues, solution, hints, true, true,
-                    false);
+            solver.updateSudoku(verbose);
         }
         if (!isTrueGrid(solution)) throw new ArithmeticException("solution is no true grid");
         if (verbose) Log.d("makeRandomTrueGridBB","solution: " + solution.toString());
@@ -165,13 +166,13 @@ class SudokuExptimeFunctions extends SudokuStaticFunctions {
      * @return -1 if sudoku is not solvable, 0 if sudoku has more than one possible solution, 1 if
      *         sudoku is a valid sudoku
      */
-    private static int isSudoku(final Playground sudoku, Playground solution) {
+    private static int isSudoku(final Playground sudoku, Playground solution, final boolean verbose) {
         if (solution == null) solution = new Playground(sudoku);
-        int result = solveByBacktracking(sudoku, false, solution);
+        int result = solveByBacktracking(sudoku, false, solution, verbose);
         if (result != 0) return result; // -> -1: Sudoku is not solvable, 1: Sudoku is a valid Sudoku
         Playground possibleSolution = new Playground(solution);
         solution.init(sudoku);
-        solveByBacktracking(sudoku, true, solution);
+        solveByBacktracking(sudoku, true, solution, verbose);
         if (possibleSolution.equals(solution)) return 1; // -> Sudoku is a valid Sudoku
         return 0; // -> Sudoku has more than one possible solution
     }
@@ -191,7 +192,7 @@ class SudokuExptimeFunctions extends SudokuStaticFunctions {
             if (sudoku.isPopulated(arrId)) {
                 if (verbose) Log.v("inspect", ""+arrId);
                 sudoku.set(arrId, 0);
-                int tmp = isSudoku(sudoku, null);
+                int tmp = isSudoku(sudoku, null, verbose);
                 if (tmp == -1) throw new ArithmeticException("trueGrid was not a solution or valid sudoku");
                 else if (tmp == 0) sudoku.set(arrId, trueGrid[arrId]);
                 else Log.d("removed", ""+arrId);

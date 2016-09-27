@@ -6,7 +6,7 @@ import java.util.HashSet;
 
 /**
  * LIFO Queue that preserves uniqueness of its elements
- * We use this class to track not tested hints ({@link SudokuStaticFunctions#updateSudoku}).
+ * We use this class to track not tested hints ({@link SudokuSolver#updateSudoku}).
  * Why a structure that combines ArrayDeque AND a HashSet:
  * We need a structure that support a pop like action, adding elements and providing uniqueness of the elements in constant time.
  * Unluckily there is no HashSetDeque and HashSet can not give a unspecified Element back.
@@ -48,5 +48,10 @@ class HashSetLIFOQueue {
 
     void addAll(Collection<Integer> collection) {
         for (int elm : collection) push(elm);
+    }
+
+    @Override
+    public String toString() {
+        return set.toString() + ";" + deque.toString();
     }
 }

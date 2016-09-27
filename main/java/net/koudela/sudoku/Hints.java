@@ -1,7 +1,6 @@
 package net.koudela.sudoku;
 
 import android.annotation.SuppressLint;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;

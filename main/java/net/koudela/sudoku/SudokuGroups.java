@@ -1,7 +1,10 @@
 package net.koudela.sudoku;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -235,5 +238,24 @@ class SudokuGroups {
                 break;
         }
         return complementGroup;
+    }
+
+    static List<Integer> getRandomizedArrIds() {
+        List<Integer> arrIds = new ArrayList<>(Arrays.asList(ALL_ARR_IDS));
+        Collections.shuffle(arrIds);
+        return arrIds;
+    }
+
+    /**
+     * Checks if pField represents a valid solution.
+     * @param pField the sudoku playground to check
+     * @return true if pField represents a valid solution, false otherwise
+     */
+    static boolean isTrueGrid(final Playground pField) {
+        if (pField.getSizeNotPopulatedArrIds() != 0) return false;
+        Hint hint = new Hint();
+        Hints.populatePlainHints(hint, pField);
+        for (int arrId : ALL_ARR_IDS) if (hint.get(arrId, pField.get(arrId) - 1) != 1) return false;
+        return true;
     }
 }
