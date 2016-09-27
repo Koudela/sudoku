@@ -20,7 +20,6 @@ import android.widget.Toast;
 import java.lang.ref.WeakReference;
 //TODO: Bug: Sometimes insert hint 2 does not get set (but get found as hint)
 //TODO: UNDO Button
-//TODO: Action Hint Adv3 back to it's place
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     protected final static int DIM = Sudoku.DIM;
     protected final static int CHOOSE_INPUT_REQUEST = 1;

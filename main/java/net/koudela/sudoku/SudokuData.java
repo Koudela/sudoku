@@ -182,18 +182,10 @@ class SudokuData {
 
     void suggestField() {
         SharedPreferences sPref = PreferenceManager.getDefaultSharedPreferences(MainActivity.getContext());
+        Set<Integer> arrId;
         if (!sPref.getBoolean(PreferencesFragment.KEY_PREF_HINT, false)) {
             Toast.makeText(MainActivity.getContext(), "activate hints in settings", Toast.LENGTH_SHORT).show();
             return;
-        }
-        Set<Integer> arrId;
-        if (sPref.getBoolean(PreferencesFragment.KEY_PREF_AUTO_ADV3HINT, false)) {
-            arrId = hints.setAutoHintsAdv3(mainButtonsText, true, false);
-            if (!arrId.isEmpty()) {
-                setEasyTouchArea((int) arrId.toArray()[0]);
-                Toast.makeText(MainActivity.getContext(), "Hint Advanced 3", Toast.LENGTH_SHORT).show();
-                return;
-            }
         }
         if (sPref.getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT1HINT, false)) {
             Integer[] ai1arr = mainButtonsText.getAutoInsert1(hints);
@@ -211,7 +203,6 @@ class SudokuData {
                 return;
             }
         }
-        //Set<Integer> arrId;
         if (sPref.getBoolean(PreferencesFragment.KEY_PREF_AUTO_ADV1HINT, false)) {
             arrId = hints.setAutoHintsAdv1(mainButtonsText, true);
             if (!arrId.isEmpty()) {
@@ -221,11 +212,36 @@ class SudokuData {
             }
         }
         if (sPref.getBoolean(PreferencesFragment.KEY_PREF_AUTO_ADV2HINT, false)) {
+            arrId = hints.setAutoHintsAdv2(mainButtonsText, true, true);
+            if (!arrId.isEmpty()) {
+                Log.v("setEasyTouch",Arrays.toString(arrId.toArray()));
+                setEasyTouchArea((int) arrId.toArray()[0]);
+                Toast.makeText(MainActivity.getContext(), "Hint Advanced 2", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+        if (sPref.getBoolean(PreferencesFragment.KEY_PREF_AUTO_ADV3HINT, false)) {
+            arrId = hints.setAutoHintsAdv3(mainButtonsText, true, true);
+            if (!arrId.isEmpty()) {
+                setEasyTouchArea((int) arrId.toArray()[0]);
+                Toast.makeText(MainActivity.getContext(), "Hint Advanced 3", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+        if (sPref.getBoolean(PreferencesFragment.KEY_PREF_AUTO_ADV2HINT, false)) {
             arrId = hints.setAutoHintsAdv2(mainButtonsText, true, false);
             if (!arrId.isEmpty()) {
                 Log.v("setEasyTouch",Arrays.toString(arrId.toArray()));
                 setEasyTouchArea((int) arrId.toArray()[0]);
                 Toast.makeText(MainActivity.getContext(), "Hint Advanced 2", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+        if (sPref.getBoolean(PreferencesFragment.KEY_PREF_AUTO_ADV3HINT, false)) {
+            arrId = hints.setAutoHintsAdv3(mainButtonsText, true, false);
+            if (!arrId.isEmpty()) {
+                setEasyTouchArea((int) arrId.toArray()[0]);
+                Toast.makeText(MainActivity.getContext(), "Hint Advanced 3", Toast.LENGTH_SHORT).show();
                 return;
             }
         }
