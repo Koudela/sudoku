@@ -305,14 +305,13 @@ class SudokuBuilder extends Thread {
             Playground[] workbench = new Playground[7];
             //workbench[0] = new Playground(Sudoku.TRUE_GRID);
             //workbench[0].shuffle();
-            workbench[0] = Sudoku.makeRandomTrueGridByBacktracking();
+            workbench[0] = Sudoku.makeRandomTrueGridByBacktracking(verbose);
             workbench[1] = makeLevelOneSudoku(workbench[0], verbose);
             workbench[2] = makeLevelTwoSudoku(workbench[1], verbose);
             workbench[3] = makeLevelThreeSudoku(workbench[2], verbose);
             workbench[4] = makeLevelFourSudoku(workbench[3], verbose);
             workbench[5] = makeLevelFiveSudoku(workbench[4], verbose);
             workbench[6] = Sudoku.makeMinimalSudokuByBacktrackingOutOfTrueGrid(workbench[5].getPField(), verbose);
-            if (verbose) Log.i("minimalSudoku", workbench[6].toString());
             sudokuStack.add(workbench);
             writeSudokuStackToFile();
             closed++;

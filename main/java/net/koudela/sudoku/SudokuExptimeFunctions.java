@@ -126,7 +126,7 @@ class SudokuExptimeFunctions extends SudokuStaticFunctions {
      * @return a random valid 9x9 sudoku solution grid
      */
     static Playground makeRandomTrueGridByBacktracking(boolean verbose) {
-        if (verbose) Log.v("makeRandomTrueGridBB","start");
+        if (verbose) Log.d("makeRandomTrueGridBB","start");
         Playground solution = new Playground();
         Hints hints = new Hints(true, true, true, true, false);
         List<Integer> numbersLeft;
@@ -189,7 +189,7 @@ class SudokuExptimeFunctions extends SudokuStaticFunctions {
         // erases random values iff sudoku stays a valid sudoku
         for (int arrId : getRandomizedArrIds())
             if (sudoku.isPopulated(arrId)) {
-                if (verbose) Log.d("inspect", ""+arrId);
+                if (verbose) Log.v("inspect", ""+arrId);
                 sudoku.set(arrId, 0);
                 int tmp = isSudoku(sudoku, null);
                 if (tmp == -1) throw new ArithmeticException("trueGrid was not a solution or valid sudoku");
@@ -198,6 +198,7 @@ class SudokuExptimeFunctions extends SudokuStaticFunctions {
                 // particular sudoku
                 else Log.e("removed", ""+arrId);
             }
+        if (verbose) Log.d("minimalSudoku", sudoku.toString());
         return sudoku;
     }
 }
