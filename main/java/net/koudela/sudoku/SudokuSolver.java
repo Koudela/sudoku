@@ -71,19 +71,22 @@ class SudokuSolver {
 
     /**
      * Updates the sudoku/plain hints with Playground.getAutoInsert1 as far as possible.
+     * @return number of values set
      */
-    private void useAutoInsert1() {
-        int arrId, number;
+    private int useAutoInsert1() {
+        int arrId, number, count = 0;
         while (!arrIdsNotTestedHints.isEmpty()) {
             arrId = arrIdsNotTestedHints.pop();
             if (sudoku.isPopulated(arrId)) continue;
             number = sudoku.getAutoInsert1ByField(arrId, hints);
             if (number != 0) {
+                count++;
                 sudoku.set(arrId, number);
                 updateTracker(arrId);
                 updateTracker(hints.incrementStarGroup(arrId, number - 1, sudoku));
             }
         }
+        return count;
     }
 
     /**
@@ -112,32 +115,42 @@ class SudokuSolver {
      * Solves a sudoku as far as possible with the specified functions. (The used hints are
      * specified implicit by the hints parameter.)
      */
-    void updateSudoku(boolean verbose) {
+    void updateSudoku(final boolean makeTrueGrid, final boolean verbose) {
         // principle: we use the cheaper solving methods first as long as they return results
         updateTracker(sudoku.getNotPopulatedArrIds());
         Set<Integer> changed;
-        int count[] = {0, 0, 0, 0, 0, 0, 0};
+        int count[] = {0, 0, -1, -1, -1, -1, -1, -1, -1};
         while (true) {
-            if (verbose) count[0]++;
-            if (byAutoInsert1) useAutoInsert1();
-            if (verbose) count[1]++;
-            if (byAutoInsert2) if (useAutoInsert2()) continue;
+            count[2]++;
+            if (byAutoInsert1) count[0] += useAutoInsert1();
+            if (!makeTrueGrid) {
+                count[3]++;
+                count[1]++;
+                if (byAutoInsert2) if (useAutoInsert2()) continue;
+                count[1]--;
+            }
             // no auto insert possible - update the advanced (cheap/relaxed versions)
-            if (verbose) count[2]++;
+            count[4]++;
             changed = hints.updateAdv1(sudoku);
             if (changed.size() == 0) {
-                if (verbose) count[3]++;
+                count[5]++;
                 changed = hints.updateAdv2(sudoku, true);
                 if (changed.size() == 0) {
-                    if (verbose) count[4]++;
+                    count[6]++;
                     changed = hints.updateAdv3(sudoku, true);
                     // relaxed methods hold no result - use the costly versions if applicable
                     if (changed.size() == 0 && !useRelaxation) {
-                        if (verbose) count[5]++;
+                        count[7]++;
                         changed = hints.updateAdv2(sudoku, false);
                         if (changed.size() == 0) {
-                            if (verbose) count[6]++;
+                            count[8]++;
                             changed = hints.updateAdv3(sudoku, false);
+                            if (makeTrueGrid && changed.size() == 0) {
+                                count[3]++;
+                                count[1]++;
+                                if (byAutoInsert2) if (useAutoInsert2()) continue;
+                                count[1]--;
+                            }
                         }
                     }
                 }
@@ -176,7 +189,7 @@ class SudokuSolver {
         Set<Integer> arrIdsChangedValues = new HashSet<>();
         init(solution, hints, arrIdsChangedHints, arrIdsChangedValues, byAutoInsert1, byAutoInsert2,
                 useRelaxation);
-        updateSudoku(false);
+        updateSudoku(false, false);
         return Sudoku.isTrueGrid(solution);
     }
 }

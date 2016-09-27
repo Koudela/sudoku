@@ -18,7 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
-//TODO: Bug: Sometimes insert hint 2 does not get set (but get found as hint)
+
 //TODO: UNDO Button
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     protected final static int DIM = Sudoku.DIM;

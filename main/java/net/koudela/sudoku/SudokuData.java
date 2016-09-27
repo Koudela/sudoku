@@ -251,7 +251,7 @@ class SudokuData {
 
     private void updateSudoku(Set<Integer> arrIdsChangedHints, Set<Integer> arrIdsChangedValues) {
         solver.init(mainButtonsText, hints, arrIdsChangedHints, arrIdsChangedValues, useAutoInsert1, useAutoInsert2, true);
-        solver.updateSudoku(false);
+        solver.updateSudoku(false, false);
         for (int arrId : arrIdsChangedHints) this.setHelperTextViewContent(arrId);
         for (int arrId : arrIdsChangedValues) {
             isAutoInsert[arrId] = true;

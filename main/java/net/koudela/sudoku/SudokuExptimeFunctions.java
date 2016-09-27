@@ -50,7 +50,7 @@ class SudokuExptimeFunctions extends SudokuGroups {
         // start the main computing
         if (computedSolution == null) computedSolution = new Playground(sudoku);
         solver.init(computedSolution, hints, arrIdsChangedHints, arrIdsChangedValues, true, true, false);
-        solver.updateSudoku(verbose);
+        solver.updateSudoku(false, verbose);
         // -> Sudoku is a valid Sudoku
         if (computedSolution.getSizeNotPopulatedArrIds() == 0) return 1;
         Set<Integer> mayBeDependValidValues = new HashSet<>(computedSolution.getPopulatedArrIds());
@@ -111,7 +111,7 @@ class SudokuExptimeFunctions extends SudokuGroups {
                 Log.v("solveByBacktracking","take ("+arrId+";"+computedSolution.get(arrId)+") - " + count);
             hints.incrementStarGroup(arrId, computedSolution.get(arrId) - 1);
             arrIdsChangedValues.clear();
-            solver.updateSudoku(verbose);
+            solver.updateSudoku(false, verbose);
             // -> Sudoku may be a valid Sudoku
             if (computedSolution.getSizeNotPopulatedArrIds() == 0) return 0;
             dependentValidValues.put(arrId, new HashSet<>(arrIdsChangedValues));
@@ -151,7 +151,7 @@ class SudokuExptimeFunctions extends SudokuGroups {
             arrIdsChangedValues.clear();
             hints.incrementStarGroup(arrId, solution.get(arrId) - 1);
             // the advanced hints are getting updated in updateSudokuStart
-            solver.updateSudoku(verbose);
+            solver.updateSudoku(true, verbose);
         }
         if (!isTrueGrid(solution)) throw new ArithmeticException("solution is no true grid");
         if (verbose) Log.d("makeRandomTrueGridBB","solution: " + solution.toString());
@@ -184,7 +184,7 @@ class SudokuExptimeFunctions extends SudokuGroups {
      * @param verbose if true the method writes its progress to the log
      * @return a minimal sudoku
      */
-    static Playground makeMinimalSudokuByBacktrackingOutOfTrueGrid(final int[] trueGrid, boolean verbose) {
+    static Playground makeMinimalSudokuByBacktrackingOutOfTrueGrid(final int[] trueGrid, final boolean verbose) {
         if (verbose) Log.v("makeMinimalSudoku","start");
         Playground sudoku = new Playground(trueGrid);
         // erases random values iff sudoku stays a valid sudoku
