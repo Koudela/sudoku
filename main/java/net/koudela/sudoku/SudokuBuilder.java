@@ -309,9 +309,17 @@ class SudokuBuilder extends Thread {
             workbench[1] = makeLevelOneSudoku(workbench[0], verbose);
             workbench[2] = makeLevelTwoSudoku(workbench[1], verbose);
             workbench[3] = makeLevelThreeSudoku(workbench[2], verbose);
-            workbench[4] = makeLevelFourSudoku(workbench[3], verbose);
-            workbench[5] = makeLevelFiveSudoku(workbench[4], verbose);
-            workbench[6] = Sudoku.makeMinimalSudokuByBacktrackingOutOfTrueGrid(workbench[5].getPField(), verbose);
+            workbench[6] = Sudoku.makeMinimalSudokuByBacktrackingOutOfTrueGrid(workbench[3].getPField(), verbose);
+            if (workbench[3].getSizePopulatedArrIds() == workbench[6].getSizePopulatedArrIds()
+                    || Sudoku.isSolvableSudoku(-1, workbench[6], true, true, true, true, true, true)) {
+                workbench[4] = new Playground(workbench[6]);
+                workbench[5] = new Playground(workbench[6]);
+            } else {
+                workbench[4] = makeLevelFourSudoku(workbench[3], verbose);
+                if (Sudoku.isSolvableSudoku(-1, workbench[6], true, true, true, true, true, false))
+                    workbench[5] = new Playground(workbench[6]);
+                else workbench[5] = makeLevelFiveSudoku(workbench[4], verbose);
+            }
             sudokuStack.add(workbench);
             writeSudokuStackToFile();
             closed++;

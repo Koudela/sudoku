@@ -142,7 +142,7 @@ class SudokuExptimeFunctions extends SudokuStaticFunctions {
                 solution.set(arrId, numbersLeft.get(0));
                 numbersLeft.remove(0);
             } while (hints.isHint(arrId, solution.get(arrId) - 1));
-            Log.v("set", arrId + "(" + solution.get(arrId) + ")");
+            if (verbose) Log.v("set", arrId + "(" + solution.get(arrId) + ")");
             arrIdsChangedHints.clear();
             arrIdsChangedValues.clear();
             hints.incrementStarGroup(arrId, solution.get(arrId) - 1);
@@ -194,9 +194,7 @@ class SudokuExptimeFunctions extends SudokuStaticFunctions {
                 int tmp = isSudoku(sudoku, null);
                 if (tmp == -1) throw new ArithmeticException("trueGrid was not a solution or valid sudoku");
                 else if (tmp == 0) sudoku.set(arrId, trueGrid[arrId]);
-                // it is an error for us, if the implemented hint methods don't suffice to solve a
-                // particular sudoku
-                else Log.e("removed", ""+arrId);
+                else Log.d("removed", ""+arrId);
             }
         if (verbose) Log.d("minimalSudoku", sudoku.toString());
         return sudoku;
