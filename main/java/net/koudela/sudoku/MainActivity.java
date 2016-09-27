@@ -158,6 +158,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.action_suggest_field:
                 sudokuData.suggestField();
+                break;
+            case R.id.action_back:
+                sudokuData.goBack();
             default:
                 break;
         }
@@ -207,13 +210,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     sudokuData.updateSudoku(number, arrId);
                 }
             } else if (chooseInputViewTag.substring(0,3).equals("not")) {
-                sudokuData.setUserHint(arrId, Integer.valueOf(chooseInputViewTag.substring(3)) - 1);
+                int num = Integer.valueOf(chooseInputViewTag.substring(3)) - 1;
+                sudokuData.setUserHint(arrId, num);
                 sudokuData.setHelperTextViewContent(arrId);
-                sudokuData.updateSudoku();
+                sudokuData.updateSudokuHintVersion(arrId, num);
             }
 
         }
     }
+
     public static void setTextSizeMainButtons() {
         float textSize = Float.valueOf(PreferenceManager.getDefaultSharedPreferences(MainActivity.getContext()).getString(PreferencesFragment.KEY_PREF_FONT_SIZE_MAIN, "20"));
         for (Button button: mainButtons) button.setTextSize(textSize);

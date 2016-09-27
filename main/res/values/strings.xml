@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Sudoku</string>
     <string name="action_suggest_field">Hint</string>
+    <string name="action_back">Undo</string>
     <string name="action_reset">Restart</string>
     <string name="action_new_game">New game</string>
     <string name="action_settings">Settings</string>

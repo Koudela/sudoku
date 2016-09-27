@@ -1,5 +1,6 @@
 package net.koudela.sudoku;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -7,9 +8,13 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -26,6 +31,7 @@ import java.util.Set;
 class SudokuData {
     private static final SudokuData Singleton = new SudokuData();
     private final static int DIM = Sudoku.DIM;
+    private Deque<Map<Integer, Integer>> history = new ArrayDeque<>();
     private SudokuSolver solver = new SudokuSolver();
     private Sudoku sudoku = Sudoku.getInstance();
     private Playground mainButtonsText = new Playground();
@@ -86,11 +92,37 @@ class SudokuData {
             setMainButtonsContent(arrId, false);
             setHelperTextViewContent(arrId);
         }
+        history.clear();
     }
 
     void newGame() {
         sudoku.getNewSudoku();
         resetGame(false);
+    }
+
+    void goBack() {
+        if (history.isEmpty()) return;
+        Map<Integer, Integer> map = history.pop();
+        Set<Integer> changed = new HashSet<>();
+        for (int arrId : map.keySet()) {
+            if (arrId < 0) {
+                mainButtonsText.set(-1 - arrId, map.get(arrId));
+                setMainButtonsContent(-1 - arrId, false);
+                changed.addAll(hints.incrementStarGroup(-1 - arrId, map.get(arrId) - 1, mainButtonsText));
+            } else if (arrId < DIM * DIM) {
+                mainButtonsText.set(arrId, 0);
+                setMainButtonsContent(arrId, false);
+                changed.addAll(hints.decrementStarGroup(arrId, map.get(arrId) - 1, mainButtonsText));
+            } else {
+                hints.setUserHint(arrId - DIM * DIM, map.get(arrId));
+                changed.add(arrId - DIM * DIM);
+            }
+        }
+        hints.initAdv();
+        changed.addAll(hints.updateAdv1(mainButtonsText));
+        changed.addAll(hints.updateAdv2(mainButtonsText, false));
+        changed.addAll(hints.updateAdv3(mainButtonsText, false));
+        for (int arrId : changed) setHelperTextViewContent(arrId);
     }
 
     boolean isOldGame() {
@@ -260,11 +292,18 @@ class SudokuData {
         suggestField();
 
     }
+
+    @SuppressLint("UseSparseArrays")
     void updateSudoku(final int number, final int arrId) {
         Set<Integer> arrIdsChangedHints = new HashSet<>();
         Set<Integer> arrIdsChangedValues = new HashSet<>();
-        if (number != 0) arrIdsChangedHints.addAll(hints.incrementStarGroup(arrId, number - 1, mainButtonsText));
+        history.push(new HashMap<Integer, Integer>());
+        if (number != 0) {
+            history.getFirst().put(arrId, number);
+            arrIdsChangedHints.addAll(hints.incrementStarGroup(arrId, number - 1, mainButtonsText));
+        }
         else {
+            history.getFirst().put(-1 - arrId, mainButtonsText.get(arrId));
             arrIdsChangedHints.addAll(hints.decrementStarGroup(arrId, mainButtonsText.get(arrId) - 1, mainButtonsText));
             hints.initAdv();
             arrIdsChangedHints.add(arrId);
@@ -272,12 +311,20 @@ class SudokuData {
         mainButtonsText.set(arrId, number);
         this.setMainButtonsContent(arrId, false);
         updateSudoku(arrIdsChangedHints, arrIdsChangedValues);
+        for (int tempArrId: arrIdsChangedValues)
+            history.getFirst().put(tempArrId, mainButtonsText.get(tempArrId));
     }
 
-    void updateSudoku() {
+    @SuppressLint("UseSparseArrays")
+    void updateSudokuHintVersion(final int arrId, final int num) {
+        history.push(new HashMap<Integer, Integer>());
+        history.getFirst().put(arrId + DIM * DIM, num);
         HashSet<Integer> arrIdsChangedHints = new HashSet<>();
         HashSet<Integer> arrIdsChangedValues = new HashSet<>();
         updateSudoku(arrIdsChangedHints, arrIdsChangedValues);
+        if (!arrIdsChangedValues.isEmpty())
+            for (int tempArrId : arrIdsChangedValues)
+                history.getFirst().put(tempArrId, mainButtonsText.get(tempArrId));
     }
 
     void redrawHints() {
