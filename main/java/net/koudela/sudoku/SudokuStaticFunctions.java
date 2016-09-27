@@ -79,10 +79,18 @@ class SudokuStaticFunctions extends SudokuGroups {
                     idsNotTestedGroupedGroups, arrIdsNotTestedHints, arrIdsChangedHints,
                     arrIdsChangedValues, sudoku, hints, byAutoInsert1, byAutoInsert2);
             // no auto insert possible - update the advanced (cheap/relaxed versions)
-            changed = hints.updateAdvanced(sudoku, true);
-            if (changed.size() == 0 && !useRelaxation)
-                // relaxed methods hold no result - use the costly versions if applicable
-                changed = hints.updateAdvanced2plus3(sudoku, false);
+            changed = hints.updateAdv1(sudoku);
+            if (changed.size() == 0) {
+                changed = hints.updateAdv2(sudoku, true);
+                if (changed.size() == 0) {
+                    changed = hints.updateAdv3(sudoku, true);
+                    // relaxed methods hold no result - use the costly versions if applicable
+                    if (changed.size() == 0 && !useRelaxation) {
+                        changed = hints.updateAdv2(sudoku, false);
+                        if (changed.size() == 0) changed = hints.updateAdv3(sudoku, false);
+                    }
+                }
+            }
             if (changed.size() != 0) {
                 arrIdsChangedHints.addAll(changed);
                 updateSudokuUpdateHints(idsNotTestedVerticalGroups, idsNotTestedHorizontalGroups,

@@ -125,7 +125,8 @@ class SudokuExptimeFunctions extends SudokuStaticFunctions {
      * Be careful, this algorithm resides in EXPTIME
      * @return a random valid 9x9 sudoku solution grid
      */
-    static Playground makeRandomTrueGridByBacktracking() {
+    static Playground makeRandomTrueGridByBacktracking(boolean verbose) {
+        if (verbose) Log.v("makeRandomTrueGridBB","start");
         Playground solution = new Playground();
         Hints hints = new Hints(true, true, true, true, false);
         List<Integer> numbersLeft;
@@ -141,6 +142,7 @@ class SudokuExptimeFunctions extends SudokuStaticFunctions {
                 solution.set(arrId, numbersLeft.get(0));
                 numbersLeft.remove(0);
             } while (hints.isHint(arrId, solution.get(arrId) - 1));
+            Log.v("set", arrId + "(" + solution.get(arrId) + ")");
             arrIdsChangedHints.clear();
             arrIdsChangedValues.clear();
             hints.incrementStarGroup(arrId, solution.get(arrId) - 1);
@@ -151,6 +153,7 @@ class SudokuExptimeFunctions extends SudokuStaticFunctions {
                     false);
         }
         if (!isTrueGrid(solution)) throw new ArithmeticException("solution is no true grid");
+        if (verbose) Log.d("makeRandomTrueGridBB","solution: " + solution.toString());
         return solution;
     }
 

@@ -112,19 +112,19 @@ class Hints {
         userHint.set(arrId, num, userHint.isHint(arrId, num)?0:1);
     }
 
-    Set<Integer> updateAdvanced(final Playground pField, boolean useRelaxation) {
-        Set<Integer> changed = new HashSet<>();
-        if (useAdv1) changed.addAll(setAutoHintsAdv1(pField, false));
-        if (useAdv2) changed.addAll(setAutoHintsAdv2(pField, false, useRelaxation));
-        if (useAdv3) changed.addAll(setAutoHintsAdv3(pField, false, useRelaxation));
-        return changed;
+    Set<Integer> updateAdv1(final Playground pField) {
+        if (useAdv1) return setAutoHintsAdv1(pField, false);
+        return new HashSet<>();
     }
 
-    Set <Integer> updateAdvanced2plus3(final Playground pField, boolean useRelaxation) {
-        Set<Integer> changed = new HashSet<>();
-        if (useAdv2) changed.addAll(setAutoHintsAdv2(pField, false, useRelaxation));
-        if (useAdv3) changed.addAll(setAutoHintsAdv3(pField, false, useRelaxation));
-        return changed;
+    Set<Integer> updateAdv2(final Playground pField, boolean useRelaxation) {
+        if (useAdv2) return setAutoHintsAdv2(pField, false, useRelaxation);
+        return new HashSet<>();
+    }
+
+    Set<Integer> updateAdv3(final Playground pField, boolean useRelaxation) {
+        if (useAdv3) return setAutoHintsAdv3(pField, false, useRelaxation);
+        return new HashSet<>();
     }
 
     boolean isHint(final int arrId, final int num) {
