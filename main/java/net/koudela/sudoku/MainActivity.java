@@ -19,7 +19,13 @@ import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
 
-//TODO: UNDO Button
+//TODO: Bug: freestyle marks errors
+//TODO: Info action
+//TODO: Show banner at start (during loading)
+//TODO: get hard/sudokuLevel4 + solution from server/upload to server
+//TODO: save only sudokuLevel4 + solution / make sudokuLevel1/2/3 on the fly
+//TODO: score
+//TODO: update opportunity
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     protected final static int DIM = Sudoku.DIM;
     protected final static int CHOOSE_INPUT_REQUEST = 1;

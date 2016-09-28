@@ -629,10 +629,8 @@ class Hints {
             }
         }
         callback.init(missing);
-        for (int coverSize = 2; coverSize < DIM - populated; coverSize++) {
-            changed = searchSetCover(missing, coverSize, coverSize, new HashSet<Integer>(), callback);
-            if (changed != null) return changed;
-        }
+        changed = searchSetCover(missing, (DIM - populated) - 1, 0, new HashSet<Integer>(), callback);
+        if (changed != null) return changed;
         return new HashSet<>();
     }
 
@@ -692,28 +690,27 @@ class Hints {
         @SuppressLint("UseSparseArrays")
         Map<Integer, Set<Integer>> missing = new HashMap<>();
         int populated = 0;
+        for (int arrId : group) if (pField.isPopulated(arrId)) populated++;
         for (int num = 0; num < DIM; num++) {
             missing.put(num, new HashSet<Integer>());
             for (int arrId : group)
                 if (!pField.isPopulated(arrId) && !isHint(arrId, num))
                     missing.get(num).add(arrId);
-            if (missing.get(num).size() == 0 || missing.get(num).size() == DIM) missing.remove(num);
+            if (missing.get(num).size() == 0 || missing.get(num).size() == DIM - populated) missing.remove(num);
         }
-        for (int arrId : group) if (pField.isPopulated(arrId)) populated++;
         callback.init(missing);
-        for (int coverSize = 2; coverSize < DIM - populated; coverSize++) {
-            changed = searchSetCover(missing, coverSize, coverSize, new HashSet<Integer>(), callback);
-            if (changed != null) return changed;
-        }
+        changed = searchSetCover(missing, (DIM - populated) - 1, 0, new HashSet<Integer>(), callback);
+        if (changed != null) return changed;
         return new HashSet<>();
     }
 
     /**
      * In contrast to the algorithm using a superset this algorithm discards impractical subsets
      * Be careful, this algorithm resides in EXPTIME
-     * @param elements a collection of sets that may fit
-     * @param coverSize how many set elements the cover is allowed to contain
-     * @param minCountElements how many sets that are contained in the cover need to be found
+     * @param elements a collection of sets that may fit, the size of these sets need to be
+     *                 <= maxCoverSize
+     * @param maxCoverSize how many set elements the cover is allowed to contain
+     * @param coverSizeCaller how many set elements that are contained in the cover need to be found
      * @param coverKeysCaller the coverKeys the caller works with, the initial caller need to
      *                        supply an empty set
      * @param callback the object that handles the callback function
@@ -722,44 +719,44 @@ class Hints {
      *         >= minCountElements and the callback function does not evaluate to null,
      *         null otherwise
      */
-    private Set<Integer> searchSetCover(Map<Integer, Set<Integer>> elements, final int coverSize,
-                                        final int minCountElements, Set<Integer> coverKeysCaller,
+    @SuppressLint("UseSparseArrays")
+    private Set<Integer> searchSetCover(Map<Integer, Set<Integer>> elements, final int maxCoverSize,
+                                        final int coverSizeCaller, Set<Integer> coverKeysCaller,
                                         final Callback callback) {
-        //Log.v("SearchSetCover",elements.toString()+" ; "+coverSize+" ; "+minCountElements+" ; "+coverKeysCaller.toString());
-        Set<Integer> foundKeys;
+        int subclassMaxCoverSize, subclassCoverSize;
+        Set<Integer> foundKeys, returnCallback;
+        Map<Integer, Set<Integer>> subclassElements;
         for (int key : elements.keySet()) {
-            // if the cardinality elements set is bigger than coverSize, we can not cover it
-            if (elements.get(key).size() > coverSize) continue;
-            int subclassCoverSize = coverSize - elements.get(key).size();
-            @SuppressLint("UseSparseArrays")
-            Map<Integer, Set<Integer>> subclassElements = new HashMap<>();
+            // the cover will contain all elements of elm(key)
+            subclassMaxCoverSize = maxCoverSize - elements.get(key).size();
+            subclassCoverSize = coverSizeCaller + elements.get(key).size();
+            // we don't need to check if subclassMaxCoverSize < 0,
+            // since elements.get(key).size() <= maxCoverSize by contract;
+            subclassElements = new HashMap<>();
             foundKeys = new HashSet<>(coverKeysCaller);
             foundKeys.add(key);
             for (int tempKey : elements.keySet()) {
-                // if the cardinality elements set is bigger than coverSize, we can not cover it
-                if (elements.get(tempKey).size() > coverSize) continue;
                 // we look only at the other elements
                 if (tempKey == key) continue;
+                // holds all elements in elm(tempKey) that are not in elm(key)
                 Set<Integer> newSet = new HashSet<>();
                 for (int value : elements.get(tempKey))
                     if (!elements.get(key).contains(value))
                         newSet.add(value);
                 if (newSet.isEmpty()) {
                     foundKeys.add(tempKey);
-                    if (foundKeys.size() >= minCountElements) {
+                    if (foundKeys.size() >= subclassCoverSize) {
+                        returnCallback = callback.invokeFunction(foundKeys);
                         // the solution is feasible and was processed, tell the method to die
-                        //Log.v("FoundKeysPre",foundKeys.toString());
-                        foundKeys = callback.invokeFunction(foundKeys);
-                        //Log.v("FoundKeysPost", foundKeys == null?"null":foundKeys.toString());
-                        if (foundKeys != null) return foundKeys;
-                            // the solution is not feasible, we need to go on with the next key
-                        else break;
+                        if (returnCallback != null) return returnCallback;
+                        // the solution is not feasible, we need to go on with the next key
                     }
-                } else if (newSet.size() <= subclassCoverSize) subclassElements.put(tempKey, newSet);
+                } else if (newSet.size() <= subclassMaxCoverSize) subclassElements.put(tempKey, newSet);
             }
-            // we search the subclasses
-            if (foundKeys != null && subclassElements.size() >= minCountElements - foundKeys.size()) {
-                foundKeys = searchSetCover(subclassElements, subclassCoverSize, minCountElements,
+            // we search the subclasses (equal would only be possible, if subclassElements would
+            // contain empty sets, but they are represented in foundKeys already)
+            if (subclassElements.size() > subclassCoverSize - foundKeys.size()) {
+                foundKeys = searchSetCover(subclassElements, subclassMaxCoverSize, subclassCoverSize,
                         foundKeys, callback);
                 // a feasible solution was found and processed, tell the method to die
                 if (foundKeys != null) return foundKeys;
