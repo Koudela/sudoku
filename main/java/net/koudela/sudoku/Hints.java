@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static net.koudela.sudoku.SudokuGroups.DIM;
+
 /**
  * generates and memorizes different types of sudoku hints
  *
@@ -17,7 +19,6 @@ import java.util.Set;
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 class Hints {
-    private static final int DIM = Sudoku.DIM;
     private Hint hint;
     private Hint hintAdv1;
     private Hint hintAdv2;
@@ -61,6 +62,10 @@ class Hints {
     void setUseUserHint(final boolean useUserHint) {
         this.useUserHint = useUserHint;
         if (this.useUserHint) userHint = new Hint();
+    }
+
+    boolean[] getUsage() {
+        return new boolean[]{usePlain, useAdv1, useAdv2, useAdv3, useUserHint};
     }
 
     void init(Playground pField, boolean firstRun, boolean useRelaxation) {
@@ -147,9 +152,8 @@ class Hints {
     Set<Integer> incrementStarGroup(final int arrId, final int num, final Playground pField) {
         Set<Integer> changed = new HashSet<>();
         for (int tempArrId : Sudoku.getStarGroup(arrId)) {
+            if (!pField.isPopulated(tempArrId) && !isHint(tempArrId, num)) changed.add(tempArrId);
             hint.increment(tempArrId, num);
-            if (!pField.isPopulated(tempArrId) && hint.get(tempArrId, num) == 1)
-                changed.add(tempArrId);
         }
         return changed;
     }
@@ -167,8 +171,7 @@ class Hints {
         Set<Integer> changed = new HashSet<>();
         for (int tempArrId : Sudoku.getStarGroup(arrId)) {
             hint.decrement(tempArrId, num);
-            if (!pField.isPopulated(tempArrId) && hint.get(tempArrId, num) == 0)
-                changed.add(tempArrId);
+            if (!pField.isPopulated(tempArrId) && !isHint(tempArrId, num)) changed.add(tempArrId);
         }
         return changed;
     }
@@ -763,5 +766,17 @@ class Hints {
             }
         }
         return null;
+    }
+
+    @SuppressWarnings("CloneDoesntCallSuperClone")
+    @Override
+    public Hints clone() {
+        Hints clone = new Hints(usePlain, useAdv1, useAdv2,useAdv3, useUserHint);
+        if (hint != null) clone.hint = new Hint(hint);
+        if (hintAdv1 != null) clone.hintAdv1 = new Hint(hintAdv1);
+        if (hintAdv2 != null) clone.hintAdv2 = new Hint(hintAdv2);
+        if (hintAdv3 != null) clone.hintAdv3 = new Hint(hintAdv3);
+        if (userHint != null) clone.userHint = new Hint(userHint);
+        return clone;
     }
 }

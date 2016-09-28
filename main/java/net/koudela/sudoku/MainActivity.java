@@ -20,12 +20,28 @@ import android.widget.Toast;
 import java.lang.ref.WeakReference;
 
 //TODO: Bug: freestyle marks errors
+//TODO: Bug: disabling auto insert 1/2 kills the hints
 //TODO: Info action
 //TODO: Show banner at start (during loading)
 //TODO: get hard/sudokuLevel4 + solution from server/upload to server
 //TODO: save only sudokuLevel4 + solution / make sudokuLevel1/2/3 on the fly
 //TODO: score
+// UserHint: if (isHint) before 0 points;
+// if (would be plain hint) 1 point;
+// else if (would be adv1) 3 points;
+// else if (would be adv2 relaxed || adv3 relaxed) 6 points;
+// else if (would be adv2 hard || adv3 hard) 10 points;
+// else 2 points
+// Remove: - (valueGivenOnSet) point
+// Insert value: number of new plain hints on a hint field that is not set + number of not set hints
+// on value field;
+// Remove value: negative value of Insert;
+// if hint action used -1
+//TODO: personal max score
 //TODO: update opportunity
+
+//TODO: german localization
+//TODO: advertising adds
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     protected final static int DIM = Sudoku.DIM;
     protected final static int CHOOSE_INPUT_REQUEST = 1;
@@ -75,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 sudokuData.setMainButtonsContent(arrId, false);
                 sudokuData.setHelperTextViewContent(arrId);
             }
+            sudokuData.setScore();
         }
 
         setTextSizeHelperTextViews();

@@ -6,16 +6,18 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import static net.koudela.sudoku.SudokuGroups.DIM;
 
 /**
  * Holds the current game state and applies it to the UI. Runs the game logic methods and get called
@@ -30,7 +32,6 @@ import java.util.Set;
  */
 class SudokuData {
     private static final SudokuData Singleton = new SudokuData();
-    private final static int DIM = Sudoku.DIM;
     private Deque<Map<Integer, Integer>> history = new ArrayDeque<>();
     private SudokuSolver solver = new SudokuSolver();
     private Sudoku sudoku = Sudoku.getInstance();
@@ -38,13 +39,12 @@ class SudokuData {
     // plain hints even get calculated if they don't get shown to the user,
     // we need them to find badUserInput and to show actionbar hints
     private Hints hints = new Hints(true, false, false, false, true);
-    private Boolean[] isBlocked = new Boolean[DIM*DIM];
-    private Boolean[] isAutoInsert = new Boolean[DIM*DIM];
-    private int[] textColorHints = new int[DIM*DIM];
-    private int arrIdEasyTouchButton;
-    private int requestViewId;
-    private boolean useAutoInsert1;
-    private boolean useAutoInsert2;
+    private Boolean[] isBlocked = new Boolean[DIM * DIM];
+    private Boolean[] isAutoInsert = new Boolean[DIM * DIM];
+    private int[] textColorHints = new int[DIM * DIM];
+    private int[] score = new int[DIM * DIM + 1];
+    private int arrIdEasyTouchButton, requestViewId, arrIdLastHint;
+    private boolean useAutoInsert1, useAutoInsert2;
 
     private SudokuData() {
         initPreferences();
@@ -81,6 +81,10 @@ class SudokuData {
         for (int arrId : Sudoku.ALL_ARR_IDS) isAutoInsert[arrId] = false;
         arrIdEasyTouchButton = -1;
         requestViewId = -1;
+        arrIdLastHint = -1;
+        for (int i = 0; i < score.length; i++) score[i] = 0;
+        setScore();
+        history.clear();
     }
 
     void resetGame(boolean firstRun) {
@@ -92,7 +96,6 @@ class SudokuData {
             setMainButtonsContent(arrId, false);
             setHelperTextViewContent(arrId);
         }
-        history.clear();
     }
 
     void newGame() {
@@ -110,14 +113,18 @@ class SudokuData {
                 setMainButtonsContent(-1 - arrId, false);
                 changed.addAll(hints.incrementStarGroup(-1 - arrId, map.get(arrId) - 1, mainButtonsText));
             } else if (arrId < DIM * DIM) {
+                score[arrId] = 0;
                 mainButtonsText.set(arrId, 0);
                 setMainButtonsContent(arrId, false);
                 changed.addAll(hints.decrementStarGroup(arrId, map.get(arrId) - 1, mainButtonsText));
+            } else if (arrId == DIM * DIM) {
+                score[DIM * DIM] -= map.get(DIM * DIM);
             } else {
                 hints.setUserHint(arrId - DIM * DIM, map.get(arrId));
                 changed.add(arrId - DIM * DIM);
             }
         }
+        setScore();
         hints.initAdv();
         changed.addAll(hints.updateAdv1(mainButtonsText));
         changed.addAll(hints.updateAdv2(mainButtonsText, false));
@@ -127,6 +134,11 @@ class SudokuData {
 
     boolean isOldGame() {
         return (mainButtonsText.getPopulatedArrIds().size() > 0);
+    }
+
+    void setScore() {
+        ((TextView) ((MainActivity) MainActivity.getContext()).findViewById(R.id.score))
+                .setText((score[DIM * DIM] * DIM) + " " + MainActivity.getContext().getResources().getText(R.string.score));
     }
 
     void setMainButtonsContent(final int arrId, boolean isInit) {
@@ -223,6 +235,7 @@ class SudokuData {
         if (sPref.getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT1HINT, false)) {
             Integer[] ai1arr = mainButtonsText.getAutoInsert1(hints);
             if (ai1arr != null) {
+                arrIdLastHint = ai1arr[0];
                 setEasyTouchArea(ai1arr[0]);
                 Toast.makeText(MainActivity.getContext(), "Hint Insert 1", Toast.LENGTH_SHORT).show();
                 return;
@@ -231,6 +244,7 @@ class SudokuData {
         if (sPref.getBoolean(PreferencesFragment.KEY_PREF_AUTO_INSERT1HINT, false)) {
             Integer[] ai2arr = mainButtonsText.getAutoInsert2(hints);
             if (ai2arr != null) {
+                arrIdLastHint = ai2arr[0];
                 setEasyTouchArea(ai2arr[0]);
                 Toast.makeText(MainActivity.getContext(), "Hint Insert 2", Toast.LENGTH_SHORT).show();
                 return;
@@ -239,6 +253,7 @@ class SudokuData {
         if (sPref.getBoolean(PreferencesFragment.KEY_PREF_AUTO_ADV1HINT, false)) {
             arrId = hints.setAutoHintsAdv1(mainButtonsText, true);
             if (!arrId.isEmpty()) {
+                arrIdLastHint = (int) arrId.toArray()[0];
                 setEasyTouchArea((int) arrId.toArray()[0]);
                 Toast.makeText(MainActivity.getContext(), "Hint Advanced 1", Toast.LENGTH_SHORT).show();
                 return;
@@ -247,7 +262,7 @@ class SudokuData {
         if (sPref.getBoolean(PreferencesFragment.KEY_PREF_AUTO_ADV2HINT, false)) {
             arrId = hints.setAutoHintsAdv2(mainButtonsText, true, true);
             if (!arrId.isEmpty()) {
-                Log.v("setEasyTouch",Arrays.toString(arrId.toArray()));
+                arrIdLastHint = (int) arrId.toArray()[0];
                 setEasyTouchArea((int) arrId.toArray()[0]);
                 Toast.makeText(MainActivity.getContext(), "Hint Advanced 2", Toast.LENGTH_SHORT).show();
                 return;
@@ -256,6 +271,7 @@ class SudokuData {
         if (sPref.getBoolean(PreferencesFragment.KEY_PREF_AUTO_ADV3HINT, false)) {
             arrId = hints.setAutoHintsAdv3(mainButtonsText, true, true);
             if (!arrId.isEmpty()) {
+                arrIdLastHint = (int) arrId.toArray()[0];
                 setEasyTouchArea((int) arrId.toArray()[0]);
                 Toast.makeText(MainActivity.getContext(), "Hint Advanced 3", Toast.LENGTH_SHORT).show();
                 return;
@@ -264,7 +280,7 @@ class SudokuData {
         if (sPref.getBoolean(PreferencesFragment.KEY_PREF_AUTO_ADV2HINT, false)) {
             arrId = hints.setAutoHintsAdv2(mainButtonsText, true, false);
             if (!arrId.isEmpty()) {
-                Log.v("setEasyTouch",Arrays.toString(arrId.toArray()));
+                arrIdLastHint = (int) arrId.toArray()[0];
                 setEasyTouchArea((int) arrId.toArray()[0]);
                 Toast.makeText(MainActivity.getContext(), "Hint Advanced 2", Toast.LENGTH_SHORT).show();
                 return;
@@ -273,6 +289,7 @@ class SudokuData {
         if (sPref.getBoolean(PreferencesFragment.KEY_PREF_AUTO_ADV3HINT, false)) {
             arrId = hints.setAutoHintsAdv3(mainButtonsText, true, false);
             if (!arrId.isEmpty()) {
+                arrIdLastHint = (int) arrId.toArray()[0];
                 setEasyTouchArea((int) arrId.toArray()[0]);
                 Toast.makeText(MainActivity.getContext(), "Hint Advanced 3", Toast.LENGTH_SHORT).show();
                 return;
@@ -301,15 +318,25 @@ class SudokuData {
         if (number != 0) {
             history.getFirst().put(arrId, number);
             arrIdsChangedHints.addAll(hints.incrementStarGroup(arrId, number - 1, mainButtonsText));
+            score[arrId] = arrIdsChangedHints.size();
+            for (int num = 0; num < DIM; num++) if (!isHint(arrId, num)) score[arrId]++;
+            if (arrIdLastHint == arrId) score[arrId]--;
+            history.getFirst().put(DIM * DIM, score[arrId]);
+            score[DIM * DIM] += score[arrId];
         }
         else {
             history.getFirst().put(-1 - arrId, mainButtonsText.get(arrId));
             arrIdsChangedHints.addAll(hints.decrementStarGroup(arrId, mainButtonsText.get(arrId) - 1, mainButtonsText));
             hints.initAdv();
             arrIdsChangedHints.add(arrId);
+            history.getFirst().put(DIM * DIM, -score[arrId]);
+            score[DIM * DIM] -= score[arrId];
+            score[arrId] = 0;
         }
+        arrIdLastHint = -1;
         mainButtonsText.set(arrId, number);
         this.setMainButtonsContent(arrId, false);
+        setScore();
         updateSudoku(arrIdsChangedHints, arrIdsChangedValues);
         for (int tempArrId: arrIdsChangedValues)
             history.getFirst().put(tempArrId, mainButtonsText.get(tempArrId));
@@ -317,6 +344,8 @@ class SudokuData {
 
     @SuppressLint("UseSparseArrays")
     void updateSudokuHintVersion(final int arrId, final int num) {
+        ScoreUserHint scoreUserHint = new ScoreUserHint(arrId, num, hints, mainButtonsText);
+        scoreUserHint.execute();
         history.push(new HashMap<Integer, Integer>());
         history.getFirst().put(arrId + DIM * DIM, num);
         HashSet<Integer> arrIdsChangedHints = new HashSet<>();
@@ -325,6 +354,18 @@ class SudokuData {
         if (!arrIdsChangedValues.isEmpty())
             for (int tempArrId : arrIdsChangedValues)
                 history.getFirst().put(tempArrId, mainButtonsText.get(tempArrId));
+    }
+
+    void setScore(final int arrId, int points) {
+        if (history.getFirst().get(DIM * DIM) != null) {
+            Log.e("SudokuData", "setScore is out of sync");
+            return;
+        }
+        if (arrIdLastHint == arrId) points--;
+        arrIdLastHint = -1;
+        history.getFirst().put(DIM * DIM, points);
+        score[DIM * DIM] += points;
+        setScore();
     }
 
     void redrawHints() {

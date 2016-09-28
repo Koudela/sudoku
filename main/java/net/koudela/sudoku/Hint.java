@@ -1,5 +1,7 @@
 package net.koudela.sudoku;
 
+import static net.koudela.sudoku.SudokuGroups.DIM;
+
 /**
  *  base class for sudoku hints
  *
@@ -8,7 +10,6 @@ package net.koudela.sudoku;
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 class Hint {
-    private final static int DIM = Sudoku.DIM;
     private int[][] hint = new int[DIM * DIM][DIM];
 
     Hint() {
@@ -19,6 +20,12 @@ class Hint {
         for (int arrId : Sudoku.ALL_ARR_IDS)
             for (int num = 0; num < DIM; num++)
                 hint[arrId][num] = 0;
+    }
+
+    Hint(Hint hint) {
+        for (int arrId : Sudoku.ALL_ARR_IDS)
+            for (int num = 0; num < DIM; num++)
+                this.hint[arrId][num] = hint.get(arrId, num);
     }
 
     boolean isHint(final int arrId, final int num) {

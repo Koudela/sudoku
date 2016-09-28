@@ -1,32 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000"
+    android:orientation="vertical"
     tools:context="net.koudela.sudoku.MainActivity">
-    <!-- we don't use GridLayout
-         layout weights are available in the GridLayout since API 21
-         to provide backwards compatibility we use nested Linear Layouts instead -->
-    <!-- tableHelper holds the TextView hints -->
-    <LinearLayout
-        android:id="@+id/tableHelper"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:paddingBottom="3dp"
-        android:paddingLeft="2dp"
-        android:paddingRight="3dp"
-        android:paddingTop="2dp" />
-    <!-- tableMain holds the Button number/blank -->
-    <LinearLayout
-        android:id="@+id/tableMain"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:paddingBottom="3dp"
-        android:paddingLeft="2dp"
-        android:paddingRight="3dp"
-        android:paddingTop="2dp" />
 
-</RelativeLayout>
+    <TextView
+        android:id="@+id/score"
+        android:layout_width="match_parent"
+        android:layout_height="24dp"
+        android:gravity="end"
+        android:paddingRight="8dp"
+        android:paddingTop="2dp"
+        android:paddingLeft="8dp"
+        android:paddingBottom="0dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="3dp"
+        android:layout_marginBottom="0dp"
+        android:background="@color/backgroundUntouched"
+        android:text="@string/score"
+        android:textSize="12sp" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000"
+        tools:context="net.koudela.sudoku.MainActivity">
+        <!-- we don't use GridLayout
+             layout weights are available in the GridLayout since API 21
+             to provide backwards compatibility we use nested Linear Layouts instead -->
+        <!-- tableHelper holds the TextView hints -->
+        <LinearLayout
+            android:id="@+id/tableHelper"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:paddingBottom="3dp"
+            android:paddingLeft="2dp"
+            android:paddingRight="3dp"
+            android:paddingTop="0dp" />
+        <!-- tableMain holds the Button number/blank -->
+        <LinearLayout
+            android:id="@+id/tableMain"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:paddingBottom="3dp"
+            android:paddingLeft="2dp"
+            android:paddingRight="3dp"
+            android:paddingTop="2dp" />
+
+    </RelativeLayout>
+</LinearLayout>
