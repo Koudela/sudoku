@@ -7,7 +7,6 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -198,6 +197,7 @@ class SudokuData {
         if (isBlocked[arrId]) MainActivity.mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorIsBlocked));
         else if (hints.getPlainHint(arrId, mainButtonsText.get(arrId) - 1) > 1) MainActivity.mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorBadUserInput));
         else if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(PreferencesFragment.KEY_PREF_MARK_ERROR, false)
+                && sudoku.getLevel() != 5
             && mainButtonsText.get(arrId) != sudoku.get(0).get(arrId))
             MainActivity.mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorMarkError));
         else if (isAutoInsert[arrId]) MainActivity.mainButtons[arrId].setTextColor(ContextCompat.getColor(context, R.color.textColorAutoInsert));

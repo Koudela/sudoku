@@ -64,13 +64,17 @@ class Sudoku extends SudokuExptimeFunctions {
         return Singleton;
     }
 
-    public Playground get(final int level) {
+    Playground get(final int level) {
         if (level == 5) return new Playground();
         return new Playground(sudoku[level]);
     }
 
-    public Playground get() {
+    Playground get() {
         return get(level);
+    }
+
+    int getLevel() {
+        return level;
     }
 
     boolean getNewSudoku() {
