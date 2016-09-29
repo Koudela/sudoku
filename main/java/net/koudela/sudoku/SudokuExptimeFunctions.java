@@ -170,10 +170,9 @@ class SudokuExptimeFunctions extends SudokuGroups {
         if (solution == null) solution = new Playground(sudoku);
         int result = solveByBacktracking(sudoku, false, solution, verbose);
         if (result != 0) return result; // -> -1: Sudoku is not solvable, 1: Sudoku is a valid Sudoku
-        Playground possibleSolution = new Playground(solution);
-        solution.init(sudoku);
-        solveByBacktracking(sudoku, true, solution, verbose);
-        if (possibleSolution.equals(solution)) return 1; // -> Sudoku is a valid Sudoku
+        Playground solution2 = new Playground(sudoku);
+        solveByBacktracking(sudoku, true, solution2, verbose);
+        if (solution2.equals(solution)) return 1; // -> Sudoku is a valid Sudoku
         return 0; // -> Sudoku has more than one possible solution
     }
 

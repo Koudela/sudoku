@@ -27,7 +27,7 @@ import static net.koudela.sudoku.SudokuGroups.getVerticalGroup;
 @SuppressWarnings({"WeakerAccess", "unused"})
 class SudokuBuilder extends Thread {
     private static final SudokuBuilder Singleton = new SudokuBuilder();
-    private List<Playground[]> sudokuStack = new ArrayList<>();
+    private List<PField[]> sudokuStack = new ArrayList<>();
     private int opened = 0;
     private int closed = 0;
     private SudokuSolver solver = new SudokuSolver();
@@ -36,14 +36,14 @@ class SudokuBuilder extends Thread {
         readSudokuStackFromFile();
         // seeding, we always wanna have something useful in stack
         if (sudokuStack.size() == 0) {
-            sudokuStack.add(new Playground[]{
-                    new Playground(Sudoku.SOLUTION),
-                    new Playground(Sudoku.LEVEL1),
-                    new Playground(Sudoku.LEVEL2),
-                    new Playground(Sudoku.LEVEL3),
-                    new Playground(Sudoku.LEVEL4),
-                    new Playground(Sudoku.LEVEL5),
-                    new Playground(Sudoku.LEVEL6),
+            sudokuStack.add(new PField[]{
+                    new PField(Sudoku.SOLUTION),
+                    new PField(Sudoku.LEVEL1),
+                    new PField(Sudoku.LEVEL2),
+                    new PField(Sudoku.LEVEL3),
+                    new PField(Sudoku.LEVEL4),
+                    new PField(Sudoku.LEVEL5),
+                    new PField(Sudoku.LEVEL6),
             });
             init(sudokuStack.get(0));
         }
@@ -54,9 +54,9 @@ class SudokuBuilder extends Thread {
      * seeding with the same constant arrays.
      * @param sudokuLevels the sudokus to initialize
      */
-    static void init(Playground[] sudokuLevels) {
-        List<List<Integer>> shuffleRelations = Playground.getShuffleRelations();
-        for (Playground level : sudokuLevels)
+    static void init(PField[] sudokuLevels) {
+        List<List<Integer>> shuffleRelations = PField.getShuffleRelations();
+        for (PField level : sudokuLevels)
             level.shuffle(shuffleRelations);
     }
 
@@ -81,7 +81,16 @@ class SudokuBuilder extends Thread {
      * @return a collection of sudoku levels
      */
     Playground[] getResult(final int pos) {
-        return sudokuStack.get(pos);
+        PField[] pFields = sudokuStack.get(pos);
+        return new Playground[]{
+                new Playground(pFields[0].getPField()),
+                new Playground(pFields[1].getPField()),
+                new Playground(pFields[2].getPField()),
+                new Playground(pFields[3].getPField()),
+                new Playground(pFields[4].getPField()),
+                new Playground(pFields[5].getPField()),
+                new Playground(pFields[6].getPField()),
+        };
     }
 
     /**
@@ -239,9 +248,9 @@ class SudokuBuilder extends Thread {
         ObjectOutputStream oos = null;
         ArrayList<ArrayList<int[]>> serializableList = new ArrayList<>();
         int count = -1;
-        for (Playground[] pFamily : sudokuStack) {
+        for (PField[] pFamily : sudokuStack) {
             serializableList.add(++count, new ArrayList<int[]>());
-            for (Playground playground : pFamily)
+            for (PField playground : pFamily)
                 if (playground != null)
                     serializableList.get(count).add(playground.getPField());
         }
@@ -277,9 +286,9 @@ class SudokuBuilder extends Thread {
             ArrayList<ArrayList<int[]>> serializableList = (ArrayList<ArrayList<int[]>>) ois.readObject();
             int count = -1;
             for (ArrayList<int[]> pFamily : serializableList) {
-                sudokuStack.add(++count, new Playground[7]);
+                sudokuStack.add(++count, new PField[7]);
                 int i = 0;
-                for (int[] playground : pFamily) sudokuStack.get(count)[i++] = new Playground(playground);
+                for (int[] playground : pFamily) sudokuStack.get(count)[i++] = new PField(playground);
             }
         } catch (Exception e) {
             e.printStackTrace();
