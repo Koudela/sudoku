@@ -40,21 +40,25 @@ class Hints {
     }
 
     void setUsePlain(final boolean usePlain) {
+        if (usePlain == this.usePlain) return;
         this.usePlain = usePlain;
         if (this.usePlain) hint = new Hint();
     }
 
     void setUseAdv1(final boolean useAdv1) {
+        if (useAdv1 == this.useAdv1) return;
         this.useAdv1 = useAdv1;
         if (this.useAdv1) hintAdv1 = new Hint();
     }
 
     void setUseAdv2(final boolean useAdv2) {
+        if (useAdv2 == this.useAdv2) return;
         this.useAdv2 = useAdv2;
         if (this.useAdv2) hintAdv2 = new Hint();
     }
 
     void setUseAdv3(final boolean useAdv3) {
+        if (useAdv3 == this.useAdv3) return;
         this.useAdv3 = useAdv3;
         if (this.useAdv3) hintAdv3 = new Hint();
     }
