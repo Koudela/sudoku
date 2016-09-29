@@ -439,7 +439,7 @@ class Hints {
                     for (int arrId : missing)
                         if (!hintAdv3.isHint(arrId, otherNum)) {
                             if (getOnly) {
-                                if (isHint(arrId, num)) continue;
+                                if (isHint(arrId, otherNum)) continue;
                                 changed.add(arrId);
                                 return changed;
                             }
@@ -676,7 +676,6 @@ class Hints {
                             if (!hintAdv3.isHint(arrId, key)) {
                                 if (getOnly) {
                                     if (isHint(arrId, key)) continue;
-                                    //Log.v("HINTSADV3",arrId+","+key);
                                     changed.add(arrId);
                                     return changed;
                                 }
@@ -688,7 +687,6 @@ class Hints {
             }
         }
         CallbackAdv3 callback = new CallbackAdv3(group, pField, getOnly);
-        //Log.v("HINTSADV3-group",Arrays.toString(group));
         Set<Integer> changed;
         @SuppressLint("UseSparseArrays")
         Map<Integer, Set<Integer>> missing = new HashMap<>();
