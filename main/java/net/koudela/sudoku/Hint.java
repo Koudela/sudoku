@@ -6,17 +6,21 @@ import static net.koudela.sudoku.SudokuGroups.DIM;
  *  base class for sudoku hints
  *
  * @author Thomas Koudela
- * @version 1.0 stable
+ * @version 1.0 tested, stable
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 class Hint {
     private int[][] hint = new int[DIM * DIM][DIM];
 
     Hint() {
-        init();
+        pInit();
     }
 
     void init() {
+        pInit();
+    }
+
+    private void pInit() {
         for (int arrId : Sudoku.ALL_ARR_IDS)
             for (int num = 0; num < DIM; num++)
                 hint[arrId][num] = 0;
@@ -26,10 +30,6 @@ class Hint {
         for (int arrId : Sudoku.ALL_ARR_IDS)
             for (int num = 0; num < DIM; num++)
                 this.hint[arrId][num] = hint.get(arrId, num);
-    }
-
-    boolean isHint(final int arrId, final int num) {
-        return hint[arrId][num] != 0;
     }
 
     int get(final int arrId, final int num) {
@@ -46,6 +46,10 @@ class Hint {
 
     void decrement(final int arrId, final int num) {
         hint[arrId][num]--;
+    }
+
+    boolean isHint(final int arrId, final int num) {
+        return hint[arrId][num] != 0;
     }
 
     @Override
