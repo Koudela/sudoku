@@ -11,7 +11,7 @@ import static net.koudela.sudoku.SudokuGroups.DIM;
  * transforms and memorizes a sudoku field
  *
  * @author Thomas Koudela
- * @version 1.0 stable
+ * @version 1.0 tested, stable
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 class PField {
@@ -25,26 +25,31 @@ class PField {
         // It seems java supplies no method to enforce using the classes own method, if it is called
         // from a subclass witch hides the method. (Unfortunately the set method of the subclass is
         // used during construction, although that makes no sense at all, even explicit casting does
-        // not work.) Renaming and making final seems a stupid way of programming.
-        for (int arrId : Sudoku.ALL_ARR_IDS) setFinal(arrId, cloneField[arrId]);
+        // not work.) Renaming and making final or duplicating and making private seems a stupid way
+        // of programming.
+        for (int arrId : Sudoku.ALL_ARR_IDS) pSet(arrId, cloneField[arrId]);
     }
 
     int get(final int arrId) {
         return pField[arrId];
     }
 
-    final void setFinal(final int arrId, final int val) {
+    void set(final int arrId, final int val) {
+        pSet(arrId, val);
+    }
+
+    private void pSet(final int arrId, final int val) {
         if (val < 0 || val > DIM)
             throw new IllegalArgumentException("val must be within [0, " + DIM + "]; val was " + val);
         pField[arrId] = val;
     }
 
-    int[] getPField() {
-        return pField.clone();
-    }
-
     boolean isPopulated(final int arrId) {
         return pField[arrId] != 0;
+    }
+
+    int[] getPField() {
+        return pField.clone();
     }
 
     /**
@@ -97,13 +102,6 @@ class PField {
         return relations;
     }
 
-    public static String relationToString(final List<Integer> list) {
-        String relationString = "[";
-        for (int i = 0; i < list.size(); i++)
-            relationString += i + " => " + list.get(i) + ", ";
-        return relationString + "]";
-    }
-
     private static int[] rotate90Degree(final int[] pField, final boolean left) {
         int[] newField = new int[DIM * DIM];
         int oldArrId;
@@ -137,8 +135,7 @@ class PField {
         }
     }
 
-    private static int[] flipVerticalGroupsHorizontally(final int[] pField,
-                                                        final List<Integer> flipRelation) {
+    private static int[] flipVerticalGroupsHorizontally(final int[] pField, final List<Integer> flipRelation) {
         int oldArrId;
         int newArrId;
         int[] newField = new int[DIM * DIM];
@@ -152,8 +149,7 @@ class PField {
         return newField;
     }
 
-    private static int[] flipHorizontalGroupsVertically(final int[] pField,
-                                                        final List<Integer> flipRelation) {
+    private static int[] flipHorizontalGroupsVertically(final int[] pField, final List<Integer> flipRelation) {
         int oldArrId;
         int newArrId;
         int[] newField = new int[DIM * DIM];
