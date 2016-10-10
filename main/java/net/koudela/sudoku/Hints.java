@@ -39,31 +39,32 @@ class Hints {
         setUseUserHint(useUserHint);
     }
 
-    void setUsePlain(final boolean usePlain) {
+    final void setUsePlain(final boolean usePlain) {
         if (usePlain == this.usePlain) return;
         this.usePlain = usePlain;
         if (this.usePlain) hint = new Hint();
     }
 
-    void setUseAdv1(final boolean useAdv1) {
+    final void setUseAdv1(final boolean useAdv1) {
         if (useAdv1 == this.useAdv1) return;
         this.useAdv1 = useAdv1;
         if (this.useAdv1) hintAdv1 = new Hint();
     }
 
-    void setUseAdv2(final boolean useAdv2) {
+    final void setUseAdv2(final boolean useAdv2) {
         if (useAdv2 == this.useAdv2) return;
         this.useAdv2 = useAdv2;
         if (this.useAdv2) hintAdv2 = new Hint();
     }
 
-    void setUseAdv3(final boolean useAdv3) {
+    final void setUseAdv3(final boolean useAdv3) {
         if (useAdv3 == this.useAdv3) return;
         this.useAdv3 = useAdv3;
         if (this.useAdv3) hintAdv3 = new Hint();
     }
 
-    void setUseUserHint(final boolean useUserHint) {
+    final void setUseUserHint(final boolean useUserHint) {
+        if (useUserHint == this.useUserHint) return;
         this.useUserHint = useUserHint;
         if (this.useUserHint) userHint = new Hint();
     }
@@ -120,21 +121,6 @@ class Hints {
         userHint.set(arrId, num, userHint.isHint(arrId, num)?0:1);
     }
 
-    Set<Integer> updateAdv1(final Playground pField) {
-        if (useAdv1) return setAutoHintsAdv1(pField, false);
-        return new HashSet<>();
-    }
-
-    Set<Integer> updateAdv2(final Playground pField, boolean useRelaxation) {
-        if (useAdv2) return setAutoHintsAdv2(pField, false, useRelaxation);
-        return new HashSet<>();
-    }
-
-    Set<Integer> updateAdv3(final Playground pField, boolean useRelaxation) {
-        if (useAdv3) return setAutoHintsAdv3(pField, false, useRelaxation);
-        return new HashSet<>();
-    }
-
     boolean isHint(final int arrId, final int num) {
         return (useUserHint && userHint.isHint(arrId, num)
                 || usePlain && hint.isHint(arrId, num)
@@ -188,6 +174,22 @@ class Hints {
     void decrementStarGroup(final int arrId, final int num) {
         decrementStarGroup(arrId, num, hint);
     }
+
+    Set<Integer> updateAdv1(final Playground pField) {
+        if (useAdv1) return setAutoHintsAdv1(pField, false);
+        return new HashSet<>();
+    }
+
+    Set<Integer> updateAdv2(final Playground pField, boolean useRelaxation) {
+        if (useAdv2) return setAutoHintsAdv2(pField, false, useRelaxation);
+        return new HashSet<>();
+    }
+
+    Set<Integer> updateAdv3(final Playground pField, boolean useRelaxation) {
+        if (useAdv3) return setAutoHintsAdv3(pField, false, useRelaxation);
+        return new HashSet<>();
+    }
+
 
     /**
      * if a number is group wise bounded to a specific row/column, in the same row/column other
@@ -460,7 +462,7 @@ class Hints {
      * @param originalSet the set to make a powerset from
      * @return the powerset of the original set
      */
-    static Set<Set<Integer>> powerSet(final Set<Integer> originalSet) {
+    private static Set<Set<Integer>> powerSet(final Set<Integer> originalSet) {
         Set<Set<Integer>> sets = new HashSet<>();
         if (originalSet.isEmpty()) {
             sets.add(new HashSet<Integer>());
@@ -584,14 +586,17 @@ class Hints {
                                                         final boolean getOnly) {
         class CallbackAdv2 implements Callback {
             Map<Integer, Set<Integer>> elements;
+            Set<Integer> foundKeys = new HashSet<>();
             Integer[] group;
             Playground pField;
             boolean getOnly;
+            boolean checkOnly;
 
-            CallbackAdv2(final Integer[] group, final Playground pField, final boolean getOnly) {
+            CallbackAdv2(final Integer[] group, final Playground pField, final boolean getOnly, final  boolean checkOnly) {
                 this.group = group;
                 this.pField = pField;
                 this.getOnly = getOnly;
+                this.checkOnly = checkOnly;
             }
 
             public void init(final Map<Integer, Set<Integer>> elements) {
@@ -599,9 +604,14 @@ class Hints {
             }
 
             @Override
+            public Set<Integer> getKeys() {
+                return foundKeys;
+            }
+
+            @Override
             public Set<Integer> invokeFunction(Set<Integer> coverKeys) {
-                Set<Integer> changed = new HashSet<>();
                 Set<Integer> distributedOverFields = new HashSet<>();
+                foundKeys.clear();
                 for (int key : coverKeys) distributedOverFields.addAll(elements.get(key));
                 for (int arrId : group) {
                     if (!pField.isPopulated(arrId) && !coverKeys.contains(arrId))
@@ -609,17 +619,17 @@ class Hints {
                             if (!hintAdv2.isHint(arrId, num)) {
                                 if (getOnly) {
                                     if (isHint(arrId, num)) continue;
-                                    changed.add(arrId);
-                                    return changed;
+                                    foundKeys.add(arrId);
+                                    return foundKeys;
                                 }
-                                changed.add(arrId);
-                                hintAdv2.increment(arrId, num);
+                                foundKeys.add(arrId);
+                                if (!checkOnly) hintAdv2.increment(arrId, num);
                             }
                 }
-                return changed.isEmpty() ? null : changed;
+                return foundKeys.isEmpty() ? null : foundKeys;
             }
         }
-        CallbackAdv2 callback = new CallbackAdv2(group, pField, getOnly);
+        CallbackAdv2 callback = new CallbackAdv2(group, pField, getOnly, false);
         Set<Integer> changed;
         @SuppressLint("UseSparseArrays")
         Map<Integer, Set<Integer>> missing = new HashMap<>();
@@ -636,8 +646,10 @@ class Hints {
             }
         }
         callback.init(missing);
-        changed = searchSetCover(missing, (DIM - populated) - 1, 0, new HashSet<Integer>(), callback);
-        if (changed != null) return changed;
+        if ((DIM - populated) - 1 > 1 && missing.size() > 1) {
+            changed = searchSetCover(missing, 2, (DIM - populated) - 1, callback);
+            if (changed != null) return changed;
+        }
         return new HashSet<>();
     }
 
@@ -655,14 +667,17 @@ class Hints {
                                                         final boolean getOnly) {
         class CallbackAdv3 implements Callback {
             Map<Integer, Set<Integer>> elements;
+            Set<Integer> foundKeys = new HashSet<>();
             Integer[] group;
             Playground pField;
             boolean getOnly;
+            boolean checkOnly;
 
-            CallbackAdv3(final Integer[] group, final Playground pField, final boolean getOnly) {
+            CallbackAdv3(final Integer[] group, final Playground pField, final boolean getOnly, final boolean checkOnly) {
                 this.group = group;
                 this.pField = pField;
                 this.getOnly = getOnly;
+                this.checkOnly = checkOnly;
             }
 
             public void init(final Map<Integer, Set<Integer>> elements) {
@@ -670,9 +685,14 @@ class Hints {
             }
 
             @Override
+            public Set<Integer> getKeys() {
+                return foundKeys;
+            }
+
+            @Override
             public Set<Integer> invokeFunction(Set<Integer> coverKeys) {
-                Set<Integer> changed = new HashSet<>();
                 Set<Integer> distributedOverFields = new HashSet<>();
+                foundKeys.clear();
                 for (int key : coverKeys) distributedOverFields.addAll(elements.get(key));
                 for (int arrId : group) {
                     if (!pField.isPopulated(arrId) && !distributedOverFields.contains(arrId))
@@ -680,17 +700,17 @@ class Hints {
                             if (!hintAdv3.isHint(arrId, key)) {
                                 if (getOnly) {
                                     if (isHint(arrId, key)) continue;
-                                    changed.add(arrId);
-                                    return changed;
+                                    foundKeys.add(arrId);
+                                    return foundKeys;
                                 }
-                                changed.add(arrId);
-                                hintAdv3.increment(arrId, key);
+                                foundKeys.add(arrId);
+                                if (!checkOnly) hintAdv3.increment(arrId, key);
                             }
                 }
-                return changed.isEmpty()?null:changed;
+                return foundKeys.isEmpty() ? null : foundKeys;
             }
         }
-        CallbackAdv3 callback = new CallbackAdv3(group, pField, getOnly);
+        CallbackAdv3 callback = new CallbackAdv3(group, pField, getOnly, false);
         Set<Integer> changed;
         @SuppressLint("UseSparseArrays")
         Map<Integer, Set<Integer>> missing = new HashMap<>();
@@ -704,8 +724,10 @@ class Hints {
             if (missing.get(num).size() == 0 || missing.get(num).size() == DIM - populated) missing.remove(num);
         }
         callback.init(missing);
-        changed = searchSetCover(missing, (DIM - populated) - 1, 0, new HashSet<Integer>(), callback);
-        if (changed != null) return changed;
+        if ((DIM - populated) - 1 > 1 && missing.size() > 1) {
+            changed = searchSetCover(missing, 2, (DIM - populated) - 1, callback);
+            if (changed != null) return changed;
+        }
         return new HashSet<>();
     }
 
@@ -725,7 +747,7 @@ class Hints {
      *         null otherwise
      */
     @SuppressLint("UseSparseArrays")
-    private Set<Integer> searchSetCover(Map<Integer, Set<Integer>> elements, final int maxCoverSize,
+    private static Set<Integer> searchSetCover(Map<Integer, Set<Integer>> elements, final int maxCoverSize,
                                         final int coverSizeCaller, Set<Integer> coverKeysCaller,
                                         final Callback callback) {
         int subclassMaxCoverSize, subclassCoverSize;
@@ -734,6 +756,7 @@ class Hints {
         for (int key : elements.keySet()) {
             // the cover will contain all elements of elm(key)
             subclassMaxCoverSize = maxCoverSize - elements.get(key).size();
+            if (subclassMaxCoverSize < 0) continue;
             subclassCoverSize = coverSizeCaller + elements.get(key).size();
             // we don't need to check if subclassMaxCoverSize < 0,
             // since elements.get(key).size() <= maxCoverSize by contract;
@@ -765,6 +788,48 @@ class Hints {
                         foundKeys, callback);
                 // a feasible solution was found and processed, tell the method to die
                 if (foundKeys != null) return foundKeys;
+            }
+        }
+        return null;
+    }
+
+
+    /**
+     * New faster version of searchSetCover. It uses the {@link Matrix} to solve a complementary
+     * problem and deduce the solution therefrom. It boosts the {@link SudokuExptimeFunctions#makeRandomTrueGridByBacktracking(boolean)}
+     * making it nearly 10 times faster. {@link SudokuExptimeFunctions#makeMinimalSudokuByBacktrackingOutOfTrueGrid(int[], boolean)}
+     * is 2-3 times faster with it. The speedup for the whole background creation process in between
+     * 2.5 and 3.
+     * @param elements a collection of sets that may fit
+     * @param minCoverSize how many set elements form the minimal cover size
+     * @param maxCoverSize how many set elements the cover is maximal allowed to contain
+     * @param callback the object that handles the callback function
+     * @return the return set of the callback function, if there is a collection of sets that are
+     *         contained in a cover of coverSize and the cardinality of the collection is
+     *         >= minCoverSize and <= maxCoverSize  and {@link Callback#invokeFunction(Set)} does not
+     *         evaluate to null, null otherwise
+     */
+    private static Set<Integer> searchSetCover(Map<Integer, Set<Integer>> elements, final int minCoverSize,
+                                               int maxCoverSize,
+                                               final Callback callback) {
+        Matrix matrix = new Matrix();
+        Matrix newMatrix;
+        matrix.buildMatrixFromCoverMap(elements);
+        if (matrix.rowCount() < maxCoverSize) maxCoverSize = matrix.rowCount();
+        int quadraticFieldSize;
+        for (int coverSize = minCoverSize; coverSize <= maxCoverSize; coverSize++) {
+            quadraticFieldSize = matrix.colCount() - coverSize;
+            if (quadraticFieldSize < coverSize) {
+                newMatrix = matrix.addFullColumns(coverSize - quadraticFieldSize);
+                if (-1 == newMatrix.findQuadraticFields(coverSize, 0, 0, callback))
+                    return callback.getKeys();
+            } else if (quadraticFieldSize > coverSize) {
+                newMatrix = matrix.addFullRows(quadraticFieldSize - coverSize);
+                if (-1 == newMatrix.findQuadraticFields(quadraticFieldSize, 0, 0, callback))
+                    return callback.getKeys();
+            } else {
+                if (-1 == matrix.findQuadraticFields(coverSize, 0, 0, callback))
+                    return callback.getKeys();
             }
         }
         return null;
