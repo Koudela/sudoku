@@ -8,6 +8,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,13 +20,15 @@ import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
 
-//TODO: Bug: freestyle marks errors
-//TODO: Bug: disabling auto insert 1/2 kills the hints
+import static android.R.attr.data;
+import static net.koudela.sudoku.SudokuGroups.DIM;
+
 //TODO: Info action
+//TODO: hint adv1 can be generalized
 //TODO: Show banner at start (during loading)
 //TODO: get hard/sudokuLevel4 + solution from server/upload to server
 //TODO: save only sudokuLevel4 + solution / make sudokuLevel1/2/3 on the fly
-//TODO: score
+//DONE: score
 // UserHint: if (isHint) before 0 points;
 // if (would be plain hint) 1 point;
 // else if (would be adv1) 3 points;
@@ -38,28 +41,15 @@ import java.lang.ref.WeakReference;
 // Remove value: negative value of Insert;
 // if hint action used -1
 //TODO: personal max score
-//TODO: update opportunity
 
 //TODO: german localization
 //TODO: advertising adds
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    protected final static int DIM = Sudoku.DIM;
     protected final static int CHOOSE_INPUT_REQUEST = 1;
     private static WeakReference<Context> context;
     protected static Button[] mainButtons = new Button[DIM * DIM];
     protected static TextView[] helperTextViews = new TextView[DIM*DIM];
     protected SudokuData sudokuData;
-    @SuppressWarnings("unused")
-    public static final int TALKATIVENESS_TO_LOG_NONE = 0;
-    @SuppressWarnings("unused")
-    public static final int TALKATIVENESS_TO_LOG_WARN = 1;
-    @SuppressWarnings("unused")
-    public static final int TALKATIVENESS_TO_LOG_INFO = 2;
-    @SuppressWarnings("unused")
-    public static final int TALKATIVENESS_TO_LOG_DEBUG = 3;
-    @SuppressWarnings("unused")
-    public static final int TALKATIVENESS_TO_LOG_VERBOSE = 4;
-    public static int talkativenessToLog = TALKATIVENESS_TO_LOG_NONE;
 
     public static Context getContext() {
         return context.get();
@@ -180,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 sudokuData.resetGame(false);
                 break;
             case R.id.action_suggest_field:
-                sudokuData.suggestField();
+                sudokuData.suggestField(true);
                 break;
             case R.id.action_back:
                 sudokuData.goBack();
@@ -200,7 +190,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(final View view) {
         boolean easyTouch = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferencesFragment.KEY_PREF_EASY_TOUCH, false);
         int arrId = Integer.valueOf(((String) view.getTag()).substring(4));
-        sudokuData.setRequestViewId(arrId);
+        if (sudokuData.setRequestViewId(arrId)) {
+            sudokuData.setEasyTouchArea(-1);
+            return;
+        }
 
         if (easyTouch) {
             if (sudokuData.getArrIdEasyTouchButton() != arrId) {

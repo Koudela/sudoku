@@ -2,10 +2,10 @@ package net.koudela.sudoku;
 
 import android.util.Log;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import static android.util.Log.v;
 import static net.koudela.sudoku.SudokuGroups.GROUPED_GROUPS;
 import static net.koudela.sudoku.SudokuGroups.HORIZONTAL_GROUPS;
 import static net.koudela.sudoku.SudokuGroups.ID_GROUPED_GROUPS;
@@ -64,9 +64,13 @@ class SudokuSolver {
 
     private void updateTracker(int arrId) {
         arrIdsChangedValues.add(arrId);
-        idsNotTestedVerticalGroups.push(ID_VERTICAL_GROUPS[arrId]);
-        idsNotTestedHorizontalGroups.push(ID_HORIZONTAL_GROUPS[arrId]);
-        idsNotTestedGroupedGroups.push(ID_GROUPED_GROUPS[arrId]);
+        for (int tempArrId : SudokuGroups.getStarGroup(arrId))
+            if (!sudoku.isPopulated(tempArrId)) {
+                idsNotTestedVerticalGroups.push(ID_VERTICAL_GROUPS[tempArrId]);
+                idsNotTestedHorizontalGroups.push(ID_HORIZONTAL_GROUPS[tempArrId]);
+                idsNotTestedGroupedGroups.push(ID_GROUPED_GROUPS[tempArrId]);
+                arrIdsNotTestedHints.push(tempArrId);
+            }
     }
 
     /**
@@ -115,49 +119,54 @@ class SudokuSolver {
      * Solves a sudoku as far as possible with the specified functions. (The used hints are
      * specified implicit by the hints parameter.)
      */
-    void updateSudoku(final boolean makeTrueGrid, final boolean verbose) {
+    void updateSudoku(final boolean verbose) {
         // principle: we use the cheaper solving methods first as long as they return results
         updateTracker(sudoku.getNotPopulatedArrIds());
         Set<Integer> changed;
-        int count[] = {0, 0, -1, -1, -1, -1, -1, -1, -1};
+        String log = "";
         while (true) {
-            count[2]++;
-            if (byAutoInsert1) count[0] += useAutoInsert1();
-            if (!makeTrueGrid) {
-                count[3]++;
-                count[1]++;
-                if (byAutoInsert2) if (useAutoInsert2()) continue;
-                count[1]--;
-            }
-            // no auto insert possible - update the advanced (cheap/relaxed versions)
-            count[4]++;
+            if (byAutoInsert1) {
+                int uAI = useAutoInsert1();
+                if (verbose) log += "AI1:" + uAI;
+            } else if (verbose) log += "AI1";
+            if (byAutoInsert2) if (useAutoInsert2()) {
+                if (verbose) log += "AI2:+";
+                continue;
+            } else if (verbose) log += "AI2";
+            // no auto insert possible - update the advanced (cheap versions)
             changed = hints.updateAdv1(sudoku);
+            if (verbose) {
+                if (changed.size() != 0) log += "Adv1:" + changed.toString();
+                else log += "Adv1";
+            }
+            // in the mean using the relaxed methods first is more expensive (there are lots of times
+            // they yield no result); the not relaxed versions adv2 and adv3 hold the same results
+            // on not degenerate sudokus - use adv2 which is faster in the mean
             if (changed.size() == 0) {
-                count[5]++;
-                changed = hints.updateAdv2(sudoku, true);
-                if (changed.size() == 0) {
-                    count[6]++;
-                    changed = hints.updateAdv3(sudoku, true);
-                    // relaxed methods hold no result - use the costly versions if applicable
-                    if (changed.size() == 0 && !useRelaxation) {
-                        count[7]++;
-                        changed = hints.updateAdv2(sudoku, false);
-                        if (changed.size() == 0) {
-                            count[8]++;
-                            changed = hints.updateAdv3(sudoku, false);
-                            if (makeTrueGrid && changed.size() == 0) {
-                                count[3]++;
-                                count[1]++;
-                                if (byAutoInsert2) if (useAutoInsert2()) continue;
-                                count[1]--;
-                            }
+                if (useRelaxation) {
+                    changed = hints.updateAdv2(sudoku, true);
+                    if (verbose) {
+                        if (changed.size() != 0) log += "Adv2r:" + changed.toString();
+                        else log += "Adv2r";
+                    }
+                    if (changed.size() == 0) {
+                        changed = hints.updateAdv3(sudoku, true);
+                        if (verbose) {
+                            if (changed.size() != 0) log += "Adv3r:" + changed.toString();
+                            else log += "Adv3r";
                         }
+                    }
+                } else {
+                    changed = hints.updateAdv2(sudoku, false);
+                    if (verbose) {
+                        if (changed.size() != 0) log += "Adv2:" + changed.toString();
+                        else log += "Adv2";
                     }
                 }
             }
             // no further computations possible: exit
             if (changed.size() == 0) {
-                if (verbose) Log.v("updateSudoku", "exit(" + Arrays.toString(count) + ")");
+                if (verbose) Log.v("updateSudoku", "exit(" + log + ")");
                 return;
             }
             updateTracker(changed);
@@ -189,7 +198,7 @@ class SudokuSolver {
         Set<Integer> arrIdsChangedValues = new HashSet<>();
         init(solution, hints, arrIdsChangedHints, arrIdsChangedValues, byAutoInsert1, byAutoInsert2,
                 useRelaxation);
-        updateSudoku(false, false);
+        updateSudoku(false);
         return Sudoku.isTrueGrid(solution);
     }
 }

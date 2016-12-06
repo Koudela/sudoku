@@ -14,7 +14,7 @@ import static net.koudela.sudoku.SudokuGroups.DIM;
 /**
  * generates and memorizes different types of sudoku hints
  *
- * @author Thomas Koudela (excluding {@link #powerSet)
+ * @author Thomas Koudela (excluding {@link #powerSet}
  * @version 1.0 stable
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
@@ -255,8 +255,8 @@ class Hints {
      * @param pField sudoku state object
      * @param getOnly if true no hints get set, instead as soon as a possible new hint is found a
      *                unit set containing the corresponding field id is returned
-     * @param useRelaxation a faster version that only finds hints if one field generates a superset
-     *                      is used
+     * @param useRelaxation a faster version is used that only finds hints if one field generates a
+     *                      superset
      * @return a HashSet containing the ids of the changed fields
      */
     Set<Integer> setAutoHintsAdv2(final Playground pField, boolean getOnly, boolean useRelaxation) {
@@ -296,8 +296,8 @@ class Hints {
      * @param pField sudoku state object
      * @param getOnly if true no hints get set, instead as soon as a possible new hint is found a
      *                unit set containing the corresponding field id is returned
-     * @param useRelaxation a faster version that only finds hints if one number generates a
-     *                      superset is used
+     * @param useRelaxation a faster version is used that only finds hints if one number generates a
+     *                      superset
      * @return a HashSet containing the ids of the changed fields
      */
     Set<Integer> setAutoHintsAdv3(final Playground pField, boolean getOnly, boolean useRelaxation) {
@@ -381,9 +381,8 @@ class Hints {
                     && notMissing.size() == otherArrIds.size() + populatedFieldsCount)
                 for (int tempArrId : otherArrIds)
                     for (int num : missing)
-                        if (!hintAdv2.isHint(tempArrId, num)) {
+                        if (!isHint(tempArrId, num)) {
                             if (getOnly) {
-                                if (isHint(tempArrId, num)) continue;
                                 changed.add(tempArrId);
                                 return changed;
                             }
@@ -443,9 +442,8 @@ class Hints {
                 // hints get set on the other numbers on the same n fields.
                 for (int otherNum : otherNumbers)
                     for (int arrId : missing)
-                        if (!hintAdv3.isHint(arrId, otherNum)) {
+                        if (!isHint(arrId, otherNum)) {
                             if (getOnly) {
-                                if (isHint(arrId, otherNum)) continue;
                                 changed.add(arrId);
                                 return changed;
                             }
@@ -513,7 +511,7 @@ class Hints {
             for (int arrId : group)
                 if (!subset.contains(arrId))
                     for (int num : distributedOverNumbers)
-                        if (!hintAdv2.isHint(arrId, num)) {
+                        if (!isHint(arrId, num)) {
                             if (getOnly) {
                                 if (isHint(arrId, num)) continue;
                                 changed.add(arrId);
@@ -559,7 +557,7 @@ class Hints {
             for (int num = 0; num < DIM; num++)
                 if (!subset.contains(num))
                     for (int arrId : distributedOverFields)
-                        if (!hintAdv3.isHint(arrId, num)) {
+                        if (!isHint(arrId, num)) {
                             if (getOnly) {
                                 if (isHint(arrId, num)) continue;
                                 changed.add(arrId);
@@ -616,9 +614,8 @@ class Hints {
                 for (int arrId : group) {
                     if (!pField.isPopulated(arrId) && !coverKeys.contains(arrId))
                         for (int num : distributedOverFields)
-                            if (!hintAdv2.isHint(arrId, num)) {
+                            if (!isHint(arrId, num)) {
                                 if (getOnly) {
-                                    if (isHint(arrId, num)) continue;
                                     foundKeys.add(arrId);
                                     return foundKeys;
                                 }
@@ -641,7 +638,9 @@ class Hints {
                 for (int num = 0; num < DIM; num++)
                     if (!isHint(arrId, num))
                         missing.get(arrId).add(num);
-                if (missing.get(arrId).size() == DIM)
+                if (missing.get(arrId).size() == DIM
+                        // can happen if we are on a wrong backtracking path
+                        || missing.get(arrId).isEmpty())
                     missing.remove(arrId);
             }
         }
@@ -695,17 +694,18 @@ class Hints {
                 foundKeys.clear();
                 for (int key : coverKeys) distributedOverFields.addAll(elements.get(key));
                 for (int arrId : group) {
-                    if (!pField.isPopulated(arrId) && !distributedOverFields.contains(arrId))
-                        for (int key : coverKeys)
-                            if (!hintAdv3.isHint(arrId, key)) {
+                    if (!pField.isPopulated(arrId) && distributedOverFields.contains(arrId))
+                        for (int otherNum = 0; otherNum < DIM; otherNum++) {
+                            if (coverKeys.contains(otherNum)) continue;
+                            if (!isHint(arrId, otherNum)) {
                                 if (getOnly) {
-                                    if (isHint(arrId, key)) continue;
                                     foundKeys.add(arrId);
                                     return foundKeys;
                                 }
                                 foundKeys.add(arrId);
-                                if (!checkOnly) hintAdv3.increment(arrId, key);
+                                if (!checkOnly) hintAdv3.increment(arrId, otherNum);
                             }
+                        }
                 }
                 return foundKeys.isEmpty() ? null : foundKeys;
             }

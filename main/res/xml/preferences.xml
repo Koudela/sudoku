@@ -7,7 +7,7 @@
             android:summary="@string/pref_easy_touch_summ"
             android:title="@string/pref_easy_touch" />
         <ListPreference
-            android:defaultValue="easy"
+            android:defaultValue="1"
             android:dialogTitle="@string/pref_level"
             android:entries="@array/pref_level_entries"
             android:entryValues="@array/pref_level_values"
@@ -15,7 +15,7 @@
             android:summary="@string/pref_level_summ"
             android:title="@string/pref_level" />
         <CheckBoxPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="pref_auto_hint"
             android:summary="@string/pref_auto_hint_summ"
             android:title="@string/pref_auto_hint" />
@@ -29,31 +29,31 @@
             android:summary="@string/pref_hint_summ"
             android:title="@string/pref_hint" />
         <CheckBoxPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:dependency="pref_hint"
             android:key="pref_auto_insert1hint"
             android:summary="@string/pref_auto_insert1hint_summ"
             android:title="@string/pref_auto_insert1hint" />
         <CheckBoxPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:dependency="pref_hint"
             android:key="pref_auto_insert2hint"
             android:summary="@string/pref_auto_insert2hint_summ"
             android:title="@string/pref_auto_insert2hint" />
         <CheckBoxPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:dependency="pref_hint"
             android:key="pref_auto_adv1hint"
             android:summary="@string/pref_auto_adv1hint_summ"
             android:title="@string/pref_auto_adv1hint" />
         <CheckBoxPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:dependency="pref_hint"
             android:key="pref_auto_adv2hint"
             android:summary="@string/pref_auto_adv2hint_summ"
             android:title="@string/pref_auto_adv2hint" />
         <CheckBoxPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:dependency="pref_hint"
             android:key="pref_auto_adv3hint"
             android:summary="@string/pref_auto_adv3hint_summ"
@@ -100,6 +100,18 @@
         <CheckBoxPreference
             android:defaultValue="false"
             android:dependency="pref_development_options"
+            android:key="pref_auto_insert1"
+            android:summary="@string/pref_auto_insert1_summ"
+            android:title="@string/pref_auto_insert1" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:dependency="pref_development_options"
+            android:key="pref_auto_insert2"
+            android:summary="@string/pref_auto_insert2_summ"
+            android:title="@string/pref_auto_insert2" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:dependency="pref_development_options"
             android:key="pref_auto_hint_adv1"
             android:summary="@string/pref_auto_hint_adv1_summ"
             android:title="@string/pref_auto_hint_adv1" />
@@ -115,17 +127,5 @@
             android:key="pref_auto_hint_adv3"
             android:summary="@string/pref_auto_hint_adv3_summ"
             android:title="@string/pref_auto_hint_adv3" />
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:dependency="pref_development_options"
-            android:key="pref_auto_insert1"
-            android:summary="@string/pref_auto_insert1_summ"
-            android:title="@string/pref_auto_insert1" />
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:dependency="pref_development_options"
-            android:key="pref_auto_insert2"
-            android:summary="@string/pref_auto_insert2_summ"
-            android:title="@string/pref_auto_insert2" />
     </PreferenceCategory>
 </PreferenceScreen>

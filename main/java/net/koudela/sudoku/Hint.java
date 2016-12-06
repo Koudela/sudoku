@@ -29,10 +29,14 @@ class Hint {
     Hint(Hint hint) {
         for (int arrId : Sudoku.ALL_ARR_IDS)
             for (int num = 0; num < DIM; num++)
-                this.hint[arrId][num] = hint.get(arrId, num);
+                this.hint[arrId][num] = hint.pGet(arrId, num);
     }
 
     int get(final int arrId, final int num) {
+        return hint[arrId][num];
+    }
+
+    private int pGet(final int arrId, final int num) {
         return hint[arrId][num];
     }
 

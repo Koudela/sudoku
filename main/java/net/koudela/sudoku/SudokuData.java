@@ -5,8 +5,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static android.util.Log.e;
 import static net.koudela.sudoku.SudokuGroups.DIM;
 
 /**
@@ -32,6 +33,7 @@ import static net.koudela.sudoku.SudokuGroups.DIM;
 class SudokuData {
     private static final SudokuData Singleton = new SudokuData();
     private Deque<Map<Integer, Integer>> history = new ArrayDeque<>();
+    private int[] highScore = new int[5];
     private SudokuSolver solver = new SudokuSolver();
     private Sudoku sudoku = Sudoku.getInstance();
     private Playground mainButtonsText = new Playground();
@@ -45,9 +47,7 @@ class SudokuData {
     private int arrIdEasyTouchButton, requestViewId, arrIdLastHint;
     private boolean useAutoInsert1, useAutoInsert2;
 
-    private SudokuData() {
-        initPreferences();
-    }
+    private SudokuData() {}
 
     static SudokuData getInstance() {
         return Singleton;
@@ -57,12 +57,15 @@ class SudokuData {
         sudoku.startBuilder();
     }
 
-    void initPreferences() {
+    final void initPreferences() {
         Context context = MainActivity.getContext();
         SharedPreferences sPrefs = PreferenceManager.getDefaultSharedPreferences(context);
         boolean devOptionsIsSet = sPrefs.getBoolean(PreferencesFragment.
                 KEY_PREF_DEVELOPMENT_OPTIONS, false);
-        hints.setUsePlain(sPrefs.getBoolean(PreferencesFragment.KEY_PREF_AUTO_HINT, false));
+        if (sPrefs.getBoolean(PreferencesFragment.KEY_PREF_AUTO_HINT, true)) {
+            hints.setUsePlain(true);
+            hints.populatePlainHints(mainButtonsText);
+        } else hints.setUsePlain(false);
         hints.setUseAdv1(devOptionsIsSet && sPrefs.getBoolean(PreferencesFragment.
                 KEY_PREF_AUTO_HINT_ADV1, false));
         hints.setUseAdv2(devOptionsIsSet && sPrefs.getBoolean(PreferencesFragment.
@@ -87,6 +90,7 @@ class SudokuData {
     }
 
     void resetGame(boolean firstRun) {
+        if (firstRun) initPreferences();
         initData();
         mainButtonsText = sudoku.get();
         hints.init(mainButtonsText, firstRun, false);
@@ -225,7 +229,12 @@ class SudokuData {
             MainActivity.helperTextViews[arrId].setTextColor(textColorHints[arrId]);
     }
 
-    void suggestField() {
+    void suggestField(boolean showMessage) {
+        SharedPreferences sPref = PreferenceManager.getDefaultSharedPreferences(MainActivity.getContext());
+        if (!sPref.getBoolean(PreferencesFragment.KEY_PREF_HINT, false)) {
+            if (showMessage) Toast.makeText(MainActivity.getContext(), "activate hints in settings", Toast.LENGTH_SHORT).show();
+            return;
+        }
         SuggestField suggestField = new SuggestField(hints, mainButtonsText);
         suggestField.execute();
     }
@@ -236,14 +245,14 @@ class SudokuData {
     }
 
     private void updateSudoku(Set<Integer> arrIdsChangedHints, Set<Integer> arrIdsChangedValues) {
-        solver.init(mainButtonsText, hints, arrIdsChangedHints, arrIdsChangedValues, useAutoInsert1, useAutoInsert2, true);
-        solver.updateSudoku(false, false);
+        solver.init(mainButtonsText, hints, arrIdsChangedHints, arrIdsChangedValues, useAutoInsert1, useAutoInsert2, false);
+        solver.updateSudoku(false);
         for (int arrId : arrIdsChangedHints) this.setHelperTextViewContent(arrId);
         for (int arrId : arrIdsChangedValues) {
             isAutoInsert[arrId] = true;
             this.setMainButtonsContent(arrId, false);
         }
-        suggestField();
+        suggestField(false);
 
     }
 
@@ -295,7 +304,7 @@ class SudokuData {
 
     void setScore(final int arrId, int points) {
         if (history.getFirst().get(DIM * DIM) != null) {
-            Log.e("SudokuData", "setScore is out of sync");
+            e("SudokuData", "setScore is out of sync");
             return;
         }
         if (arrIdLastHint == arrId) points--;
@@ -306,8 +315,9 @@ class SudokuData {
     }
 
     void redrawHints() {
-        for (int arrId : new ArrayList<>(mainButtonsText.getNotPopulatedArrIds()))
+        for (int arrId : new ArrayList<>(mainButtonsText.getNotPopulatedArrIds())) {
             setHelperTextViewContent(arrId);
+        }
     }
 
     void initAdv() {
@@ -346,8 +356,9 @@ class SudokuData {
         return arrIdEasyTouchButton;
     }
 
-    void setRequestViewId(int arrId) {
+    boolean setRequestViewId(int arrId) {
         requestViewId = arrId;
+        return isBlocked[arrId];
     }
 
     int getRequestViewId() {

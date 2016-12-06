@@ -43,7 +43,7 @@ class Playground extends PField{
     }
 
     void set(final int arrId, final int val) {
-        super.setFinal(arrId, val);
+        super.set(arrId, val);
         if (val == 0) {
             populatedArrIds.remove(arrId);
             notPopulatedArrIds.add(arrId);

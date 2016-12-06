@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 /**
  * A collection of static functions using the backtracking solver as well as the backtracking solver
@@ -35,13 +36,14 @@ class SudokuExptimeFunctions extends SudokuGroups {
      */
     private static int solveByBacktracking(final Playground sudoku, final boolean countDown,
                                            Playground computedSolution, final  boolean verbose) {
+        //Log.e("solveByBacktracking", "\n" + "\n" + "\nstart\n" + sudoku.toString());
         SudokuSolver solver = new SudokuSolver();
         Hints hints = new Hints(true, true, true, true, false);
         Set<Integer> arrIdsChangedHints = new HashSet<>();
         Set<Integer> arrIdsChangedValues = new HashSet<>();
         int initValue = countDown?9:1;
         // initial check
-        // we don't wanna init the advanced hints yet (if we use them),
+        // we don't wanna init the advanced hints yet,
         // updateSudokuStart takes care of that
         hints.populatePlainHints(sudoku);
         for (int arrId : sudoku.getPopulatedArrIds())
@@ -50,7 +52,7 @@ class SudokuExptimeFunctions extends SudokuGroups {
         // start the main computing
         if (computedSolution == null) computedSolution = new Playground(sudoku);
         solver.init(computedSolution, hints, arrIdsChangedHints, arrIdsChangedValues, true, true, false);
-        solver.updateSudoku(false, verbose);
+        solver.updateSudoku(verbose);
         // -> Sudoku is a valid Sudoku
         if (computedSolution.getSizeNotPopulatedArrIds() == 0) return 1;
         Set<Integer> mayBeDependValidValues = new HashSet<>(computedSolution.getPopulatedArrIds());
@@ -87,9 +89,7 @@ class SudokuExptimeFunctions extends SudokuGroups {
                     // rollback
                     // TODO: A better understanding
                     // log message reminds us: we don't know why there are sometimes still rollbacks
-                    Log.w("solveByBacktracking","rollback ("+arrId+") - " + count);
-                    if ((++count) % 100 == 0)
-                        Log.v("solveByBacktracking","rollback ("+arrId+") - " + count);
+                    Log.w("solveByBacktracking","rollback ("+arrId+") - " + count++);
                     hints.decrementStarGroup(arrId, computedSolution.get(arrId) - 1);
                     for (int tempArrId : dependentValidValues.get(arrId)) {
                         mayBeDependValidValues.remove(tempArrId);
@@ -107,11 +107,30 @@ class SudokuExptimeFunctions extends SudokuGroups {
                 }
             }
             // step forward
-            if ((++count) % 100 == 0)
-                Log.v("solveByBacktracking","take ("+arrId+";"+computedSolution.get(arrId)+") - " + count);
+            count++;
             hints.incrementStarGroup(arrId, computedSolution.get(arrId) - 1);
             arrIdsChangedValues.clear();
-            solver.updateSudoku(false, verbose);
+            /*
+            Log.w("set", arrId+";"+computedSolution.get(arrId));
+            Log.w("pre", computedSolution.toString());
+            */
+            solver.updateSudoku(verbose);
+            /*
+            Log.e("post", computedSolution.toString());
+            Log.e("arrIdsChangedValues", arrIdsChangedValues.toString());
+
+            Set<Integer> changed = hints.setAutoHintsAdv1(computedSolution, false);
+            if (changed.size() > 0) throw new ArithmeticException("!!!Adv1\n" + changed.toString());
+            changed = hints.setAutoHintsAdv2(computedSolution, false, true);
+            if (changed.size() > 0) throw new ArithmeticException("!!!Adv2 relax\n" + changed.toString());
+            changed = hints.setAutoHintsAdv3(computedSolution, false, true);
+            if (changed.size() > 0) throw new ArithmeticException("!!!Adv3 relax\n" + changed.toString());
+            */
+            //degenerate:
+            //changed = hints.setAutoHintsAdv2(computedSolution, false, false);
+            //if (changed.size() > 0) throw new ArithmeticException("!!!Adv2\n" + changed.toString());
+            //changed = hints.setAutoHintsAdv3(computedSolution, false, false);
+            //if (changed.size() > 0) throw new ArithmeticException("!!!Adv3\n" + changed.toString());
             // -> Sudoku may be a valid Sudoku
             if (computedSolution.getSizeNotPopulatedArrIds() == 0) return 0;
             dependentValidValues.put(arrId, new HashSet<>(arrIdsChangedValues));
@@ -151,7 +170,7 @@ class SudokuExptimeFunctions extends SudokuGroups {
             arrIdsChangedValues.clear();
             hints.incrementStarGroup(arrId, solution.get(arrId) - 1);
             // the advanced hints are getting updated in updateSudokuStart
-            solver.updateSudoku(true, verbose);
+            solver.updateSudoku(verbose);
         }
         if (!isTrueGrid(solution)) throw new ArithmeticException("solution is no true grid");
         if (verbose) Log.d("makeRandomTrueGridBB","solution: " + solution.toString());
@@ -192,7 +211,7 @@ class SudokuExptimeFunctions extends SudokuGroups {
                 if (verbose) Log.v("inspect", ""+arrId);
                 sudoku.set(arrId, 0);
                 int tmp = isSudoku(sudoku, null, verbose);
-                if (tmp == -1) throw new ArithmeticException("trueGrid was not a solution or valid sudoku");
+                if (tmp == -1) throw new ArithmeticException("trueGrid was not a solution or valid sudoku...\n" + sudoku.toString() + "\n\n" + (new Playground(trueGrid)).toString());
                 else if (tmp == 0) sudoku.set(arrId, trueGrid[arrId]);
                 else Log.d("removed", ""+arrId);
             }

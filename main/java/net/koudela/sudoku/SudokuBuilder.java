@@ -308,7 +308,7 @@ class SudokuBuilder extends Thread {
      */
     @Override
     public void run() {
-        boolean verbose = (MainActivity.talkativenessToLog >= 4);
+        boolean verbose = false;
         while (sudokuStack.size() < 10000) {
             opened++;
             Playground[] workbench = new Playground[7];
